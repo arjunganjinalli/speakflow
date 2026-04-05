@@ -8,174 +8,74 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script>
-    tailwind.config = {
-        theme: {
-            extend: {
-                colors: {
-                    copper: { 300: '#F0CFA8', 400: '#E8B88A', 500: '#C8956C', 600: '#A87A55', 700: '#8A6040' },
-                    sage: { 300: '#A8E0C0', 400: '#7EC9A0', 500: '#5BB882', 600: '#449966' },
-                    coral: { 400: '#E89590', 500: '#D4736E' },
-                    surface: { 50: '#E8E6E1', 100: '#C8C6C1', 200: '#8A8885', 300: '#6E6D69', 700: '#1E1E22', 800: '#161619', 900: '#0D0D0F' }
-                },
-                fontFamily: {
-                    display: ['"Space Grotesk"', 'sans-serif'],
-                    body: ['"DM Sans"', 'sans-serif']
-                }
-            }
-        }
-    }
+    tailwind.config={theme:{extend:{colors:{copper:{300:'#F0CFA8',400:'#E8B88A',500:'#C8956C',600:'#A87A55'},sage:{300:'#A8E0C0',400:'#7EC9A0',500:'#5BB882',600:'#449966'},coral:{400:'#E89590',500:'#D4736E'},sf:{50:'#E8E6E1',100:'#C8C6C1',200:'#8A8885',300:'#6E6D69',700:'#1E1E22',800:'#161619',900:'#0D0D0F'}},fontFamily:{display:['"Space Grotesk"','sans-serif'],body:['"DM Sans"','sans-serif']}}}}
     </script>
     <style>
-        *, *::before, *::after { box-sizing: border-box; }
-        body { font-family: 'DM Sans', sans-serif; background: #0D0D0F; color: #E8E6E1; overflow-x: hidden; }
-        h1, h2, h3, h4, h5, h6 { font-family: 'Space Grotesk', sans-serif; }
-
-        .bg-blob {
-            position: fixed; border-radius: 50%; pointer-events: none;
-            filter: blur(130px); opacity: 0.12; z-index: 0;
-        }
-        .blob-1 { width: 650px; height: 650px; background: #C8956C; top: -250px; right: -200px; animation: bfloat 22s ease-in-out infinite; }
-        .blob-2 { width: 550px; height: 550px; background: #5BB882; bottom: -220px; left: -200px; animation: bfloat 22s ease-in-out infinite reverse; animation-delay: -8s; }
-        .blob-3 { width: 350px; height: 350px; background: #C8956C; top: 45%; left: 30%; animation: bfloat 18s ease-in-out infinite; animation-delay: -14s; opacity: 0.06; }
-
-        @keyframes bfloat {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(35px, -25px) scale(1.06); }
-            66% { transform: translate(-25px, 20px) scale(0.94); }
-        }
-
-        .dot-grid {
-            position: fixed; inset: 0; z-index: 0; pointer-events: none;
-            background-image: radial-gradient(rgba(200,149,108,0.04) 1px, transparent 1px);
-            background-size: 32px 32px;
-        }
-
-        .screen { display: none; opacity: 0; transition: opacity 0.4s ease; position: relative; z-index: 1; }
-        .screen.active { display: flex; opacity: 1; }
-
-        .glass {
-            background: rgba(22, 22, 25, 0.82);
-            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(200, 149, 108, 0.1);
-        }
-
-        .gradient-text {
-            background: linear-gradient(135deg, #E8B88A 0%, #C8956C 40%, #5BB882 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .mode-card { cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden; }
-        .mode-card::before {
-            content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity 0.3s ease;
-            background: linear-gradient(135deg, rgba(200,149,108,0.08), rgba(91,184,130,0.05));
-        }
-        .mode-card:hover::before, .mode-card.selected::before { opacity: 1; }
-        .mode-card.selected { border-color: rgba(200, 149, 108, 0.4) !important; }
-        .mode-card .check-mark {
-            position: absolute; top: 12px; right: 12px; width: 24px; height: 24px; border-radius: 50%;
-            background: #C8956C; display: flex; align-items: center; justify-content: center;
-            transform: scale(0); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .mode-card.selected .check-mark { transform: scale(1); }
-
-        .role-pill {
-            cursor: pointer; transition: all 0.25s ease; padding: 8px 20px; border-radius: 999px;
-            border: 1px solid rgba(200,149,108,0.15); background: rgba(22,22,25,0.6);
-            font-size: 14px; font-weight: 500; color: #C8C6C1;
-        }
-        .role-pill:hover { border-color: rgba(200,149,108,0.35); color: #E8E6E1; }
-        .role-pill.selected {
-            background: linear-gradient(135deg, rgba(200,149,108,0.2), rgba(200,149,108,0.08));
-            border-color: #C8956C; color: #E8B88A;
-        }
-
-        .bubble { max-width: 80%; padding: 12px 16px; border-radius: 16px; position: relative; transition: all 0.3s ease; }
-        .bubble-other {
-            background: rgba(30, 30, 34, 0.7); border: 1px solid rgba(91,184,130,0.12);
-            border-left: 3px solid #5BB882; align-self: flex-start; border-bottom-left-radius: 4px;
-        }
-        .bubble-user {
-            background: rgba(200,149,108,0.08); border: 1px solid rgba(200,149,108,0.15);
-            border-right: 3px solid #C8956C; align-self: flex-end; border-bottom-right-radius: 4px;
-        }
-        .bubble-current { box-shadow: 0 0 24px rgba(200,149,108,0.1); transform: scale(1.02); }
-        .bubble-past { opacity: 0.5; }
-        .bubble-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-        .bubble-other .bubble-label { color: #7EC9A0; }
-        .bubble-user .bubble-label { color: #E8B88A; }
-        .replay-btn {
-            position: absolute; top: 8px; right: 8px; width: 26px; height: 26px; border-radius: 50%;
-            background: rgba(91,184,130,0.15); border: none; color: #7EC9A0; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; font-size: 11px;
-            opacity: 0; transition: opacity 0.2s ease;
-        }
-        .bubble:hover .replay-btn, .bubble-current .replay-btn { opacity: 1; }
-
-        .mic-btn {
-            width: 56px; height: 56px; border-radius: 50%; border: 2px solid rgba(200,149,108,0.3);
-            background: rgba(200,149,108,0.08); color: #E8B88A; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; font-size: 20px;
-            transition: all 0.3s ease; position: relative; flex-shrink: 0;
-        }
-        .mic-btn:hover { background: rgba(200,149,108,0.15); border-color: #C8956C; }
-        .mic-btn.recording { border-color: #D4736E; color: #D4736E; background: rgba(212,115,110,0.1); }
-        .mic-btn.recording::after {
-            content: ''; position: absolute; inset: -6px; border-radius: 50%;
-            border: 2px solid rgba(212,115,110,0.4); animation: micpulse 1.5s ease-out infinite;
-        }
-        @keyframes micpulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
-
-        .progress-track { height: 3px; background: rgba(255,255,255,0.06); overflow: hidden; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #C8956C, #5BB882); transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-
-        .eval-slide-in { animation: evalSlideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-        @keyframes evalSlideIn { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        .score-ring-bg { stroke: rgba(255,255,255,0.06); }
-        .score-ring-fill { transition: stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1); }
-
-        .toast {
-            padding: 12px 20px; border-radius: 12px; font-size: 14px; font-weight: 500;
-            display: flex; align-items: center; gap: 10px; max-width: 420px;
-            animation: toastIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-        }
-        .toast-success { background: rgba(91,184,130,0.15); border: 1px solid rgba(91,184,130,0.3); color: #A8E0C0; }
-        .toast-error { background: rgba(212,115,110,0.15); border: 1px solid rgba(212,115,110,0.3); color: #E89590; }
-        .toast-info { background: rgba(200,149,108,0.15); border: 1px solid rgba(200,149,108,0.3); color: #E8B88A; }
-        @keyframes toastIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes toastOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100px); opacity: 0; } }
-
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(200,149,108,0.2); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(200,149,108,0.35); }
-
-        .line-dot { width: 8px; height: 8px; border-radius: 50%; transition: all 0.3s ease; background: rgba(255,255,255,0.1); }
-        .line-dot.done { background: #5BB882; }
-        .line-dot.current { background: #C8956C; transform: scale(1.4); box-shadow: 0 0 8px rgba(200,149,108,0.5); }
-
-        .typing-dot { width: 6px; height: 6px; border-radius: 50%; background: #C8956C; animation: typingBounce 1.4s ease-in-out infinite; }
-        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes typingBounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-8px); } }
-
-        .input-glow:focus { box-shadow: 0 0 0 2px rgba(200,149,108,0.25); border-color: rgba(200,149,108,0.4) !important; }
-
-        .spinner { width: 20px; height: 20px; border: 2px solid rgba(200,149,108,0.2); border-top-color: #C8956C; border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-        }
-
-        @media (max-width: 640px) {
-            .bubble { max-width: 92%; }
-            .eval-grid { grid-template-columns: 1fr !important; }
-        }
-
-        select option { background: #161619; color: #E8E6E1; }
+        *,*::before,*::after{box-sizing:border-box}
+        body{font-family:'DM Sans',sans-serif;background:#0D0D0F;color:#E8E6E1;overflow-x:hidden}
+        h1,h2,h3,h4,h5,h6{font-family:'Space Grotesk',sans-serif}
+        .bg-blob{position:fixed;border-radius:50%;pointer-events:none;filter:blur(130px);opacity:.12;z-index:0}
+        .blob-1{width:650px;height:650px;background:#C8956C;top:-250px;right:-200px;animation:bf 22s ease-in-out infinite}
+        .blob-2{width:550px;height:550px;background:#5BB882;bottom:-220px;left:-200px;animation:bf 22s ease-in-out infinite reverse;animation-delay:-8s}
+        .blob-3{width:300px;height:300px;background:#C8956C;top:50%;left:35%;animation:bf 18s ease-in-out infinite;animation-delay:-14s;opacity:.05}
+        @keyframes bf{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(35px,-25px) scale(1.06)}66%{transform:translate(-25px,20px) scale(.94)}}
+        .dot-grid{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:radial-gradient(rgba(200,149,108,.035) 1px,transparent 1px);background-size:32px 32px}
+        .screen{display:none;opacity:0;transition:opacity .4s ease;position:relative;z-index:1}
+        .screen.active{display:flex;opacity:1}
+        .glass{background:rgba(22,22,25,.82);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(200,149,108,.1)}
+        .gradient-text{background:linear-gradient(135deg,#E8B88A 0%,#C8956C 40%,#5BB882 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .mode-card{cursor:pointer;transition:all .3s ease;position:relative;overflow:hidden}
+        .mode-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s ease;background:linear-gradient(135deg,rgba(200,149,108,.08),rgba(91,184,130,.05))}
+        .mode-card:hover::before,.mode-card.selected::before{opacity:1}
+        .mode-card.selected{border-color:rgba(200,149,108,.4)!important}
+        .mode-card .ck{position:absolute;top:12px;right:12px;width:24px;height:24px;border-radius:50%;background:#C8956C;display:flex;align-items:center;justify-content:center;transform:scale(0);transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+        .mode-card.selected .ck{transform:scale(1)}
+        .role-pill{cursor:pointer;transition:all .25s ease;padding:8px 20px;border-radius:999px;border:1px solid rgba(200,149,108,.15);background:rgba(22,22,25,.6);font-size:14px;font-weight:500;color:#C8C6C1}
+        .role-pill:hover{border-color:rgba(200,149,108,.35);color:#E8E6E1}
+        .role-pill.selected{background:linear-gradient(135deg,rgba(200,149,108,.2),rgba(200,149,108,.08));border-color:#C8956C;color:#E8B88A}
+        .bubble{max-width:80%;padding:12px 16px;border-radius:16px;position:relative;transition:all .3s ease}
+        .bubble-other{background:rgba(30,30,34,.7);border:1px solid rgba(91,184,130,.12);border-left:3px solid #5BB882;align-self:flex-start;border-bottom-left-radius:4px}
+        .bubble-user{background:rgba(200,149,108,.08);border:1px solid rgba(200,149,108,.15);border-right:3px solid #C8956C;align-self:flex-end;border-bottom-right-radius:4px}
+        .bubble-current{box-shadow:0 0 24px rgba(200,149,108,.1);transform:scale(1.02)}
+        .bubble-past{opacity:.5}
+        .bubble-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+        .bubble-other .bubble-label{color:#7EC9A0}
+        .bubble-user .bubble-label{color:#E8B88A}
+        .replay-btn{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:rgba(91,184,130,.15);border:none;color:#7EC9A0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;opacity:0;transition:opacity .2s ease}
+        .bubble:hover .replay-btn,.bubble-current .replay-btn{opacity:1}
+        .mic-btn{width:56px;height:56px;border-radius:50%;border:2px solid rgba(200,149,108,.3);background:rgba(200,149,108,.08);color:#E8B88A;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;transition:all .3s ease;position:relative;flex-shrink:0}
+        .mic-btn:hover{background:rgba(200,149,108,.15);border-color:#C8956C}
+        .mic-btn.recording{border-color:#D4736E;color:#D4736E;background:rgba(212,115,110,.1)}
+        .mic-btn.recording::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:2px solid rgba(212,115,110,.4);animation:mp 1.5s ease-out infinite}
+        @keyframes mp{0%{transform:scale(1);opacity:1}100%{transform:scale(1.5);opacity:0}}
+        .progress-track{height:3px;background:rgba(255,255,255,.06);overflow:hidden}
+        .progress-fill{height:100%;background:linear-gradient(90deg,#C8956C,#5BB882);transition:width .5s cubic-bezier(.4,0,.2,1)}
+        .eval-in{animation:ei .5s cubic-bezier(.4,0,.2,1) forwards}
+        @keyframes ei{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+        .score-ring-bg{stroke:rgba(255,255,255,.06)}
+        .score-ring-fill{transition:stroke-dashoffset 1s cubic-bezier(.4,0,.2,1)}
+        .toast{padding:12px 20px;border-radius:12px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:10px;max-width:420px;animation:ti .4s cubic-bezier(.34,1.56,.64,1);box-shadow:0 8px 32px rgba(0,0,0,.5)}
+        .toast-success{background:rgba(91,184,130,.15);border:1px solid rgba(91,184,130,.3);color:#A8E0C0}
+        .toast-error{background:rgba(212,115,110,.15);border:1px solid rgba(212,115,110,.3);color:#E89590}
+        .toast-info{background:rgba(200,149,108,.15);border:1px solid rgba(200,149,108,.3);color:#E8B88A}
+        @keyframes ti{from{transform:translateX(100px);opacity:0}to{transform:translateX(0);opacity:1}}
+        @keyframes to2{from{transform:translateX(0);opacity:1}to{transform:translateX(100px);opacity:0}}
+        ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(200,149,108,.2);border-radius:3px}
+        .line-dot{width:8px;height:8px;border-radius:50%;transition:all .3s ease;background:rgba(255,255,255,.1)}
+        .line-dot.done{background:#5BB882}.line-dot.current{background:#C8956C;transform:scale(1.4);box-shadow:0 0 8px rgba(200,149,108,.5)}
+        .typing-dot{width:6px;height:6px;border-radius:50%;background:#C8956C;animation:tb 1.4s ease-in-out infinite}
+        .typing-dot:nth-child(2){animation-delay:.2s}.typing-dot:nth-child(3){animation-delay:.4s}
+        @keyframes tb{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-8px)}}
+        .input-glow:focus{box-shadow:0 0 0 2px rgba(200,149,108,.25);border-color:rgba(200,149,108,.4)!important}
+        .spinner{width:20px;height:20px;border:2px solid rgba(200,149,108,.2);border-top-color:#C8956C;border-radius:50%;animation:sp .8s linear infinite}
+        @keyframes sp{to{transform:rotate(360deg)}}
+        .report-card{transition:all .3s ease}.report-card:hover{border-color:rgba(200,149,108,.2)}
+        .report-card.low{border-color:rgba(212,115,110,.3)!important;background:rgba(212,115,110,.03)}
+        audio{border-radius:8px;height:32px}
+        @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+        @media(max-width:640px){.bubble{max-width:92%}.egrid{grid-template-columns:1fr!important}.hdr-stats{grid-template-columns:repeat(2,1fr)!important}}
+        select option{background:#161619;color:#E8E6E1}
+        @media print{.no-print{display:none!important}body{background:#fff;color:#111}}
     </style>
 </head>
 <body class="min-h-screen">
@@ -183,223 +83,145 @@
     <div class="bg-blob blob-2"></div>
     <div class="bg-blob blob-3"></div>
     <div class="dot-grid"></div>
-
     <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-3" aria-live="polite"></div>
 
-    <!-- ==================== SETUP SCREEN ==================== -->
+    <!-- SETUP SCREEN -->
     <div id="setup-screen" class="screen active min-h-screen items-center justify-center p-4">
         <div class="w-full max-w-2xl">
             <header class="text-center mb-10">
                 <div class="inline-flex items-center gap-3 mb-4">
-                    <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-copper-500 to-sage-500 flex items-center justify-center shadow-lg shadow-copper-500/20">
-                        <i class="fas fa-comments text-surface-900 text-lg"></i>
-                    </div>
+                    <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-copper-500 to-sage-500 flex items-center justify-center shadow-lg shadow-copper-500/20"><i class="fas fa-comments text-sf-900 text-lg"></i></div>
                     <h1 class="text-4xl sm:text-5xl font-bold gradient-text tracking-tight">SpeakFlow</h1>
                 </div>
-                <p class="text-surface-200 text-lg font-light">AI-Powered Dialogue Practice Coach</p>
+                <p class="text-sf-200 text-lg font-light">AI-Powered Dialogue Practice Coach</p>
+                <p class="text-sf-300 text-xs mt-2">Natural voices for EN, ES, FR, DE, IT, PT &middot; Browser TTS for other languages</p>
             </header>
-
             <div class="glass rounded-2xl p-6 sm:p-8 space-y-7">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-surface-200 mb-2">
-                            <i class="fas fa-key text-copper-500 mr-1.5"></i>GLM API Key
-                        </label>
+                        <label class="block text-sm font-medium text-sf-200 mb-2"><i class="fas fa-key text-copper-500 mr-1.5"></i>GLM API Key</label>
                         <div class="relative">
-                            <input id="api-key" type="password" placeholder="Paste your z.ai API key..."
-                                class="input-glow w-full bg-surface-800/60 border border-white/8 rounded-xl px-4 py-3 text-sm text-surface-50 placeholder-surface-300 outline-none transition-all pr-10"
-                                aria-label="API Key" autocomplete="off">
-                            <button id="toggle-key" class="absolute right-3 top-1/2 -translate-y-1/2 text-surface-300 hover:text-surface-50 transition-colors" aria-label="Toggle API key visibility">
-                                <i class="fas fa-eye text-sm"></i>
-                            </button>
+                            <input id="api-key" type="password" placeholder="Paste your z.ai API key..." class="input-glow w-full bg-sf-800/60 border border-white/8 rounded-xl px-4 py-3 text-sm text-sf-50 placeholder-sf-300 outline-none transition-all pr-10" aria-label="API Key" autocomplete="off">
+                            <button id="toggle-key" class="absolute right-3 top-1/2 -translate-y-1/2 text-sf-300 hover:text-sf-50 transition-colors" aria-label="Toggle key"><i class="fas fa-eye text-sm"></i></button>
                         </div>
-                        <p class="text-[11px] text-surface-300 mt-1.5">From <span class="text-copper-400">open.bigmodel.cn</span> or <span class="text-copper-400">z.ai</span></p>
+                        <p class="text-[11px] text-sf-300 mt-1.5">From <span class="text-copper-400">open.bigmodel.cn</span> or <span class="text-copper-400">z.ai</span></p>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-surface-200 mb-2">
-                            <i class="fas fa-globe text-sage-400 mr-1.5"></i>Language
-                        </label>
-                        <select id="language-select"
-                            class="input-glow w-full bg-surface-800/60 border border-white/8 rounded-xl px-4 py-3 text-sm text-surface-50 outline-none transition-all appearance-none cursor-pointer"
-                            aria-label="Select language">
-                            <option value="en">English</option>
-                            <option value="es">Español</option>
-                            <option value="fr">Français</option>
-                            <option value="de">Deutsch</option>
-                            <option value="zh">中文</option>
-                            <option value="ja">日本語</option>
-                            <option value="ko">한국어</option>
-                            <option value="it">Italiano</option>
-                            <option value="pt">Português</option>
-                            <option value="ru">Русский</option>
-                            <option value="ar">العربية</option>
+                        <label class="block text-sm font-medium text-sf-200 mb-2"><i class="fas fa-globe text-sage-400 mr-1.5"></i>Language</label>
+                        <select id="language-select" class="input-glow w-full bg-sf-800/60 border border-white/8 rounded-xl px-4 py-3 text-sm text-sf-50 outline-none transition-all appearance-none cursor-pointer" aria-label="Language">
+                            <option value="en">English</option><option value="es">Espa&ntilde;ol</option><option value="fr">Fran&ccedil;ais</option><option value="de">Deutsch</option><option value="zh">&#20013;&#25991;</option><option value="ja">&#26085;&#26412;&#35486;</option><option value="ko">&#54620;&#44397;&#50612;</option><option value="it">Italiano</option><option value="pt">Portugu&ecirc;s</option><option value="ru">&#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;</option><option value="ar">&#1575;&#1604;&#1593;&#1585;&#1576;&#1610;&#1577;</option>
                         </select>
                     </div>
                 </div>
-
                 <div>
-                    <label class="block text-sm font-medium text-surface-200 mb-3">
-                        <i class="fas fa-sliders text-copper-500 mr-1.5"></i>Practice Mode
-                    </label>
+                    <label class="block text-sm font-medium text-sf-200 mb-3"><i class="fas fa-sliders text-copper-500 mr-1.5"></i>Practice Mode</label>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="mode-card glass rounded-xl p-5 border border-white/5 selected" data-mode="practice" role="radio" aria-checked="true" tabindex="0">
-                            <div class="check-mark"><i class="fas fa-check text-surface-900 text-xs"></i></div>
-                            <div class="w-10 h-10 rounded-lg bg-copper-500/10 flex items-center justify-center mb-3">
-                                <i class="fas fa-microphone-lines text-copper-400"></i>
-                            </div>
-                            <h3 class="font-display font-semibold text-surface-50 mb-1">Practice Mode</h3>
-                            <p class="text-surface-300 text-sm leading-relaxed">AI evaluates your spoken or typed responses for accuracy, grammar, and fluency.</p>
-                        </div>
-                        <div class="mode-card glass rounded-xl p-5 border border-white/5" data-mode="presentation" role="radio" aria-checked="false" tabindex="0">
-                            <div class="check-mark"><i class="fas fa-check text-surface-900 text-xs"></i></div>
-                            <div class="w-10 h-10 rounded-lg bg-sage-500/10 flex items-center justify-center mb-3">
-                                <i class="fas fa-masks-theater text-sage-400"></i>
-                            </div>
-                            <h3 class="font-display font-semibold text-surface-50 mb-1">Presentation Mode</h3>
-                            <p class="text-surface-300 text-sm leading-relaxed">AI speaks all other lines aloud. You practice saying your lines in real-time.</p>
-                        </div>
+                        <div class="mode-card glass rounded-xl p-5 border border-white/5 selected" data-mode="practice" role="radio" aria-checked="true" tabindex="0"><div class="ck"><i class="fas fa-check text-sf-900 text-xs"></i></div><div class="w-10 h-10 rounded-lg bg-copper-500/10 flex items-center justify-center mb-3"><i class="fas fa-microphone-lines text-copper-400"></i></div><h3 class="font-display font-semibold text-sf-50 mb-1">Practice Mode</h3><p class="text-sf-300 text-sm leading-relaxed">AI evaluates your spoken or typed responses for accuracy, grammar, and fluency.</p></div>
+                        <div class="mode-card glass rounded-xl p-5 border border-white/5" data-mode="presentation" role="radio" aria-checked="false" tabindex="0"><div class="ck"><i class="fas fa-check text-sf-900 text-xs"></i></div><div class="w-10 h-10 rounded-lg bg-sage-500/10 flex items-center justify-center mb-3"><i class="fas fa-masks-theater text-sage-400"></i></div><h3 class="font-display font-semibold text-sf-50 mb-1">Presentation Mode</h3><p class="text-sf-300 text-sm leading-relaxed">Lines are hidden. Listen, get hints, and practice saying your lines from memory.</p></div>
                     </div>
                 </div>
-
                 <div>
                     <div class="flex items-center justify-between mb-2">
-                        <label class="text-sm font-medium text-surface-200">
-                            <i class="fas fa-scroll text-copper-500 mr-1.5"></i>Dialogue Script
-                        </label>
-                        <button id="load-example" class="text-xs text-copper-500 hover:text-copper-400 transition-colors font-medium">
-                            <i class="fas fa-flask mr-1"></i>Load Example
-                        </button>
+                        <label class="text-sm font-medium text-sf-200"><i class="fas fa-scroll text-copper-500 mr-1.5"></i>Dialogue Script</label>
+                        <button id="load-example" class="text-xs text-copper-500 hover:text-copper-400 transition-colors font-medium"><i class="fas fa-flask mr-1"></i>Load Example</button>
                     </div>
-                    <textarea id="script-input" rows="8" placeholder="Paste your dialogue script here...&#10;&#10;Format: [Role]: dialogue line&#10;Example:&#10;[Waiter]: Good evening, welcome!&#10;[Customer]: Thank you, I have a reservation."
-                        class="input-glow w-full bg-surface-800/60 border border-white/8 rounded-xl px-4 py-3 text-sm text-surface-50 placeholder-surface-300 outline-none transition-all resize-none leading-relaxed font-body"
-                        aria-label="Dialogue script input"></textarea>
-                    <div id="parse-status" class="mt-2 text-xs text-surface-300 h-5"></div>
+                    <textarea id="script-input" rows="8" placeholder="Paste your dialogue script here...&#10;&#10;Format: [Role]: dialogue line&#10;Example:&#10;[Waiter]: Good evening, welcome!&#10;[Customer]: Thank you, I have a reservation." class="input-glow w-full bg-sf-800/60 border border-white/8 rounded-xl px-4 py-3 text-sm text-sf-50 placeholder-sf-300 outline-none transition-all resize-none leading-relaxed font-body" aria-label="Script"></textarea>
+                    <div id="parse-status" class="mt-2 text-xs text-sf-300 h-5"></div>
                 </div>
-
                 <div id="role-section" class="hidden">
-                    <label class="block text-sm font-medium text-surface-200 mb-3">
-                        <i class="fas fa-user-tag text-copper-500 mr-1.5"></i>Choose Your Role
-                    </label>
+                    <label class="block text-sm font-medium text-sf-200 mb-3"><i class="fas fa-user-tag text-copper-500 mr-1.5"></i>Choose Your Role</label>
                     <div id="role-pills" class="flex flex-wrap gap-2"></div>
                 </div>
-
-                <button id="start-btn" disabled
-                    class="w-full py-3.5 rounded-xl font-display font-semibold text-base transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed bg-gradient-to-r from-copper-500 to-copper-600 text-surface-900 hover:from-copper-400 hover:to-copper-500 hover:shadow-lg hover:shadow-copper-500/20">
-                    Begin Session
-                </button>
+                <button id="start-btn" disabled class="w-full py-3.5 rounded-xl font-display font-semibold text-base transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed bg-gradient-to-r from-copper-500 to-copper-600 text-sf-900 hover:from-copper-400 hover:to-copper-500 hover:shadow-lg hover:shadow-copper-500/20">Begin Session</button>
             </div>
-
-            <p class="text-center text-surface-300 text-xs mt-6">
-                GLM 5.1 via z.ai &middot; Web Speech API &middot; Your key never leaves your browser
-            </p>
+            <p class="text-center text-sf-300 text-xs mt-6">GLM via z.ai &middot; StreamElements TTS &middot; Your key never leaves your browser</p>
         </div>
     </div>
 
-    <!-- ==================== SESSION SCREEN ==================== -->
+    <!-- SESSION SCREEN -->
     <div id="session-screen" class="screen flex-col h-screen">
         <header class="glass border-b border-white/5 px-4 py-3 flex items-center justify-between flex-shrink-0 z-10">
             <div class="flex items-center gap-3">
-                <button id="back-btn" class="w-9 h-9 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors" aria-label="Back to setup">
-                    <i class="fas fa-arrow-left text-sm text-surface-200"></i>
-                </button>
-                <div class="flex items-center gap-2">
-                    <span id="mode-badge" class="px-2.5 py-1 rounded-md text-xs font-semibold bg-copper-500/15 text-copper-400">Practice</span>
-                    <span id="lang-badge" class="px-2.5 py-1 rounded-md text-xs font-medium bg-white/5 text-surface-200">EN</span>
-                </div>
+                <button id="back-btn" class="w-9 h-9 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors" aria-label="Back"><i class="fas fa-arrow-left text-sm text-sf-200"></i></button>
+                <span id="mode-badge" class="px-2.5 py-1 rounded-md text-xs font-semibold bg-copper-500/15 text-copper-400">Practice</span>
+                <span id="lang-badge" class="px-2.5 py-1 rounded-md text-xs font-medium bg-white/5 text-sf-200">EN</span>
+                <span id="tts-badge" class="px-2 py-1 rounded-md text-[10px] font-medium bg-sage-500/10 text-sage-400 hidden"><i class="fas fa-wave-square mr-1"></i>Natural</span>
             </div>
             <div class="flex items-center gap-4">
                 <div id="line-dots" class="hidden sm:flex items-center gap-1.5"></div>
-                <span id="progress-text" class="text-sm font-medium text-surface-200 tabular-nums">1 / 1</span>
+                <span id="progress-text" class="text-sm font-medium text-sf-200 tabular-nums">1 / 1</span>
             </div>
         </header>
-
-        <div class="progress-track flex-shrink-0">
-            <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
-        </div>
-
-        <div id="dialogue-context" class="flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col gap-3" role="log" aria-label="Dialogue history"></div>
-
-        <div id="interaction-area" class="flex-shrink-0 glass border-t border-white/5 p-4 min-h-[120px]"></div>
+        <div class="progress-track flex-shrink-0"><div id="progress-fill" class="progress-fill" style="width:0%"></div></div>
+        <div id="dialogue-context" class="flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col gap-3" role="log" aria-label="Dialogue"></div>
+        <div id="interaction-area" class="flex-shrink-0 glass border-t border-white/5 p-4 min-h-[100px]"></div>
     </div>
 
-    <!-- ==================== COMPLETE SCREEN ==================== -->
-    <div id="complete-screen" class="screen flex-col items-center justify-center min-h-screen p-6">
-        <div class="w-full max-w-md text-center">
-            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-copper-500/20 to-sage-500/20 flex items-center justify-center mx-auto mb-6 border border-copper-500/10">
-                <i class="fas fa-trophy text-3xl text-copper-400"></i>
-            </div>
-            <h2 class="font-display text-3xl font-bold gradient-text mb-2">Session Complete</h2>
-            <p class="text-surface-300 mb-8">Great work practicing your dialogue skills!</p>
-
-            <div class="glass rounded-2xl p-6 mb-6">
-                <div class="flex justify-center mb-4">
-                    <svg viewBox="0 0 120 120" width="120" height="120">
+    <!-- REPORT SCREEN -->
+    <div id="complete-screen" class="screen flex-col min-h-screen">
+        <header class="glass border-b border-white/5 px-4 py-6 flex-shrink-0 no-print">
+            <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center gap-6">
+                <div class="flex-shrink-0">
+                    <svg viewBox="0 0 120 120" width="110" height="110">
                         <circle cx="60" cy="60" r="52" fill="none" class="score-ring-bg" stroke-width="8"/>
-                        <circle id="final-score-ring" cx="60" cy="60" r="52" fill="none" stroke="url(#scoreGrad)" stroke-width="8"
-                            stroke-dasharray="326.73" stroke-dashoffset="326.73" stroke-linecap="round" transform="rotate(-90 60 60)" class="score-ring-fill"/>
-                        <defs><linearGradient id="scoreGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#C8956C"/><stop offset="100%" stop-color="#5BB882"/></linearGradient></defs>
-                        <text id="final-score-text" x="60" y="55" text-anchor="middle" fill="#E8E6E1" font-size="30" font-weight="700" font-family="Space Grotesk">0</text>
+                        <circle id="final-ring" cx="60" cy="60" r="52" fill="none" stroke="url(#sg)" stroke-width="8" stroke-dasharray="326.73" stroke-dashoffset="326.73" stroke-linecap="round" transform="rotate(-90 60 60)" class="score-ring-fill"/>
+                        <defs><linearGradient id="sg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#C8956C"/><stop offset="100%" stop-color="#5BB882"/></linearGradient></defs>
+                        <text id="final-score" x="60" y="55" text-anchor="middle" fill="#E8E6E1" font-size="30" font-weight="700" font-family="Space Grotesk">0</text>
                         <text x="60" y="74" text-anchor="middle" fill="#6E6D69" font-size="11" font-weight="600" letter-spacing="1">AVERAGE</text>
                     </svg>
                 </div>
-                <div class="grid grid-cols-3 gap-3">
-                    <div class="bg-white/3 rounded-xl p-3">
-                        <div id="stat-lines" class="text-xl font-display font-bold text-surface-50">0</div>
-                        <div class="text-xs text-surface-300 mt-0.5">Lines</div>
-                    </div>
-                    <div class="bg-white/3 rounded-xl p-3">
-                        <div id="stat-best" class="text-xl font-display font-bold text-sage-400">0</div>
-                        <div class="text-xs text-surface-300 mt-0.5">Best</div>
-                    </div>
-                    <div class="bg-white/3 rounded-xl p-3">
-                        <div id="stat-time" class="text-xl font-display font-bold text-copper-400">0s</div>
-                        <div class="text-xs text-surface-300 mt-0.5">Time</div>
-                    </div>
+                <div class="grid grid-cols-4 gap-3 flex-1 w-full hdr-stats">
+                    <div class="bg-white/3 rounded-xl p-3 text-center"><div id="st-lines" class="text-xl font-display font-bold text-sf-50">0</div><div class="text-[10px] text-sf-300 mt-0.5">Lines</div></div>
+                    <div class="bg-white/3 rounded-xl p-3 text-center"><div id="st-eval" class="text-xl font-display font-bold text-sage-400">0</div><div class="text-[10px] text-sf-300 mt-0.5">Evaluated</div></div>
+                    <div class="bg-white/3 rounded-xl p-3 text-center"><div id="st-best" class="text-xl font-display font-bold text-copper-400">0</div><div class="text-[10px] text-sf-300 mt-0.5">Best</div></div>
+                    <div class="bg-white/3 rounded-xl p-3 text-center"><div id="st-time" class="text-xl font-display font-bold text-sf-50">0s</div><div class="text-[10px] text-sf-300 mt-0.5">Time</div></div>
                 </div>
             </div>
-
-            <div id="score-breakdown" class="glass rounded-2xl p-5 mb-6 text-left hidden">
-                <h3 class="font-display font-semibold text-surface-100 mb-3 text-sm">Score Breakdown</h3>
-                <div id="score-bars" class="space-y-2"></div>
+        </header>
+        <main class="flex-1 overflow-y-auto px-4 py-6">
+            <div class="max-w-4xl mx-auto space-y-6">
+                <div>
+                    <h3 class="font-display font-semibold text-lg text-sf-50 mb-4">Line-by-Line Breakdown</h3>
+                    <div id="report-lines" class="space-y-2"></div>
+                </div>
+                <div class="flex flex-wrap gap-3 pt-4 border-t border-white/5 no-print">
+                    <button onclick="exportJSON()" class="px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/8 text-sf-100 font-semibold text-sm transition-all"><i class="fas fa-download mr-2"></i>Export JSON</button>
+                    <button onclick="exportPrint()" class="px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/8 text-sf-100 font-semibold text-sm transition-all"><i class="fas fa-print mr-2"></i>Print Report</button>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-3 pb-8 no-print">
+                    <button onclick="restartSession()" class="flex-1 py-3 rounded-xl font-display font-semibold text-sm bg-white/5 hover:bg-white/10 border border-white/8 transition-all"><i class="fas fa-rotate-right mr-2"></i>Practice Again</button>
+                    <button onclick="newDialogue()" class="flex-1 py-3 rounded-xl font-display font-semibold text-sm bg-gradient-to-r from-copper-500 to-copper-600 text-sf-900 hover:from-copper-400 hover:to-copper-500 transition-all"><i class="fas fa-plus mr-2"></i>New Dialogue</button>
+                </div>
             </div>
-
-            <div class="flex flex-col sm:flex-row gap-3">
-                <button id="restart-btn" class="flex-1 py-3 rounded-xl font-display font-semibold text-sm bg-white/5 hover:bg-white/10 border border-white/8 transition-all">
-                    <i class="fas fa-rotate-right mr-2"></i>Practice Again
-                </button>
-                <button id="new-dialogue-btn" class="flex-1 py-3 rounded-xl font-display font-semibold text-sm bg-gradient-to-r from-copper-500 to-copper-600 text-surface-900 hover:from-copper-400 hover:to-copper-500 transition-all">
-                    <i class="fas fa-plus mr-2"></i>New Dialogue
-                </button>
-            </div>
-        </div>
+        </main>
     </div>
 
-    <script>
-    /* ============================================================
-       SpeakFlow — AI Dialogue Practice Coach
-       All state, API, speech, and UI logic in one file.
-       ============================================================ */
+<script>
+/* ================================================================
+   SpeakFlow — Complete Application
+   ================================================================ */
+const MODEL='glm-4-flash';
+const API_URL='https://api.z.ai/v1/chat/completions';
+const PROXY='https://corsproxy.io/?url=';
 
-    // ── Constants ──
-    const MODEL_NAME = 'glm-4-flash'; // Change to 'glm-5' when available on your plan
-    const API_TARGET = 'https://api.z.ai/v1/chat/completions';
-    const CORS_PROXY = 'https://corsproxy.io/?url=';
+const LANG={
+    en:{name:'English',stt:'en-US',tts:'en-US',badge:'EN'},
+    es:{name:'Espanol',stt:'es-ES',tts:'es-ES',badge:'ES'},
+    fr:{name:'Francais',stt:'fr-FR',tts:'fr-FR',badge:'FR'},
+    de:{name:'Deutsch',stt:'de-DE',tts:'de-DE',badge:'DE'},
+    zh:{name:'Chinese',stt:'zh-CN',tts:'zh-CN',badge:'ZH'},
+    ja:{name:'Japanese',stt:'ja-JP',tts:'ja-JP',badge:'JA'},
+    ko:{name:'Korean',stt:'ko-KR',tts:'ko-KR',badge:'KO'},
+    it:{name:'Italiano',stt:'it-IT',tts:'it-IT',badge:'IT'},
+    pt:{name:'Portugues',stt:'pt-BR',tts:'pt-BR',badge:'PT'},
+    ru:{name:'Russian',stt:'ru-RU',tts:'ru-RU',badge:'RU'},
+    ar:{name:'Arabic',stt:'ar-SA',tts:'ar-SA',badge:'AR'}
+};
 
-    const LANGUAGES = {
-        en: { name: 'English',   stt: 'en-US', tts: 'en-US', badge: 'EN' },
-        es: { name: 'Español',   stt: 'es-ES', tts: 'es-ES', badge: 'ES' },
-        fr: { name: 'Français',  stt: 'fr-FR', tts: 'fr-FR', badge: 'FR' },
-        de: { name: 'Deutsch',   stt: 'de-DE', tts: 'de-DE', badge: 'DE' },
-        zh: { name: '中文',       stt: 'zh-CN', tts: 'zh-CN', badge: 'ZH' },
-        ja: { name: '日本語',     stt: 'ja-JP', tts: 'ja-JP', badge: 'JA' },
-        ko: { name: '한국어',     stt: 'ko-KR', tts: 'ko-KR', badge: 'KO' },
-        it: { name: 'Italiano',  stt: 'it-IT', tts: 'it-IT', badge: 'IT' },
-        pt: { name: 'Português', stt: 'pt-BR', tts: 'pt-BR', badge: 'PT' },
-        ru: { name: 'Русский',   stt: 'ru-RU', tts: 'ru-RU', badge: 'RU' },
-        ar: { name: 'العربية',   stt: 'ar-SA', tts: 'ar-SA', badge: 'AR' }
-    };
+/* StreamElements free TTS — Amazon Polly voices, no key needed */
+const NATURAL_VOICES={en:'Brian',es:'Conchita',fr:'Celine',de:'Marlene',it:'Giorgio',pt:'Camila'};
 
-    const EXAMPLE_SCRIPT = `[Waiter]: Good evening, welcome to La Maison. Do you have a reservation?
+const EXAMPLE=`[Waiter]: Good evening, welcome to La Maison. Do you have a reservation?
 [Customer]: Yes, I have a reservation for two under the name Johnson.
 [Waiter]: Ah yes, Mr. Johnson. Your table is ready. Please follow me.
 [Customer]: Thank you. Could we have a table by the window if possible?
@@ -413,869 +235,558 @@
 [Customer]: Perfect, we'll take a glass of that. My friend will have the Caesar salad to start.
 [Waiter]: Very good. I'll be back shortly with your drinks and starters.`;
 
-    // ── Application State ──
-    const state = {
-        screen: 'setup',
-        apiKey: '',
-        language: 'en',
-        mode: 'practice',
-        lines: [],
-        roles: [],
-        userRole: '',
-        currentLineIndex: 0,
-        isRecording: false,
-        isProcessing: false,
-        isSpeaking: false,
-        evaluation: null,
-        scores: [],       // null = unverified (presentation skip), number = evaluated
-        scoreDetails: [], // full eval objects for breakdown
-        showExpected: true,
-        userInput: '',
-        sessionStart: 0,
-        recognition: null,
-        autoAdvanceTimer: null
+/* ── State ── */
+const S={
+    screen:'setup',apiKey:'',language:'en',mode:'practice',
+    lines:[],roles:[],userRole:'',currentLine:0,
+    isRecording:false,isProcessing:false,isSpeaking:false,
+    showExpected:true,hintRevealed:false,
+    userInput:'',presTimer:null,sessionStart:0,
+    recognition:null,mediaRecorder:null,audioChunks:[],
+    ttsAudio:null,ttsNatural:true,
+    lineScores:{},lineDetails:{},userResponses:{},audioClips:{}
+};
+
+const $=id=>document.getElementById(id);
+function esc(t){const d=document.createElement('div');d.textContent=t;return d.innerHTML}
+
+/* ── Toast System ── */
+function toast(msg,type){
+    type=type||'info';
+    const icons={success:'fa-circle-check',error:'fa-circle-exclamation',info:'fa-circle-info'};
+    const t=document.createElement('div');
+    t.className='toast toast-'+type;
+    t.innerHTML='<i class="fas '+(icons[type]||icons.info)+'"></i><span>'+esc(msg)+'</span>';
+    $('toast-container').appendChild(t);
+    setTimeout(function(){t.style.animation='to2 .3s ease forwards';setTimeout(function(){t.remove()},300)},4000);
+}
+
+/* ── Script Parser ── */
+function parseScript(text){
+    var lines=[],m;
+    var rx=/^\[([^\]]+)\]:\s*(.+)$/gm;
+    while((m=rx.exec(text))!==null)lines.push({role:m[1].trim(),text:m[2].trim()});
+    if(!lines.length){var rx2=/^([^:\[\]]+):\s*(.+)$/gm;while((m=rx2.exec(text))!==null)lines.push({role:m[1].trim(),text:m[2].trim()});}
+    return lines;
+}
+
+/* ── Text-to-Speech ── */
+var voicesLoaded=false;
+function loadVoices(){if(typeof speechSynthesis!=='undefined'&&speechSynthesis.getVoices().length>0)voicesLoaded=true}
+if(typeof speechSynthesis!=='undefined'){speechSynthesis.onvoiceschanged=function(){voicesLoaded=true};loadVoices()}
+function getVoice(lc){if(!voicesLoaded)loadVoices();var v=speechSynthesis.getVoices();if(!v.length)return null;var p=lc.split('-')[0];return v.find(function(x){return x.lang===lc})||v.find(function(x){return x.lang.startsWith(p)})||v[0]}
+
+function speak(text,onEnd){
+    stopSpeaking();
+    if(S.ttsNatural&&NATURAL_VOICES[S.language]){speakNatural(text,onEnd)}
+    else{speakFallback(text,onEnd)}
+}
+
+function speakNatural(text,onEnd){
+    var voice=NATURAL_VOICES[S.language];
+    var url='https://api.streamelements.com/kappa/v2/speech?voice='+voice+'&text='+encodeURIComponent(text);
+    S.isSpeaking=true;
+    fetch(PROXY+encodeURIComponent(url)).then(function(res){
+        if(!res.ok)throw new Error('HTTP '+res.status);
+        return res.blob();
+    }).then(function(blob){
+        if(blob.size<100)throw new Error('Empty audio');
+        var objUrl=URL.createObjectURL(blob);
+        S.ttsAudio=new Audio(objUrl);
+        S.ttsAudio.onended=function(){S.isSpeaking=false;URL.revokeObjectURL(objUrl);if(onEnd)onEnd()};
+        S.ttsAudio.onerror=function(){S.isSpeaking=false;URL.revokeObjectURL(objUrl);speakFallback(text,onEnd)};
+        S.ttsAudio.play();
+        $('tts-badge').classList.remove('hidden');
+    }).catch(function(){
+        S.ttsNatural=false;S.isSpeaking=false;
+        $('tts-badge').classList.add('hidden');
+        speakFallback(text,onEnd);
+    });
+}
+
+function speakFallback(text,onEnd){
+    if(typeof speechSynthesis==='undefined'){if(onEnd)onEnd();return}
+    speechSynthesis.cancel();
+    var lc=LANG[S.language];
+    var u=new SpeechSynthesisUtterance(text);u.lang=lc.tts;
+    var v=getVoice(lc.tts);if(v)u.voice=v;u.rate=0.88;
+    S.isSpeaking=true;
+    u.onend=function(){S.isSpeaking=false;if(onEnd)onEnd()};
+    u.onerror=function(){S.isSpeaking=false;if(onEnd)onEnd()};
+    speechSynthesis.speak(u);
+    $('tts-badge').classList.add('hidden');
+}
+
+function stopSpeaking(){
+    if(S.ttsAudio){S.ttsAudio.pause();S.ttsAudio.currentTime=0;S.ttsAudio=null}
+    if(typeof speechSynthesis!=='undefined')speechSynthesis.cancel();
+    S.isSpeaking=false;
+}
+
+/* ── MediaRecorder for Audio Capture ── */
+function getSupportedMime(){
+    var types=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg'];
+    for(var i=0;i<types.length;i++){if(typeof MediaRecorder!=='undefined'&&MediaRecorder.isTypeSupported(types[i]))return types[i]}
+    return '';
+}
+
+function startMediaRecorder(){
+    navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+        var mime=getSupportedMime();
+        S.mediaRecorder=new MediaRecorder(stream,mime?{mimeType:mime}:undefined);
+        S.audioChunks=[];
+        S.mediaRecorder.ondataavailable=function(e){if(e.data.size>0)S.audioChunks.push(e.data)};
+        S.mediaRecorder.onstop=function(){
+            if(S.audioChunks.length){
+                var mime2=S.mediaRecorder.mimeType||'audio/webm';
+                S.audioClips[S.currentLine]=new Blob(S.audioChunks,{type:mime2});
+            }
+            stream.getTracks().forEach(function(t){t.stop()});
+        };
+        S.mediaRecorder.start();
+    }).catch(function(e){console.warn('MediaRecorder unavailable:',e)});
+}
+
+function stopMediaRecorder(){
+    if(S.mediaRecorder&&S.mediaRecorder.state!=='inactive'){try{S.mediaRecorder.stop()}catch(e){}}
+}
+
+/* ── Speech Recognition ── */
+var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+
+function startRecording(){
+    if(!SR){toast('Speech recognition not supported. Use Chrome or Edge.','error');return}
+    if(S.isRecording){stopAllRecording();return}
+    if(S.isSpeaking)stopSpeaking();
+
+    S.recognition=S.recognition||new SR();
+    S.recognition.lang=LANG[S.language].stt;
+    S.recognition.continuous=false;
+    S.recognition.interimResults=true;
+    S.recognition.maxAlternatives=1;
+    S.isRecording=true;
+    S.userInput='';
+    startMediaRecorder();
+    renderInteraction();
+
+    S.recognition.onresult=function(e){
+        var t='';for(var i=0;i<e.results.length;i++)t+=e.results[i][0].transcript;
+        S.userInput=t;renderInteraction();
+    };
+    S.recognition.onend=function(){
+        if(!S.isRecording)return;
+        S.isRecording=false;
+        stopMediaRecorder();
+        S.userResponses[S.currentLine]=S.userInput.trim()||null;
+        if(S.mode==='presentation'&&S.hintRevealed){
+            S.presTimer=setTimeout(function(){advanceLine()},1500);
+        }else if(S.mode==='practice'){
+            if(S.userInput.trim())handleSubmission();
+            else renderInteraction();
+        }
+    };
+    S.recognition.onerror=function(e){
+        S.isRecording=false;stopMediaRecorder();
+        if(e.error==='no-speech')toast('No speech detected. Try again.','info');
+        else if(e.error==='not-allowed')toast('Microphone access denied.','error');
+        else if(e.error!=='aborted')toast('Recognition error: '+e.error,'error');
+        renderInteraction();
+    };
+    try{S.recognition.start()}catch(e){S.isRecording=false;stopMediaRecorder();toast('Could not start recognition.','error');renderInteraction()}
+}
+
+function stopAllRecording(){
+    S.isRecording=false;clearTimeout(S.presTimer);
+    try{if(S.recognition)S.recognition.stop()}catch(e){}
+    stopMediaRecorder();
+}
+
+/* ── GLM API via CORS Proxy ── */
+function callGLM(messages){
+    var controller=new AbortController();
+    var timer=setTimeout(function(){controller.abort()},25000);
+    return fetch(PROXY+encodeURIComponent(API_URL),{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+S.apiKey},
+        body:JSON.stringify({model:MODEL,messages:messages,temperature:0.3,max_tokens:600}),
+        signal:controller.signal
+    }).then(function(res){
+        clearTimeout(timer);
+        if(!res.ok)return res.text().then(function(b){
+            if(res.status===401)throw new Error('Invalid API key.');
+            if(res.status===429)throw new Error('Rate limited. Wait and retry.');
+            throw new Error('API error ('+res.status+'): '+b.slice(0,200));
+        });
+        return res.json();
+    }).then(function(data){
+        if(!data.choices||!data.choices[0]||!data.choices[0].message)throw new Error('Unexpected API response.');
+        return data.choices[0].message.content||'';
+    }).catch(function(err){
+        clearTimeout(timer);
+        if(err.name==='AbortError')throw new Error('Request timed out.');
+        if(err.message&&err.message.indexOf('Failed to fetch')!==-1)throw new Error('Network error — CORS proxy may be down.');
+        throw err;
+    });
+}
+
+function evaluateResponse(ctx,expected,response){
+    var langName=LANG[S.language].name;
+    var ctxStr=ctx.map(function(l){return l.role+': '+l.text}).join('\n');
+    var messages=[
+        {role:'system',content:'You are an expert '+langName+' dialogue coach. Respond with ONLY valid JSON — no markdown, no fences, no commentary.'},
+        {role:'user',content:'Context:\n'+ctxStr+'\n\nExpected for "'+S.userRole+'": "'+expected+'"\nStudent said: "'+response+'"\n\nJSON:\n{"score":<0-100>,"accuracy":"<1 sentence>","grammar":"<1 sentence>","fluency":"<1 sentence>","corrections":["..."],"encouragement":"<positive>","suggestions":["..."]}'}
+    ];
+    return callGLM(messages).then(function(raw){
+        var p;try{p=JSON.parse(raw)}catch(e){}
+        if(!p){var m=raw.match(/```(?:json)?\s*([\s\S]*?)```/);if(m)try{p=JSON.parse(m[1].trim())}catch(e){}}
+        if(!p){var j=raw.match(/\{[\s\S]*\}/);if(j)try{p=JSON.parse(j[0])}catch(e){}}
+        if(p)return{
+            score:Math.min(100,Math.max(0,parseInt(p.score)||0)),
+            accuracy:p.accuracy||'--',grammar:p.grammar||'--',fluency:p.fluency||'--',
+            corrections:Array.isArray(p.corrections)?p.corrections:[],
+            encouragement:p.encouragement||'Keep practicing!',
+            suggestions:Array.isArray(p.suggestions)?p.suggestions:[]
+        };
+        return{score:50,accuracy:'Could not parse.',grammar:'--',fluency:'--',corrections:[],encouragement:raw.slice(0,200),suggestions:[]};
+    });
+}
+
+/* ── Screen Management ── */
+function switchScreen(n){
+    S.screen=n;
+    document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
+    $(n+'-screen').classList.add('active');
+}
+
+/* ── Setup Screen Logic ── */
+function updateParse(){
+    var text=$('script-input').value.trim(),el=$('parse-status');
+    if(!text){el.textContent='';$('role-section').classList.add('hidden');S.lines=[];updateStartBtn();return}
+    var lines=parseScript(text);
+    if(!lines.length){
+        el.innerHTML='<span class="text-coral-400"><i class="fas fa-triangle-exclamation mr-1"></i>No valid lines. Use [Role]: line</span>';
+        $('role-section').classList.add('hidden');S.lines=[];
+    }else{
+        var roles=[];lines.forEach(function(l){if(roles.indexOf(l.role)===-1)roles.push(l.role)});
+        el.innerHTML='<span class="text-sage-400"><i class="fas fa-circle-check mr-1"></i>'+lines.length+' lines &middot; Roles: '+roles.map(function(r){return '<span class="text-sf-50">'+esc(r)+'</span>'}).join(', ')+'</span>';
+        S.lines=lines;S.roles=roles;renderPills();$('role-section').classList.remove('hidden');
+        if(!S.userRole||roles.indexOf(S.userRole)===-1)S.userRole='';
+    }
+    updateStartBtn();
+}
+
+function renderPills(){
+    $('role-pills').innerHTML=S.roles.map(function(r){return '<button class="role-pill '+(S.userRole===r?'selected':'')+'" data-role="'+r+'">'+esc(r)+'</button>'}).join('');
+    $('role-pills').querySelectorAll('.role-pill').forEach(function(p){
+        p.onclick=function(){S.userRole=p.dataset.role;renderPills();updateStartBtn()};
+    });
+}
+
+function updateStartBtn(){$('start-btn').disabled=!(S.apiKey&&S.lines.length&&S.userRole)}
+
+/* ── Session Logic ── */
+function startSession(){
+    var hasLines=false;
+    S.lines.forEach(function(l){if(l.role===S.userRole)hasLines=true});
+    if(!hasLines){toast('"'+S.userRole+'" has no lines!','error');return}
+    S.currentLine=0;S.showExpected=true;S.hintRevealed=false;
+    S.userInput='';S.isProcessing=false;S.sessionStart=Date.now();
+    S.lineScores={};S.lineDetails={};S.userResponses={};S.audioClips={};
+    S.ttsNatural=true;
+    stopSpeaking();stopAllRecording();
+    $('mode-badge').textContent=S.mode==='practice'?'Practice':'Presentation';
+    $('lang-badge').textContent=LANG[S.language].badge;
+    switchScreen('session');renderSession();
+    if(S.mode==='presentation')handlePresLine();
+}
+
+function renderSession(){renderProgress();renderContext();renderInteraction()}
+
+function renderProgress(){
+    var t=S.lines.length,c=S.currentLine+1;
+    $('progress-text').textContent=c+' / '+t;
+    $('progress-fill').style.width=(c/t*100)+'%';
+    var d=$('line-dots');
+    if(t<=25){
+        d.classList.remove('hidden');
+        d.innerHTML=S.lines.map(function(l,i){
+            var cls='line-dot';if(i<S.currentLine)cls+=' done';else if(i===S.currentLine)cls+=' current';
+            return '<div class="'+cls+'"></div>';
+        }).join('');
+    }else d.classList.add('hidden');
+}
+
+function renderContext(){
+    var c=$('dialogue-context');
+    var start=Math.max(0,S.currentLine-8),end=S.currentLine+1;
+    c.innerHTML=S.lines.slice(start,end).map(function(line,vi){
+        var ri=start+vi,isU=line.role===S.userRole,isC=ri===S.currentLine,isP=ri<S.currentLine;
+        var bc=isU?'bubble-user':'bubble-other';
+        if(isC)bc+=' bubble-current';if(isP)bc+=' bubble-past';
+        var sc=S.lineScores[ri];
+        var badge=(isP&&isU&&sc!=null)?'<span class="inline-block ml-2 px-2 py-0.5 rounded text-[10px] font-bold '+(sc>=80?'bg-sage-500/20 text-sage-400':sc>=50?'bg-copper-500/20 text-copper-400':'bg-coral-500/20 text-coral-400')+'">'+sc+'</span>':'';
+        var rep=(!isU&&(isP||isC))?'<button class="replay-btn" onclick="replayLine('+ri+')" aria-label="Replay"><i class="fas fa-volume-up"></i></button>':'';
+        return '<div class="bubble '+bc+'"><div class="bubble-label">'+esc(line.role)+badge+'</div><div class="text-sm leading-relaxed text-sf-50">'+esc(line.text)+'</div>'+rep+'</div>';
+    }).join('');
+    requestAnimationFrame(function(){c.scrollTop=c.scrollHeight});
+}
+
+function renderInteraction(){
+    var area=$('interaction-area'),line=S.lines[S.currentLine];
+    if(!line)return;
+    var isU=line.role===S.userRole;
+
+    if(S.mode==='practice'){
+        if(isU){
+            var hasClip=S.audioClips[S.currentLine]&&!S.isRecording;
+            var html='<div class="flex flex-col gap-3">';
+            if(S.showExpected){
+                html+='<div class="bg-white/3 rounded-lg px-4 py-2.5 border border-white/5"><div class="text-xs text-sage-400 font-semibold mb-1 flex items-center justify-between"><span><i class="fas fa-bullseye mr-1"></i>Expected Line</span><button onclick="S.showExpected=false;renderInteraction()" class="text-sf-300 hover:text-sf-50 transition-colors text-xs"><i class="fas fa-eye-slash mr-1"></i>Hide</button></div><p class="text-sm text-sf-100 italic">'+esc(line.text)+'</p></div>';
+            }else{
+                html+='<div class="flex justify-center"><button onclick="S.showExpected=true;renderInteraction()" class="text-xs text-copper-500 hover:text-copper-400 transition-colors"><i class="fas fa-eye mr-1"></i>Show expected line</button></div>';
+            }
+            if(S.isProcessing){
+                html+='<div class="flex items-center justify-center gap-2.5 py-3"><div class="spinner"></div><span class="text-sm text-sf-300">Evaluating...</span></div>';
+            }else{
+                html+='<div class="flex items-center gap-2">';
+                html+='<input id="txt-in" type="text" placeholder="Type or use mic..." value="'+esc(S.userInput)+'" class="input-glow flex-1 bg-sf-800/60 border border-white/8 rounded-xl px-4 py-3 text-sm text-sf-50 placeholder-sf-300 outline-none transition-all" '+(S.isRecording?'readonly':'')+' aria-label="Response">';
+                html+='<button class="mic-btn '+(S.isRecording?'recording':'')+'" onclick="startRecording()" aria-label="'+(S.isRecording?'Stop':'Record')+'"><i class="fas '+(S.isRecording?'fa-stop':'fa-microphone')+'"></i></button>';
+                html+='<button onclick="handleSubmission()" class="h-14 px-5 rounded-xl bg-copper-500/15 hover:bg-copper-500/25 border border-copper-500/20 text-copper-400 font-semibold text-sm transition-all flex-shrink-0" aria-label="Submit"><i class="fas fa-paper-plane"></i></button>';
+                html+='</div>';
+                if(hasClip)html+='<div class="flex items-center gap-2 text-xs text-sf-300"><i class="fas fa-circle text-sage-500" style="font-size:6px"></i>Recorded <button onclick="playClip('+S.currentLine+')" class="text-copper-400 hover:text-copper-300 ml-1"><i class="fas fa-play" style="font-size:10px"></i> Play back</button></div>';
+            }
+            html+='</div>';
+            area.innerHTML=html;
+            var inp=$('txt-in');
+            if(inp&&!S.isRecording){
+                inp.oninput=function(e){S.userInput=e.target.value};
+                inp.onkeydown=function(e){if(e.key==='Enter'&&S.userInput.trim())handleSubmission()};
+                inp.focus();
+            }
+        }else{
+            area.innerHTML='<div class="flex flex-col items-center gap-3 py-1"><div class="flex items-center gap-3"><button onclick="replayLine('+S.currentLine+')" class="w-10 h-10 rounded-lg bg-sage-500/10 hover:bg-sage-500/20 flex items-center justify-center text-sage-400 transition-colors" aria-label="Listen"><i class="fas fa-volume-up"></i></button><span class="text-sm text-sf-300">Listen to '+esc(line.role)+'</span></div><button onclick="advanceLine()" class="px-6 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/8 text-sf-100 font-semibold text-sm transition-all">Continue <i class="fas fa-arrow-right ml-2"></i></button></div>';
+            if(!S.isSpeaking)speak(line.text);
+        }
+    }else{
+        /* Presentation Mode */
+        if(isU){
+            if(!S.hintRevealed){
+                area.innerHTML='<div class="flex flex-col items-center gap-4 py-2"><div class="text-center"><div class="text-xs text-copper-400 font-semibold mb-1"><i class="fas fa-user mr-1"></i>Your Turn — '+esc(line.role)+'</div><p class="text-sm text-sf-300">Try saying your line from memory</p></div><button onclick="revealHint()" class="px-6 py-3 rounded-xl bg-copper-500/10 hover:bg-copper-500/20 border border-copper-500/20 text-copper-400 font-display font-semibold text-sm transition-all"><i class="fas fa-lightbulb mr-2"></i>Need a hint?</button><button onclick="skipLine()" class="text-xs text-sf-300 hover:text-sf-100 transition-colors">Skip this line</button></div>';
+            }else{
+                area.innerHTML='<div class="flex flex-col items-center gap-3 py-2"><div class="text-center"><div class="text-xs text-copper-400 font-semibold mb-1.5"><i class="fas fa-eye mr-1"></i>Your Line</div><p class="text-base text-sf-50 font-medium leading-relaxed">'+esc(line.text)+'</p></div>'+(S.isRecording?'<div class="flex items-center gap-2"><button class="mic-btn recording" onclick="stopAllRecording()" aria-label="Stop"><i class="fas fa-stop"></i></button><span class="text-sm text-sf-300">Listening...</span></div>':S.userInput?'<div class="text-sm text-sage-400"><i class="fas fa-check-circle mr-1"></i>"'+esc(S.userInput)+'" — advancing...</div>':'<div class="text-sm text-sf-300">Starting recorder...</div>')+'<button onclick="skipLine()" class="text-xs text-sf-300 hover:text-sf-100 transition-colors">Skip</button></div>';
+            }
+        }else{
+            area.innerHTML='<div class="flex flex-col items-center gap-3 py-1">'+(S.isSpeaking?'<div class="flex items-center gap-2"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div><span class="text-sm text-sf-300 ml-1">'+esc(line.role)+' speaking...</span></div>':'<button onclick="replayLine('+S.currentLine+')" class="w-10 h-10 rounded-lg bg-sage-500/10 hover:bg-sage-500/20 flex items-center justify-center text-sage-400 transition-colors" aria-label="Replay"><i class="fas fa-volume-up"></i></button>')+'<button onclick="advanceLine()" class="px-6 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/8 text-sf-100 font-semibold text-sm transition-all '+(S.isSpeaking?'opacity-40 cursor-not-allowed':'')+'" '+(S.isSpeaking?'disabled':'')+'>Next Line <i class="fas fa-arrow-right ml-2"></i></button></div>';
+        }
+    }
+}
+
+function handlePresLine(){
+    clearTimeout(S.presTimer);
+    var line=S.lines[S.currentLine];if(!line)return;
+    if(line.role!==S.userRole){S.presTimer=setTimeout(function(){speak(line.text)},500)}
+    S.hintRevealed=false;
+    renderInteraction();
+}
+
+function revealHint(){
+    S.hintRevealed=true;
+    renderInteraction();
+    setTimeout(function(){startRecording()},350);
+}
+
+function skipLine(){S.userResponses[S.currentLine]=null;advanceLine()}
+
+function handleSubmission(){
+    var input=S.userInput.trim();
+    if(!input){toast('Type or speak a response.','info');return}
+    if(S.isProcessing)return;
+    stopAllRecording();S.isProcessing=true;renderInteraction();
+    evaluateResponse(
+        S.lines.slice(Math.max(0,S.currentLine-4),S.currentLine),
+        S.lines[S.currentLine].text,input
+    ).then(function(ev){
+        S.lineScores[S.currentLine]=ev.score;
+        S.lineDetails[S.currentLine]=ev;
+        S.userResponses[S.currentLine]=input;
+        showEval(ev);
+    }).catch(function(e){
+        toast(e.message,'error');S.isProcessing=false;renderInteraction();
+    });
+}
+
+function showEval(ev){
+    S.isProcessing=false;
+    var sc=ev.score,col=sc>=80?'#5BB882':sc>=50?'#E8B88A':'#D4736E';
+    var lbl=sc>=80?'Excellent':sc>=50?'Good Effort':'Keep Practicing';
+    var C=326.73,off=C*(1-sc/100);
+    var hasClip=!!S.audioClips[S.currentLine];
+    var html='<div class="eval-in"><div class="flex items-start gap-4 sm:gap-5">';
+    html+='<div class="flex-shrink-0"><svg viewBox="0 0 120 120" width="88" height="88"><circle cx="60" cy="60" r="52" fill="none" class="score-ring-bg" stroke-width="8"/><circle cx="60" cy="60" r="52" fill="none" stroke="'+col+'" stroke-width="8" stroke-dasharray="'+C+'" stroke-dashoffset="'+C+'" stroke-linecap="round" transform="rotate(-90 60 60)" class="score-ring-fill" id="ev-ring"/><text x="60" y="52" text-anchor="middle" fill="#E8E6E1" font-size="26" font-weight="700" font-family="Space Grotesk">'+sc+'</text><text x="60" y="70" text-anchor="middle" fill="'+col+'" font-size="8" font-weight="600" letter-spacing=".5">'+lbl.toUpperCase()+'</text></svg></div>';
+    html+='<div class="flex-1 min-w-0 space-y-2">';
+    html+='<div class="egrid grid gap-2" style="grid-template-columns:repeat(3,1fr)">';
+    html+='<div class="bg-white/3 rounded-lg px-3 py-2"><div class="text-[10px] text-sf-300 font-semibold uppercase">Accuracy</div><div class="text-xs text-sf-100 mt-0.5 leading-snug">'+esc(ev.accuracy)+'</div></div>';
+    html+='<div class="bg-white/3 rounded-lg px-3 py-2"><div class="text-[10px] text-sf-300 font-semibold uppercase">Grammar</div><div class="text-xs text-sf-100 mt-0.5 leading-snug">'+esc(ev.grammar)+'</div></div>';
+    html+='<div class="bg-white/3 rounded-lg px-3 py-2"><div class="text-[10px] text-sf-300 font-semibold uppercase">Fluency</div><div class="text-xs text-sf-100 mt-0.5 leading-snug">'+esc(ev.fluency)+'</div></div>';
+    html+='</div>';
+    if(ev.encouragement)html+='<p class="text-sm text-sage-400"><i class="fas fa-heart mr-1.5 text-xs"></i>'+esc(ev.encouragement)+'</p>';
+    if(ev.corrections.length){
+        html+='<div><div class="text-[10px] text-coral-400 font-semibold uppercase mb-1">Corrections</div><ul class="space-y-0.5">';
+        ev.corrections.forEach(function(c){html+='<li class="text-xs text-sf-200"><i class="fas fa-xmark text-coral-400 mr-1.5" style="font-size:10px"></i>'+esc(c)+'</li>'});
+        html+='</ul></div>';
+    }
+    if(ev.suggestions.length){
+        html+='<div><div class="text-[10px] text-copper-400 font-semibold uppercase mb-1">Tips</div><ul class="space-y-0.5">';
+        ev.suggestions.forEach(function(s){html+='<li class="text-xs text-sf-200"><i class="fas fa-lightbulb text-copper-400 mr-1.5" style="font-size:10px"></i>'+esc(s)+'</li>'});
+        html+='</ul></div>';
+    }
+    if(hasClip)html+='<button onclick="playClip('+S.currentLine+')" class="text-xs text-sf-300 hover:text-copper-400 transition-colors"><i class="fas fa-play mr-1"></i>Play your recording</button>';
+    html+='<button onclick="advanceLine()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-copper-500 to-copper-600 text-sf-900 font-display font-semibold text-sm hover:from-copper-400 hover:to-copper-500 transition-all mt-1">'+(S.currentLine>=S.lines.length-1?'Finish Session':'Next Line')+' <i class="fas fa-arrow-right ml-2"></i></button>';
+    html+='</div></div></div>';
+    $('interaction-area').innerHTML=html;
+    requestAnimationFrame(function(){requestAnimationFrame(function(){var r=$('ev-ring');if(r)r.style.strokeDashoffset=off})});
+}
+
+function advanceLine(){
+    stopSpeaking();stopAllRecording();clearTimeout(S.presTimer);
+    if(S.currentLine>=S.lines.length-1){showReport();return}
+    S.currentLine++;S.userInput='';S.isProcessing=false;S.hintRevealed=false;
+    renderSession();
+    if(S.mode==='presentation')handlePresLine();
+}
+
+function replayLine(i){var l=S.lines[i];if(l)speak(l.text)}
+
+function playClip(i){
+    var b=S.audioClips[i];if(!b)return;
+    var u=URL.createObjectURL(b),a=new Audio(u);
+    a.onended=function(){URL.revokeObjectURL(u)};
+    a.play().catch(function(){URL.revokeObjectURL(u)});
+}
+
+/* ── Report Screen ── */
+function showReport(){
+    stopSpeaking();stopAllRecording();
+    var scores=[],k;for(k in S.lineScores){if(S.lineScores[k]!=null)scores.push(S.lineScores[k])}
+    var avg=scores.length?Math.round(scores.reduce(function(a,b){return a+b},0)/scores.length):0;
+    var best=scores.length?Math.max.apply(null,scores):0;
+    var elapsed=Math.round((Date.now()-S.sessionStart)/1000);
+    var ts=elapsed>=60?Math.floor(elapsed/60)+'m '+elapsed%60+'s':elapsed+'s';
+
+    switchScreen('complete');
+    $('st-lines').textContent=S.lines.length;
+    $('st-eval').textContent=scores.length;
+    $('st-best').textContent=best;
+    $('st-time').textContent=ts;
+    $('final-score').textContent=avg;
+
+    var C=326.73,off=C*(1-avg/100),ring=$('final-ring');
+    ring.style.strokeDashoffset=C;
+    requestAnimationFrame(function(){requestAnimationFrame(function(){ring.style.strokeDashoffset=off})});
+
+    var rc=$('report-lines');
+    rc.innerHTML=S.lines.map(function(line,i){
+        var isU=line.role===S.userRole;
+        var sc=S.lineScores[i],det=S.lineDetails[i],resp=S.userResponses[i],clip=S.audioClips[i];
+        var isLow=sc!=null&&sc<50;
+
+        if(!isU){
+            return '<div class="report-card bg-white/2 rounded-xl px-4 py-3 border border-white/5 flex items-start gap-3"><span class="text-xs text-sf-300 font-mono w-6 text-right flex-shrink-0 pt-0.5">'+(i+1)+'</span><div class="flex-1 min-w-0"><span class="text-xs text-sage-400 font-semibold">'+esc(line.role)+'</span><p class="text-sm text-sf-200 mt-0.5 truncate">'+esc(line.text)+'</p></div><span class="text-[10px] text-sf-300 flex-shrink-0 pt-1">other</span></div>';
+        }
+
+        var scoreBadge=sc!=null?'<span class="px-2.5 py-1 rounded-lg text-sm font-bold '+(sc>=80?'bg-sage-500/15 text-sage-400':sc>=50?'bg-copper-500/15 text-copper-400':'bg-coral-500/15 text-coral-400')+'">'+sc+'</span>':'<span class="px-2.5 py-1 rounded-lg text-sm text-sf-300 bg-white/3">N/A</span>';
+        var detailHtml='';
+        if(det){
+            detailHtml='<div class="mt-2 space-y-1.5"><div class="grid grid-cols-3 gap-2"><div class="text-[10px]"><span class="text-sf-300">Accuracy:</span> <span class="text-sf-100">'+esc(det.accuracy)+'</span></div><div class="text-[10px]"><span class="text-sf-300">Grammar:</span> <span class="text-sf-100">'+esc(det.grammar)+'</span></div><div class="text-[10px]"><span class="text-sf-300">Fluency:</span> <span class="text-sf-100">'+esc(det.fluency)+'</span></div></div>';
+            if(det.corrections.length){detailHtml+='<div class="text-xs text-coral-400">';det.corrections.forEach(function(c){detailHtml+='<div><i class="fas fa-xmark mr-1" style="font-size:10px"></i>'+esc(c)+'</div>'});detailHtml+='</div>'}
+            if(det.suggestions.length){detailHtml+='<div class="text-xs text-copper-400">';det.suggestions.forEach(function(s){detailHtml+='<div><i class="fas fa-lightbulb mr-1" style="font-size:10px"></i>'+esc(s)+'</div>'});detailHtml+='</div>'}
+            if(det.encouragement)detailHtml+='<p class="text-xs text-sage-400 italic">'+esc(det.encouragement)+'</p>';
+            detailHtml+='</div>';
+        }
+
+        var audioHtml='';
+        if(clip){
+            var u=URL.createObjectURL(clip);
+            audioHtml='<div class="mt-2"><audio controls src="'+u+'" class="w-full h-8"></audio></div>';
+        }
+
+        return '<div class="report-card '+(isLow?'low':'')+' bg-white/2 rounded-xl px-4 py-3 border '+(isLow?'border-coral-500/25':'border-white/5')+'"><div class="flex items-start gap-3"><span class="text-xs '+(isLow?'text-coral-400':'text-sf-300')+' font-mono w-6 text-right flex-shrink-0 pt-0.5">'+(i+1)+'</span><div class="flex-1 min-w-0"><div class="flex items-center gap-2 flex-wrap"><span class="text-xs '+(isLow?'text-coral-400':'text-copper-400')+' font-semibold">'+esc(line.role)+'</span>'+scoreBadge+(isLow?'<span class="text-[10px] bg-coral-500/15 text-coral-400 px-2 py-0.5 rounded font-semibold">Needs work</span>':'')+'</div><p class="text-sm text-sf-300 mt-1 truncate"><span class="text-sf-200 font-medium">Expected:</span> '+esc(line.text)+'</p>'+(resp?'<p class="text-sm text-sf-300 mt-0.5 truncate"><span class="text-sf-200 font-medium">You said:</span> '+esc(resp)+'</p>':'<p class="text-xs text-sf-300 mt-1 italic">No response recorded</p>')+detailHtml+audioHtml+'</div></div></div>';
+    }).join('');
+}
+
+/* ── Export Functions ── */
+function exportJSON(){
+    var scores=[],k;for(k in S.lineScores){if(S.lineScores[k]!=null)scores.push(S.lineScores[k])}
+    var data={
+        session:{language:S.language,mode:S.mode,duration:Math.round((Date.now()-S.sessionStart)/1000),timestamp:new Date().toISOString(),model:MODEL},
+        overall:{avgScore:scores.length?Math.round(scores.reduce(function(a,b){return a+b},0)/scores.length):0,bestScore:scores.length?Math.max.apply(null,scores):0,linesEvaluated:scores.length,totalLines:S.lines.length},
+        lines:S.lines.map(function(l,i){return{index:i,role:l.role,isUser:l.role===S.userRole,expectedText:l.text,userResponse:S.userResponses[i]||null,score:S.lineScores[i]!=null?S.lineScores[i]:null,feedback:S.lineDetails[i]||null,hasAudio:!!S.audioClips[i]}})
+    };
+    var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    var u=URL.createObjectURL(blob);
+    var a=document.createElement('a');a.href=u;a.download='speakflow-report-'+Date.now()+'.json';a.click();
+    URL.revokeObjectURL(u);
+    toast('Report exported as JSON.','success');
+}
+
+function exportPrint(){
+    var scores=[],k;for(k in S.lineScores){if(S.lineScores[k]!=null)scores.push(S.lineScores[k])}
+    var avg=scores.length?Math.round(scores.reduce(function(a,b){return a+b},0)/scores.length):0;
+    var elapsed=Math.round((Date.now()-S.sessionStart)/1000);
+    var rows=S.lines.map(function(l,i){
+        var sc=S.lineScores[i],resp=S.userResponses[i],det=S.lineDetails[i],isU=l.role===S.userRole;
+        var scStyle=sc!=null&&sc<50?'color:#D4736E;font-weight:700':'';
+        return '<tr style="border-bottom:1px solid #eee;'+( !isU?'opacity:.6':'')+'"><td style="padding:8px;font-size:13px">'+(i+1)+'</td><td style="padding:8px;font-size:13px;font-weight:600">'+esc(l.role)+'</td><td style="padding:8px;font-size:13px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(l.text)+'</td><td style="padding:8px;font-size:13px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(resp?esc(resp):'—')+'</td><td style="padding:8px;font-size:13px;text-align:center;'+scStyle+'">'+(sc!=null?sc:'N/A')+'</td><td style="padding:8px;font-size:12px;color:#666;max-width:180px">'+(det?esc(det.encouragement):'—')+'</td></tr>';
+    }).join('');
+    var html='<!DOCTYPE html><html><head><title>SpeakFlow Report</title><style>body{font-family:system-ui,sans-serif;max-width:900px;margin:40px auto;padding:0 20px;color:#222}h1{font-size:28px;margin-bottom:4px}h2{font-size:16px;color:#666;font-weight:400;margin-bottom:20px}.stats{display:flex;gap:24px;margin-bottom:24px}.stat{text-align:center}.stat .val{font-size:32px;font-weight:700}.stat .lbl{font-size:12px;color:#888}table{width:100%;border-collapse:collapse}th{text-align:left;padding:8px;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:#888;border-bottom:2px solid #ddd}@media print{body{margin:20px}}</style></head><body><h1>SpeakFlow Session Report</h1><h2>'+LANG[S.language].name+' &middot; '+(S.mode==='practice'?'Practice':'Presentation')+' Mode &middot; '+new Date().toLocaleDateString()+'</h2><div class="stats"><div class="stat"><div class="val">'+avg+'</div><div class="lbl">Average Score</div></div><div class="stat"><div class="val">'+(scores.length?Math.max.apply(null,scores):0)+'</div><div class="lbl">Best Score</div></div><div class="stat"><div class="val">'+S.lines.length+'</div><div class="lbl">Lines</div></div><div class="stat"><div class="val">'+(elapsed>=60?Math.floor(elapsed/60)+'m '+elapsed%60+'s':elapsed+'s')+'</div><div class="lbl">Duration</div></div></div><table><thead><tr><th>#</th><th>Role</th><th>Expected</th><th>Your Response</th><th>Score</th><th>Feedback</th></tr></thead><tbody>'+rows+'</tbody></table><script>window.onload=function(){window.print()}<\/script></body></html>';
+    var w=window.open('','_blank');
+    if(w){w.document.write(html);w.document.close()}else toast('Pop-up blocked. Allow pop-ups to print.','error');
+}
+
+function restartSession(){
+    S.currentLine=0;S.hintRevealed=false;S.userInput='';S.isProcessing=false;
+    S.sessionStart=Date.now();S.lineScores={};S.lineDetails={};S.userResponses={};S.audioClips={};S.ttsNatural=true;
+    stopSpeaking();stopAllRecording();switchScreen('session');renderSession();
+    if(S.mode==='presentation')handlePresLine();
+}
+
+function newDialogue(){switchScreen('setup')}
+
+/* ── Event Bindings ── */
+document.addEventListener('DOMContentLoaded',function(){
+    $('toggle-key').onclick=function(){
+        var inp=$('api-key'),ic=$('toggle-key').querySelector('i');
+        if(inp.type==='password'){inp.type='text';ic.className='fas fa-eye-slash text-sm'}
+        else{inp.type='password';ic.className='fas fa-eye text-sm'}
+    };
+    $('api-key').oninput=function(e){S.apiKey=e.target.value.trim();updateStartBtn()};
+    $('language-select').onchange=function(e){S.language=e.target.value};
+
+    document.querySelectorAll('.mode-card').forEach(function(c){
+        c.onclick=function(){
+            document.querySelectorAll('.mode-card').forEach(function(x){x.classList.remove('selected');x.setAttribute('aria-checked','false')});
+            c.classList.add('selected');c.setAttribute('aria-checked','true');S.mode=c.dataset.role;
+        };
+        c.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();c.click()}};
+    });
+
+    var pt;
+    $('script-input').oninput=function(){clearTimeout(pt);pt=setTimeout(updateParse,350)};
+
+    $('load-example').onclick=function(){
+        $('script-input').value=EXAMPLE;S.language='en';$('language-select').value='en';
+        updateParse();toast('Example loaded. Choose your role.','success');
     };
 
-    // ── Helpers ──
-    const $ = id => document.getElementById(id);
-
-    function escapeHtml(text) {
-        const d = document.createElement('div');
-        d.textContent = text;
-        return d.innerHTML;
-    }
-
-    // ── Toast Notification System ──
-    function showToast(message, type = 'info') {
-        const container = $('toast-container');
-        const icons = { success: 'fa-circle-check', error: 'fa-circle-exclamation', info: 'fa-circle-info' };
-        const toast = document.createElement('div');
-        toast.className = `toast toast-${type}`;
-        toast.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i><span>${escapeHtml(message)}</span>`;
-        container.appendChild(toast);
-        setTimeout(() => {
-            toast.style.animation = 'toastOut 0.3s ease forwards';
-            setTimeout(() => toast.remove(), 300);
-        }, 4000);
-    }
-
-    // ── Script Parsing ──
-    function parseScript(text) {
-        const lines = [];
-        const regex1 = /^\[([^\]]+)\]:\s*(.+)$/gm;
-        let match;
-        while ((match = regex1.exec(text)) !== null) {
-            lines.push({ role: match[1].trim(), text: match[2].trim() });
-        }
-        if (lines.length === 0) {
-            const regex2 = /^([^:\[\]]+):\s*(.+)$/gm;
-            while ((match = regex2.exec(text)) !== null) {
-                lines.push({ role: match[1].trim(), text: match[2].trim() });
-            }
-        }
-        return lines;
-    }
-
-    function getUniqueRoles(lines) {
-        return [...new Set(lines.map(l => l.role))];
-    }
-
-    // ── Speech Synthesis (TTS) ──
-    let voicesLoaded = false;
-    function loadVoices() {
-        if (typeof speechSynthesis !== 'undefined' && speechSynthesis.getVoices().length > 0) voicesLoaded = true;
-    }
-    if (typeof speechSynthesis !== 'undefined') {
-        speechSynthesis.onvoiceschanged = () => { voicesLoaded = true; };
-        loadVoices();
-    }
-
-    function getVoiceForLang(langCode) {
-        if (!voicesLoaded) loadVoices();
-        const voices = speechSynthesis.getVoices();
-        if (!voices.length) return null;
-        const prefix = langCode.split('-')[0];
-        let voice = voices.find(v => v.lang === langCode);
-        if (!voice) voice = voices.find(v => v.lang.startsWith(prefix));
-        if (!voice) voice = voices[0];
-        return voice;
-    }
-
-    function speak(text, onEnd) {
-        if (typeof speechSynthesis === 'undefined') {
-            showToast('Text-to-speech not supported in this browser.', 'error');
-            if (onEnd) onEnd();
-            return;
-        }
-        speechSynthesis.cancel();
-        const langConfig = LANGUAGES[state.language];
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = langConfig.tts;
-        const voice = getVoiceForLang(langConfig.tts);
-        if (voice) utterance.voice = voice;
-        utterance.rate = 0.88;
-        utterance.pitch = 1;
-        state.isSpeaking = true;
-        utterance.onend = () => { state.isSpeaking = false; if (onEnd) onEnd(); };
-        utterance.onerror = () => { state.isSpeaking = false; if (onEnd) onEnd(); };
-        speechSynthesis.speak(utterance);
-    }
-
-    function stopSpeaking() {
-        if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel();
-        state.isSpeaking = false;
-    }
-
-    // ── Speech Recognition (STT) ──
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-    function initRecognition() {
-        if (!SpeechRecognition) return null;
-        const rec = new SpeechRecognition();
-        rec.continuous = false;
-        rec.interimResults = true;
-        rec.maxAlternatives = 1;
-        return rec;
-    }
-
-    function startRecording() {
-        if (!SpeechRecognition) {
-            showToast('Speech recognition not supported. Use Chrome or Edge.', 'error');
-            return;
-        }
-        if (state.isRecording) { stopRecording(); return; }
-        if (state.isSpeaking) stopSpeaking();
-
-        const langConfig = LANGUAGES[state.language];
-        state.recognition = state.recognition || initRecognition();
-        if (!state.recognition) return;
-
-        state.recognition.lang = langConfig.stt;
-        state.isRecording = true;
-        state.userInput = '';
-        renderInteractionArea();
-
-        state.recognition.onresult = (e) => {
-            let transcript = '';
-            for (let i = 0; i < e.results.length; i++) transcript += e.results[i][0].transcript;
-            state.userInput = transcript;
-            renderInteractionArea();
-        };
-
-        state.recognition.onend = () => {
-            if (state.isRecording) {
-                state.isRecording = false;
-                if (state.userInput.trim()) {
-                    handleSubmission();
-                } else {
-                    renderInteractionArea();
-                }
-            }
-        };
-
-        state.recognition.onerror = (e) => {
-            state.isRecording = false;
-            if (e.error === 'no-speech') showToast('No speech detected. Try again.', 'info');
-            else if (e.error === 'not-allowed') showToast('Microphone access denied.', 'error');
-            else if (e.error !== 'aborted') showToast(`Recognition error: ${e.error}`, 'error');
-            renderInteractionArea();
-        };
-
-        try { state.recognition.start(); }
-        catch { state.isRecording = false; showToast('Could not start recognition.', 'error'); renderInteractionArea(); }
-    }
-
-    function stopRecording() {
-        if (state.recognition && state.isRecording) {
-            state.isRecording = false;
-            try { state.recognition.stop(); } catch {}
-        }
-    }
-
-    // ── GLM 5.1 API via CORS Proxy ──
-    async function callGLM(messages) {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 25000);
-
-        const proxyUrl = CORS_PROXY + encodeURIComponent(API_TARGET);
-
-        try {
-            const res = await fetch(proxyUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${state.apiKey}`
-                },
-                body: JSON.stringify({
-                    model: MODEL_NAME,
-                    messages: messages,
-                    temperature: 0.3,
-                    max_tokens: 600
-                }),
-                signal: controller.signal
-            });
-            clearTimeout(timeout);
-
-            if (!res.ok) {
-                let errBody = '';
-                try { errBody = await res.text(); } catch {}
-                if (res.status === 401) throw new Error('Invalid API key. Check your z.ai key and try again.');
-                if (res.status === 429) throw new Error('Rate limited. Wait a moment and retry.');
-                if (res.status === 403) throw new Error('Access forbidden. Your key may lack permissions for this model.');
-                throw new Error(`API error (${res.status}): ${errBody.slice(0, 200)}`);
-            }
-
-            const data = await res.json();
-            if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-                throw new Error('Unexpected API response format.');
-            }
-            return data.choices[0].message.content || '';
-
-        } catch (err) {
-            clearTimeout(timeout);
-            if (err.name === 'AbortError') throw new Error('Request timed out after 25s. Check your connection.');
-            if (err.message.includes('Failed to fetch')) {
-                throw new Error('Network error — the CORS proxy may be down. Try again in a moment.');
-            }
-            throw err;
-        }
-    }
-
-    async function evaluateResponse(contextLines, expectedLine, userResponse) {
-        const langName = LANGUAGES[state.language].name;
-        const contextStr = contextLines.map(l => `${l.role}: ${l.text}`).join('\n');
-
-        const messages = [
-            {
-                role: 'system',
-                content: `You are an expert dialogue coach for ${langName}. Evaluate the student's response against the expected dialogue line. You MUST respond with ONLY valid JSON — no markdown fences, no commentary, no code blocks. Just raw JSON.`
-            },
-            {
-                role: 'user',
-                content: `Dialogue context:\n${contextStr}\n\nExpected response for "${state.userRole}": "${expectedLine}"\nStudent's actual response: "${userResponse}"\n\nReturn JSON exactly in this shape:\n{"score": <0-100 integer>,"accuracy":"<one sentence>","grammar":"<one sentence>","fluency":"<one sentence>","corrections":["<each correction as a string>"],"encouragement":"<one positive sentence>","suggestions":["<each suggestion as a string>"]}`
-            }
-        ];
-
-        const raw = await callGLM(messages);
-
-        // Parse JSON — handle various wrapping formats
-        let parsed;
-        try { parsed = JSON.parse(raw); } catch {}
-        if (!parsed) {
-            const m = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
-            if (m) try { parsed = JSON.parse(m[1].trim()); } catch {}
-        }
-        if (!parsed) {
-            // Last resort: try to find a JSON object in the raw string
-            const jsonMatch = raw.match(/\{[\s\S]*\}/);
-            if (jsonMatch) try { parsed = JSON.parse(jsonMatch[0]); } catch {}
-        }
-        if (!parsed) {
-            return {
-                score: 50, accuracy: 'Could not parse detailed evaluation.', grammar: '—',
-                fluency: '—', corrections: [], encouragement: raw.slice(0, 200), suggestions: []
-            };
-        }
-
-        return {
-            score: Math.min(100, Math.max(0, parseInt(parsed.score) || 0)),
-            accuracy: parsed.accuracy || '—',
-            grammar: parsed.grammar || '—',
-            fluency: parsed.fluency || '—',
-            corrections: Array.isArray(parsed.corrections) ? parsed.corrections : [],
-            encouragement: parsed.encouragement || 'Keep practicing!',
-            suggestions: Array.isArray(parsed.suggestions) ? parsed.suggestions : []
-        };
-    }
-
-    // ── Screen Management ──
-    function switchScreen(name) {
-        state.screen = name;
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        $(name + '-screen').classList.add('active');
-    }
-
-    // ── Setup Screen Logic ──
-    function updateParseStatus() {
-        const text = $('script-input').value.trim();
-        const el = $('parse-status');
-        if (!text) { el.textContent = ''; $('role-section').classList.add('hidden'); state.lines = []; updateStartBtn(); return; }
-
-        const lines = parseScript(text);
-        if (lines.length === 0) {
-            el.innerHTML = '<span class="text-coral-400"><i class="fas fa-triangle-exclamation mr-1"></i>No valid lines found. Use format: [Role]: dialogue line</span>';
-            $('role-section').classList.add('hidden');
-            state.lines = [];
-        } else {
-            const roles = getUniqueRoles(lines);
-            el.innerHTML = `<span class="text-sage-400"><i class="fas fa-circle-check mr-1"></i>${lines.length} lines parsed &middot; Roles: ${roles.map(r => `<span class="text-surface-50">${r}</span>`).join(', ')}</span>`;
-            state.lines = lines;
-            state.roles = roles;
-            renderRolePills();
-            $('role-section').classList.remove('hidden');
-            if (!state.userRole || !roles.includes(state.userRole)) state.userRole = '';
-        }
-        updateStartBtn();
-    }
-
-    function renderRolePills() {
-        $('role-pills').innerHTML = state.roles.map(role =>
-            `<button class="role-pill ${state.userRole === role ? 'selected' : ''}" data-role="${role}" aria-pressed="${state.userRole === role}">${escapeHtml(role)}</button>`
-        ).join('');
-        $('role-pills').querySelectorAll('.role-pill').forEach(pill => {
-            pill.addEventListener('click', () => {
-                state.userRole = pill.dataset.role;
-                renderRolePills();
-                updateStartBtn();
-            });
-        });
-    }
-
-    function updateStartBtn() {
-        $('start-btn').disabled = !(state.apiKey && state.lines.length > 0 && state.userRole);
-    }
-
-    // ── Session Logic ──
-    function startSession() {
-        const userLineIndices = state.lines.map((l, i) => l.role === state.userRole ? i : -1).filter(i => i >= 0);
-        if (userLineIndices.length === 0) {
-            showToast(`"${state.userRole}" has no lines in this dialogue!`, 'error');
-            return;
-        }
-        state.currentLineIndex = 0;
-        state.evaluation = null;
-        state.scores = [];
-        state.scoreDetails = [];
-        state.showExpected = true;
-        state.userInput = '';
-        state.isProcessing = false;
-        state.sessionStart = Date.now();
-        stopSpeaking();
-        stopRecording();
-        clearTimeout(state.autoAdvanceTimer);
-
-        $('mode-badge').textContent = state.mode === 'practice' ? 'Practice' : 'Presentation';
-        $('lang-badge').textContent = LANGUAGES[state.language].badge;
-
-        switchScreen('session');
-        renderSession();
-
-        if (state.mode === 'presentation') handlePresentationLine();
-    }
-
-    function renderSession() {
-        renderProgress();
-        renderDialogueContext();
-        renderInteractionArea();
-    }
-
-    function renderProgress() {
-        const total = state.lines.length;
-        const current = state.currentLineIndex + 1;
-        $('progress-text').textContent = `${current} / ${total}`;
-        $('progress-fill').style.width = `${(current / total) * 100}%`;
-
-        const dotsEl = $('line-dots');
-        if (total <= 25) {
-            dotsEl.classList.remove('hidden');
-            dotsEl.innerHTML = state.lines.map((l, i) => {
-                let cls = 'line-dot';
-                if (i < state.currentLineIndex) cls += ' done';
-                else if (i === state.currentLineIndex) cls += ' current';
-                return `<div class="${cls}" title="${escapeHtml(l.role)}: ${escapeHtml(l.text.slice(0, 30))}"></div>`;
-            }).join('');
-        } else {
-            dotsEl.classList.add('hidden');
-        }
-    }
-
-    function renderDialogueContext() {
-        const container = $('dialogue-context');
-        const start = Math.max(0, state.currentLineIndex - 8);
-        const end = state.currentLineIndex + 1;
-        const visibleLines = state.lines.slice(start, end);
-
-        container.innerHTML = visibleLines.map((line, vi) => {
-            const realIndex = start + vi;
-            const isUser = line.role === state.userRole;
-            const isCurrent = realIndex === state.currentLineIndex;
-            const isPast = realIndex < state.currentLineIndex;
-
-            let bubbleClass = isUser ? 'bubble-user' : 'bubble-other';
-            if (isCurrent) bubbleClass += ' bubble-current';
-            if (isPast) bubbleClass += ' bubble-past';
-
-            // Show score badge on past user bubbles that were evaluated
-            const scoreBadge = (isPast && isUser && state.scores[vi + start] !== undefined && state.scores[vi + start] !== null)
-                ? `<span class="inline-block ml-2 px-2 py-0.5 rounded text-[10px] font-bold ${state.scores[vi + start] >= 80 ? 'bg-sage-500/20 text-sage-400' : state.scores[vi + start] >= 50 ? 'bg-copper-500/20 text-copper-400' : 'bg-coral-500/20 text-coral-400'}">${state.scores[vi + start]}</span>`
-                : '';
-
-            const replayHtml = (!isUser && (isPast || isCurrent))
-                ? `<button class="replay-btn" onclick="replayLine(${realIndex})" aria-label="Replay line"><i class="fas fa-volume-up"></i></button>`
-                : '';
-
-            return `<div class="bubble ${bubbleClass}">
-                <div class="bubble-label">${escapeHtml(line.role)}${scoreBadge}</div>
-                <div class="text-sm leading-relaxed text-surface-50">${escapeHtml(line.text)}</div>
-                ${replayHtml}
-            </div>`;
-        }).join('');
-
-        requestAnimationFrame(() => { container.scrollTop = container.scrollHeight; });
-    }
-
-    function renderInteractionArea() {
-        const area = $('interaction-area');
-        const line = state.lines[state.currentLineIndex];
-        if (!line) return;
-        const isUserLine = line.role === state.userRole;
-
-        if (state.mode === 'practice') {
-            if (isUserLine) {
-                // Show expected + input controls
-                area.innerHTML = `
-                    <div class="flex flex-col gap-3">
-                        ${state.showExpected ? `
-                        <div class="bg-white/3 rounded-lg px-4 py-2.5 border border-white/5">
-                            <div class="text-xs text-sage-400 font-semibold mb-1 flex items-center justify-between">
-                                <span><i class="fas fa-bullseye mr-1"></i>Expected Line</span>
-                                <button onclick="toggleExpected()" class="text-surface-300 hover:text-surface-50 transition-colors text-xs"><i class="fas fa-eye-slash mr-1"></i>Hide</button>
-                            </div>
-                            <p class="text-sm text-surface-100 italic">${escapeHtml(line.text)}</p>
-                        </div>` : `
-                        <div class="flex justify-center">
-                            <button onclick="toggleExpected()" class="text-xs text-copper-500 hover:text-copper-400 transition-colors"><i class="fas fa-eye mr-1"></i>Show expected line</button>
-                        </div>`}
-                        ${state.isProcessing ? `
-                        <div class="flex items-center justify-center gap-2.5 py-3">
-                            <div class="spinner"></div>
-                            <span class="text-sm text-surface-300">Evaluating your response...</span>
-                        </div>` : `
-                        <div class="flex items-center gap-2">
-                            <input id="text-input" type="text" placeholder="Type your response or use the mic..."
-                                value="${escapeHtml(state.userInput)}"
-                                class="input-glow flex-1 bg-surface-800/60 border border-white/8 rounded-xl px-4 py-3 text-sm text-surface-50 placeholder-surface-300 outline-none transition-all"
-                                ${state.isRecording ? 'readonly' : ''} aria-label="Type your response">
-                            <button class="mic-btn ${state.isRecording ? 'recording' : ''}" onclick="toggleRecording()" aria-label="${state.isRecording ? 'Stop recording' : 'Start recording'}">
-                                <i class="fas ${state.isRecording ? 'fa-stop' : 'fa-microphone'}"></i>
-                            </button>
-                            <button onclick="handleSubmission()" class="h-14 px-5 rounded-xl bg-copper-500/15 hover:bg-copper-500/25 border border-copper-500/20 text-copper-400 font-semibold text-sm transition-all flex-shrink-0" aria-label="Submit">
-                                <i class="fas fa-paper-plane"></i>
-                            </button>
-                        </div>`}
-                    </div>`;
-
-                const textInput = $('text-input');
-                if (textInput && !state.isRecording) {
-                    textInput.addEventListener('input', e => { state.userInput = e.target.value; });
-                    textInput.addEventListener('keydown', e => { if (e.key === 'Enter' && state.userInput.trim()) handleSubmission(); });
-                    textInput.focus();
-                }
-            } else {
-                // Other character's line — show with listen + continue
-                area.innerHTML = `
-                    <div class="flex flex-col items-center gap-3 py-1">
-                        <div class="flex items-center gap-3">
-                            <button onclick="replayLine(${state.currentLineIndex})" class="w-10 h-10 rounded-lg bg-sage-500/10 hover:bg-sage-500/20 flex items-center justify-center text-sage-400 transition-colors" aria-label="Listen">
-                                <i class="fas fa-volume-up"></i>
-                            </button>
-                            <span class="text-sm text-surface-300">Listen to ${escapeHtml(line.role)}'s line</span>
-                        </div>
-                        <button onclick="advanceLine()" class="px-6 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/8 text-surface-100 font-semibold text-sm transition-all">
-                            Continue <i class="fas fa-arrow-right ml-2"></i>
-                        </button>
-                    </div>`;
-                if (!state.isSpeaking) speak(line.text);
-            }
-        } else {
-            // ── Presentation Mode ──
-            if (isUserLine) {
-                area.innerHTML = `
-                    <div class="flex flex-col items-center gap-3 py-1">
-                        <div class="text-center">
-                            <div class="text-xs text-copper-400 font-semibold mb-1.5"><i class="fas fa-user mr-1"></i>Your Turn — ${escapeHtml(line.role)}</div>
-                            <p class="text-base text-surface-50 font-medium leading-relaxed">${escapeHtml(line.text)}</p>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <button onclick="markLineDone()" class="px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/8 text-surface-100 font-semibold text-sm transition-all">
-                                <i class="fas fa-check mr-2"></i>Done
-                            </button>
-                            <button onclick="startPresVerification()" class="px-5 py-2.5 rounded-xl bg-copper-500/15 hover:bg-copper-500/25 border border-copper-500/20 text-copper-400 font-semibold text-sm transition-all">
-                                <i class="fas fa-microphone mr-2"></i>Speak & Verify
-                            </button>
-                        </div>
-                    </div>`;
-            } else {
-                area.innerHTML = `
-                    <div class="flex flex-col items-center gap-3 py-1">
-                        ${state.isSpeaking ? `
-                        <div class="flex items-center gap-2">
-                            <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
-                            <span class="text-sm text-surface-300 ml-1">${escapeHtml(line.role)} is speaking...</span>
-                        </div>` : `
-                        <button onclick="replayLine(${state.currentLineIndex})" class="w-10 h-10 rounded-lg bg-sage-500/10 hover:bg-sage-500/20 flex items-center justify-center text-sage-400 transition-colors" aria-label="Replay">
-                            <i class="fas fa-volume-up"></i>
-                        </button>`}
-                        <button onclick="advanceLine()" class="px-6 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/8 text-surface-100 font-semibold text-sm transition-all ${state.isSpeaking ? 'opacity-40 cursor-not-allowed' : ''}" ${state.isSpeaking ? 'disabled' : ''}>
-                            Next Line <i class="fas fa-arrow-right ml-2"></i>
-                        </button>
-                    </div>`;
-            }
-        }
-    }
-
-    function handlePresentationLine() {
-        clearTimeout(state.autoAdvanceTimer);
-        const line = state.lines[state.currentLineIndex];
-        if (!line) return;
-        if (line.role !== state.userRole) {
-            state.autoAdvanceTimer = setTimeout(() => speak(line.text), 500);
-        }
-        renderInteractionArea();
-    }
-
-    function toggleExpected() {
-        state.showExpected = !state.showExpected;
-        renderInteractionArea();
-    }
-
-    function toggleRecording() {
-        if (state.isRecording) stopRecording();
-        else startRecording();
-    }
-
-    async function handleSubmission() {
-        const input = state.userInput.trim();
-        if (!input) { showToast('Please type or speak your response.', 'info'); return; }
-        if (state.isProcessing) return;
-
-        stopRecording();
-        state.isProcessing = true;
-        renderInteractionArea();
-
-        try {
-            const contextLines = state.lines.slice(Math.max(0, state.currentLineIndex - 4), state.currentLineIndex);
-            const expectedLine = state.lines[state.currentLineIndex].text;
-            const evaluation = await evaluateResponse(contextLines, expectedLine, input);
-
-            state.evaluation = evaluation;
-            state.scores.push(evaluation.score);
-            state.scoreDetails.push(evaluation);
-            showEvalResult(evaluation);
-        } catch (err) {
-            showToast(err.message, 'error');
-            state.isProcessing = false;
-            renderInteractionArea();
-        }
-    }
-
-    function showEvalResult(eval) {
-        state.isProcessing = false;
-        const area = $('interaction-area');
-        const scoreColor = eval.score >= 80 ? '#5BB882' : eval.score >= 50 ? '#E8B88A' : '#D4736E';
-        const scoreLabel = eval.score >= 80 ? 'Excellent' : eval.score >= 50 ? 'Good Effort' : 'Keep Practicing';
-        const circumference = 326.73;
-        const offset = circumference * (1 - eval.score / 100);
-
-        area.innerHTML = `
-            <div class="eval-slide-in">
-                <div class="flex items-start gap-4 sm:gap-5">
-                    <div class="flex-shrink-0">
-                        <svg viewBox="0 0 120 120" width="88" height="88">
-                            <circle cx="60" cy="60" r="52" fill="none" class="score-ring-bg" stroke-width="8"/>
-                            <circle cx="60" cy="60" r="52" fill="none" stroke="${scoreColor}" stroke-width="8"
-                                stroke-dasharray="${circumference}" stroke-dashoffset="${circumference}" stroke-linecap="round"
-                                transform="rotate(-90 60 60)" class="score-ring-fill" id="eval-score-ring"/>
-                            <text x="60" y="52" text-anchor="middle" fill="#E8E6E1" font-size="26" font-weight="700" font-family="Space Grotesk">${eval.score}</text>
-                            <text x="60" y="70" text-anchor="middle" fill="${scoreColor}" font-size="8" font-weight="600" letter-spacing="0.5">${scoreLabel.toUpperCase()}</text>
-                        </svg>
-                    </div>
-                    <div class="flex-1 min-w-0 space-y-2">
-                        <div class="eval-grid grid grid-cols-3 gap-2">
-                            <div class="bg-white/3 rounded-lg px-3 py-2">
-                                <div class="text-[10px] text-surface-300 font-semibold uppercase tracking-wide">Accuracy</div>
-                                <div class="text-xs text-surface-100 mt-0.5 leading-snug">${escapeHtml(eval.accuracy)}</div>
-                            </div>
-                            <div class="bg-white/3 rounded-lg px-3 py-2">
-                                <div class="text-[10px] text-surface-300 font-semibold uppercase tracking-wide">Grammar</div>
-                                <div class="text-xs text-surface-100 mt-0.5 leading-snug">${escapeHtml(eval.grammar)}</div>
-                            </div>
-                            <div class="bg-white/3 rounded-lg px-3 py-2">
-                                <div class="text-[10px] text-surface-300 font-semibold uppercase tracking-wide">Fluency</div>
-                                <div class="text-xs text-surface-100 mt-0.5 leading-snug">${escapeHtml(eval.fluency)}</div>
-                            </div>
-                        </div>
-                        ${eval.encouragement ? `<p class="text-sm text-sage-400"><i class="fas fa-heart mr-1.5 text-xs"></i>${escapeHtml(eval.encouragement)}</p>` : ''}
-                        ${eval.corrections.length ? `
-                        <div>
-                            <div class="text-[10px] text-coral-400 font-semibold uppercase tracking-wide mb-1">Corrections</div>
-                            <ul class="space-y-0.5">${eval.corrections.map(c => `<li class="text-xs text-surface-200"><i class="fas fa-xmark text-coral-400 mr-1.5 text-[10px]"></i>${escapeHtml(c)}</li>`).join('')}</ul>
-                        </div>` : ''}
-                        ${eval.suggestions.length ? `
-                        <div>
-                            <div class="text-[10px] text-copper-400 font-semibold uppercase tracking-wide mb-1">Tips</div>
-                            <ul class="space-y-0.5">${eval.suggestions.map(s => `<li class="text-xs text-surface-200"><i class="fas fa-lightbulb text-copper-400 mr-1.5 text-[10px]"></i>${escapeHtml(s)}</li>`).join('')}</ul>
-                        </div>` : ''}
-                        <button onclick="advanceLine()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-copper-500 to-copper-600 text-surface-900 font-display font-semibold text-sm hover:from-copper-400 hover:to-copper-500 transition-all mt-1">
-                            ${state.currentLineIndex >= state.lines.length - 1 ? 'Finish Session' : 'Next Line'} <i class="fas fa-arrow-right ml-2"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>`;
-
-        // Animate score ring
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                const ring = $('eval-score-ring');
-                if (ring) ring.style.strokeDashoffset = offset;
-            });
-        });
-    }
-
-    function advanceLine() {
-        stopSpeaking();
-        stopRecording();
-        clearTimeout(state.autoAdvanceTimer);
-        state.evaluation = null;
-
-        if (state.currentLineIndex >= state.lines.length - 1) {
-            showCompleteScreen();
-            return;
-        }
-
-        state.currentLineIndex++;
-        state.userInput = '';
-        state.isProcessing = false;
-        renderSession();
-
-        if (state.mode === 'presentation') handlePresentationLine();
-    }
-
-    function markLineDone() {
-        state.scores.push(null);
-        state.scoreDetails.push(null);
-        advanceLine();
-    }
-
-    function startPresVerification() {
-        if (!SpeechRecognition) {
-            showToast('Speech recognition not supported. Click "Done" instead.', 'info');
-            return;
-        }
-        if (state.isSpeaking) stopSpeaking();
-
-        const langConfig = LANGUAGES[state.language];
-        state.recognition = state.recognition || initRecognition();
-        if (!state.recognition) return;
-
-        state.recognition.lang = langConfig.stt;
-        state.isRecording = true;
-        state.userInput = '';
-
-        const line = state.lines[state.currentLineIndex];
-        $('interaction-area').innerHTML = `
-            <div class="flex flex-col items-center gap-3 py-1">
-                <p class="text-sm text-surface-300"><i class="fas fa-microphone text-coral-400 mr-1.5"></i>Speak your line now...</p>
-                <button class="mic-btn recording" onclick="stopPresVerification()" aria-label="Stop recording">
-                    <i class="fas fa-stop"></i>
-                </button>
-                <p class="text-xs text-surface-300 italic max-w-sm text-center leading-relaxed">"${escapeHtml(line.text)}"</p>
-            </div>`;
-
-        state.recognition.onresult = (e) => {
-            let transcript = '';
-            for (let i = 0; i < e.results.length; i++) transcript += e.results[i][0].transcript;
-            state.userInput = transcript;
-        };
-
-        state.recognition.onend = () => {
-            if (state.isRecording) {
-                state.isRecording = false;
-                finishPresVerification();
-            }
-        };
-
-        state.recognition.onerror = (e) => {
-            state.isRecording = false;
-            if (e.error !== 'aborted') showToast(`Recognition error: ${e.error}`, 'error');
-            renderInteractionArea();
-        };
-
-        try { state.recognition.start(); }
-        catch { state.isRecording = false; showToast('Could not start recognition.', 'error'); renderInteractionArea(); }
-    }
-
-    function stopPresVerification() {
-        state.isRecording = false;
-        try { state.recognition?.stop(); } catch {}
-        finishPresVerification();
-    }
-
-    async function finishPresVerification() {
-        if (!state.userInput.trim()) {
-            showToast('No speech detected. Marking as practiced.', 'info');
-            state.scores.push(null);
-            state.scoreDetails.push(null);
-            advanceLine();
-            return;
-        }
-
-        state.isProcessing = true;
-        $('interaction-area').innerHTML = `<div class="flex items-center justify-center gap-2.5 py-3"><div class="spinner"></div><span class="text-sm text-surface-300">Verifying your delivery...</span></div>`;
-
-        try {
-            const contextLines = state.lines.slice(Math.max(0, state.currentLineIndex - 4), state.currentLineIndex);
-            const expectedLine = state.lines[state.currentLineIndex].text;
-            const evaluation = await evaluateResponse(contextLines, expectedLine, state.userInput);
-            state.evaluation = evaluation;
-            state.scores.push(evaluation.score);
-            state.scoreDetails.push(evaluation);
-            state.isProcessing = false;
-            showEvalResult(evaluation);
-        } catch (err) {
-            state.isProcessing = false;
-            showToast(err.message, 'error');
-            state.scores.push(null);
-            state.scoreDetails.push(null);
-            advanceLine();
-        }
-    }
-
-    function replayLine(index) {
-        const line = state.lines[index];
-        if (line) speak(line.text);
-    }
-
-    // ── Complete Screen ──
-    function showCompleteScreen() {
-        stopSpeaking();
-        stopRecording();
-        clearTimeout(state.autoAdvanceTimer);
-
-        const validScores = state.scores.filter(s => s !== null && s !== undefined);
-        const avgScore = validScores.length ? Math.round(validScores.reduce((a, b) => a + b, 0) / validScores.length) : 0;
-        const bestScore = validScores.length ? Math.max(...validScores) : 0;
-        const elapsed = Math.round((Date.now() - state.sessionStart) / 1000);
-        const timeStr = elapsed >= 60 ? `${Math.floor(elapsed / 60)}m ${elapsed % 60}s` : `${elapsed}s`;
-
-        switchScreen('complete');
-
-        $('stat-lines').textContent = state.lines.length;
-        $('stat-best').textContent = bestScore;
-        $('stat-time').textContent = timeStr;
-        $('final-score-text').textContent = avgScore;
-
-        // Animate ring
-        const circumference = 326.73;
-        const offset = circumference * (1 - avgScore / 100);
-        const ring = $('final-score-ring');
-        ring.style.strokeDashoffset = circumference;
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => { ring.style.strokeDashoffset = offset; });
-        });
-
-        // Score breakdown bars
-        const breakdownEl = $('score-breakdown');
-        const barsEl = $('score-bars');
-        const evaluatedDetails = state.scoreDetails.filter(d => d !== null);
-
-        if (evaluatedDetails.length > 0) {
-            breakdownEl.classList.remove('hidden');
-            barsEl.innerHTML = evaluatedDetails.map((d, i) => {
-                const lineIdx = state.scoreDetails.indexOf(d);
-                const lineText = state.lines[lineIdx] ? state.lines[lineIdx].text.slice(0, 50) : 'Line';
-                const barColor = d.score >= 80 ? 'bg-sage-500' : d.score >= 50 ? 'bg-copper-500' : 'bg-coral-500';
-                return `<div class="flex items-center gap-3">
-                    <span class="text-[10px] text-surface-300 w-5 text-right tabular-nums">${lineIdx + 1}</span>
-                    <div class="flex-1 bg-white/5 rounded-full h-2 overflow-hidden">
-                        <div class="${barColor} h-full rounded-full transition-all duration-1000" style="width: ${d.score}%"></div>
-                    </div>
-                    <span class="text-xs font-semibold tabular-nums w-8 ${d.score >= 80 ? 'text-sage-400' : d.score >= 50 ? 'text-copper-400' : 'text-coral-400'}">${d.score}</span>
-                </div>`;
-            }).join('');
-
-            // Staggered animation for bars
-            setTimeout(() => {
-                barsEl.querySelectorAll('.bg-sage-500, .bg-copper-500, .bg-coral-500').forEach((bar, i) => {
-                    const targetWidth = bar.style.width;
-                    bar.style.width = '0%';
-                    setTimeout(() => { bar.style.width = targetWidth; }, i * 80);
-                });
-            }, 100);
-        } else {
-            breakdownEl.classList.add('hidden');
-        }
-    }
-
-    // ── Event Bindings ──
-    document.addEventListener('DOMContentLoaded', () => {
-        // Toggle API key visibility
-        $('toggle-key').addEventListener('click', () => {
-            const input = $('api-key');
-            const icon = $('toggle-key').querySelector('i');
-            if (input.type === 'password') { input.type = 'text'; icon.className = 'fas fa-eye-slash text-sm'; }
-            else { input.type = 'password'; icon.className = 'fas fa-eye text-sm'; }
-        });
-
-        $('api-key').addEventListener('input', e => { state.apiKey = e.target.value.trim(); updateStartBtn(); });
-        $('language-select').addEventListener('change', e => { state.language = e.target.value; });
-
-        // Mode card selection
-        document.querySelectorAll('.mode-card').forEach(card => {
-            card.addEventListener('click', () => {
-                document.querySelectorAll('.mode-card').forEach(c => { c.classList.remove('selected'); c.setAttribute('aria-checked', 'false'); });
-                card.classList.add('selected');
-                card.setAttribute('aria-checked', 'true');
-                state.mode = card.dataset.mode;
-            });
-            card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.click(); } });
-        });
-
-        // Script parsing with debounce
-        let parseTimer;
-        $('script-input').addEventListener('input', () => { clearTimeout(parseTimer); parseTimer = setTimeout(updateParseStatus, 350); });
-
-        // Load example script
-        $('load-example').addEventListener('click', () => {
-            $('script-input').value = EXAMPLE_SCRIPT;
-            state.language = 'en';
-            $('language-select').value = 'en';
-            updateParseStatus();
-            showToast('Example dialogue loaded. Choose your role to begin.', 'success');
-        });
-
-        $('start-btn').addEventListener('click', startSession);
-
-        $('back-btn').addEventListener('click', () => {
-            stopSpeaking(); stopRecording(); clearTimeout(state.autoAdvanceTimer);
-            switchScreen('setup');
-        });
-
-        $('restart-btn').addEventListener('click', () => {
-            state.currentLineIndex = 0;
-            state.evaluation = null;
-            state.scores = [];
-            state.scoreDetails = [];
-            state.showExpected = true;
-            state.userInput = '';
-            state.isProcessing = false;
-            state.sessionStart = Date.now();
-            stopSpeaking(); stopRecording(); clearTimeout(state.autoAdvanceTimer);
-            switchScreen('session');
-            renderSession();
-            if (state.mode === 'presentation') handlePresentationLine();
-        });
-
-        $('new-dialogue-btn').addEventListener('click', () => switchScreen('setup'));
-
-        // Escape key to go back
-        document.addEventListener('keydown', e => {
-            if (e.key === 'Escape' && state.screen === 'session') {
-                stopSpeaking(); stopRecording(); clearTimeout(state.autoAdvanceTimer);
-                switchScreen('setup');
-            }
-        });
-    });
-    </script>
+    $('start-btn').onclick=startSession;
+    $('back-btn').onclick=function(){stopSpeaking();stopAllRecording();clearTimeout(S.presTimer);switchScreen('setup')};
+    $('restart-btn').onclick=restartSession;
+    $('new-dialogue-btn').onclick=newDialogue;
+
+    document.onkeydown=function(e){
+        if(e.key==='Escape'&&S.screen==='session'){stopSpeaking();stopAllRecording();clearTimeout(S.presTimer);switchScreen('setup')}
+    };
+});
+</script>
 </body>
 </html>
