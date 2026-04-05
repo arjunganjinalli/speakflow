@@ -47,7 +47,7 @@
         .mic-btn:hover{background:rgba(200,149,108,.15);border-color:#C8956C}
         .mic-btn.recording{border-color:#D4736E;color:#D4736E;background:rgba(212,115,110,.1)}
         .mic-btn.recording::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:2px solid rgba(212,115,110,.4);animation:mp 1.5s ease-out infinite}
-        .mic-btn-lg{width:80px;height:80px;font-size:28px;border-width:3px}
+        .mic-btn-lg{width:84px;height:84px;font-size:30px;border-width:3px}
         .mic-btn-lg.recording::after{inset:-8px}
         @keyframes mp{0%{transform:scale(1);opacity:1}100%{transform:scale(1.5);opacity:0}}
         .progress-track{height:3px;background:rgba(255,255,255,.06);overflow:hidden}
@@ -65,6 +65,7 @@
         ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(200,149,108,.2);border-radius:3px}
         .line-dot{width:8px;height:8px;border-radius:50%;transition:all .3s ease;background:rgba(255,255,255,.1)}
         .line-dot.done{background:#5BB882}.line-dot.current{background:#C8956C;transform:scale(1.4);box-shadow:0 0 8px rgba(200,149,108,.5)}
+        .line-dot.low{background:#D4736E}
         .typing-dot{width:6px;height:6px;border-radius:50%;background:#C8956C;animation:tb 1.4s ease-in-out infinite}
         .typing-dot:nth-child(2){animation-delay:.2s}.typing-dot:nth-child(3){animation-delay:.4s}
         @keyframes tb{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-8px)}}
@@ -76,13 +77,16 @@
         audio{border-radius:8px;height:32px}
         .collapse-content{max-height:0;overflow:hidden;transition:max-height .4s ease}.collapse-content.open{max-height:600px}
         @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
-        @media(max-width:640px){.bubble{max-width:92%}.egrid{grid-template-columns:1fr!important}.hdr-stats{grid-template-columns:repeat(2,1fr)!important}.mic-btn-lg{width:68px;height:68px;font-size:24px}}
+        @media(max-width:640px){.bubble{max-width:92%}.egrid{grid-template-columns:1fr!important}.hdr-stats{grid-template-columns:repeat(2,1fr)!important}.mic-btn-lg{width:72px;height:72px;font-size:26px}.pres-eval-grid{grid-template-columns:1fr!important}}
         select option{background:#161619;color:#E8E6E1}
         @media print{.no-print{display:none!important}body{background:#fff;color:#111}}
         .clone-wave{display:flex;align-items:end;gap:2px;height:24px}
         .clone-wave span{width:3px;background:#C8956C;border-radius:2px;animation:cw 1s ease-in-out infinite}
         .clone-wave span:nth-child(1){animation-delay:0s}.clone-wave span:nth-child(2){animation-delay:.1s}.clone-wave span:nth-child(3){animation-delay:.2s}.clone-wave span:nth-child(4){animation-delay:.3s}.clone-wave span:nth-child(5){animation-delay:.4s}
         @keyframes cw{0%,100%{height:6px}50%{height:22px}}
+        .check-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:8px;font-size:12px;font-weight:600}
+        .check-yes{background:rgba(91,184,130,.12);color:#7EC9A0}
+        .check-no{background:rgba(212,115,110,.12);color:#E89590}
     </style>
 </head>
 <body class="min-h-screen">
@@ -103,13 +107,12 @@
                 <p class="text-sf-200 text-lg font-light">AI-Powered Dialogue Practice Coach</p>
             </header>
             <div class="glass rounded-2xl p-6 sm:p-8 space-y-6">
-                <!-- API Keys -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-sf-200 mb-2"><i class="fas fa-key text-copper-500 mr-1.5"></i>GLM API Key</label>
                         <div class="relative">
                             <input id="api-key" type="password" placeholder="z.ai API key..." class="input-glow w-full bg-sf-800/60 border border-white/8 rounded-xl px-4 py-3 text-sm text-sf-50 placeholder-sf-300 outline-none transition-all pr-10" aria-label="GLM API Key" autocomplete="off">
-                            <button onclick="toggleVis('api-key',this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-sf-300 hover:text-sf-50 transition-colors" aria-label="Toggle"><i class="fas fa-eye text-sm"></i></button>
+                            <button onclick="toggleVis('api-key',this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-sf-300 hover:text-sf-50 transition-colors"><i class="fas fa-eye text-sm"></i></button>
                         </div>
                     </div>
                     <div>
@@ -119,8 +122,6 @@
                         </select>
                     </div>
                 </div>
-
-                <!-- TTS Provider -->
                 <div>
                     <button onclick="toggleCollapse('tts-section')" class="w-full flex items-center justify-between text-sm font-medium text-sf-200">
                         <span><i class="fas fa-volume-up text-sage-400 mr-1.5"></i>Voice Settings <span class="text-sf-300 font-normal">(optional)</span></span>
@@ -142,89 +143,73 @@
                                         <input id="el-key" type="password" placeholder="xi-..." class="input-glow w-full bg-sf-800/60 border border-white/8 rounded-xl px-4 py-2.5 text-sm text-sf-50 placeholder-sf-300 outline-none transition-all pr-10" aria-label="ElevenLabs Key" autocomplete="off">
                                         <button onclick="toggleVis('el-key',this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-sf-300 hover:text-sf-50 transition-colors"><i class="fas fa-eye text-sm"></i></button>
                                     </div>
-                                    <p class="text-[10px] text-sf-300 mt-1">Free tier: 10k chars/mo. Voices are natural quality.</p>
+                                    <p class="text-[10px] text-sf-300 mt-1">Free tier: 10k chars/mo</p>
                                 </div>
                                 <div>
                                     <label class="block text-xs text-sf-300 mb-1.5">Character Voice</label>
                                     <div class="flex gap-2">
-                                        <select id="el-voice-select" class="input-glow flex-1 bg-sf-800/60 border border-white/8 rounded-xl px-3 py-2.5 text-sm text-sf-50 outline-none transition-all appearance-none cursor-pointer" aria-label="Voice">
+                                        <select id="el-voice-select" class="input-glow flex-1 bg-sf-800/60 border border-white/8 rounded-xl px-3 py-2.5 text-sm text-sf-50 outline-none transition-all appearance-none cursor-pointer">
                                             <option value="21m00Tcm4TlvDq8ikWAM">Rachel (Female)</option>
                                             <option value="AZnzlk1XvdvUeBnXmlld">Domi (Female)</option>
                                             <option value="EXAVITQu4vr4xnSDxMaL">Bella (Female)</option>
                                             <option value="ErXwobaYiN019PkySvjV">Antoni (Male)</option>
                                             <option value="pNInz6obpgDQGcFmaJgB">Adam (Male)</option>
                                             <option value="jBpfuIE2acCO8z3wKNLl">Josh (Male)</option>
-                                            <option value="oWAxZDx7w5VEj9dCyTzz">Gigi (Female)</option>
-                                            <option value="custom" id="el-custom-opt" class="hidden">Cloned Voice</option>
                                         </select>
-                                        <button onclick="fetchElevenLabsVoices()" class="px-3 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/8 text-sf-200 text-xs font-medium transition-all" title="Refresh voice list"><i class="fas fa-sync-alt"></i></button>
+                                        <button onclick="fetchELVoices()" class="px-3 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/8 text-sf-200 text-xs font-medium transition-all"><i class="fas fa-sync-alt"></i></button>
                                     </div>
                                 </div>
-                                <!-- Voice Cloning -->
                                 <div class="bg-white/2 rounded-xl p-4 border border-white/5">
                                     <div class="flex items-center justify-between mb-2">
                                         <span class="text-xs font-semibold text-sf-200"><i class="fas fa-clone text-copper-400 mr-1.5"></i>Voice Cloning</span>
                                         <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/15 text-amber-400 font-medium">Pro plan</span>
                                     </div>
-                                    <p class="text-[11px] text-sf-300 mb-3">Record 10-15 seconds of your voice. ElevenLabs will clone it for your character's lines.</p>
+                                    <p class="text-[11px] text-sf-300 mb-3">Record 10-15 seconds to clone your voice for your character lines.</p>
                                     <div id="clone-ui">
                                         <div id="clone-idle" class="flex flex-col items-center gap-2">
-                                            <button onclick="startCloneRecording()" class="w-12 h-12 rounded-full bg-copper-500/10 hover:bg-copper-500/20 border border-copper-500/20 text-copper-400 flex items-center justify-center transition-all" aria-label="Record sample"><i class="fas fa-microphone"></i></button>
-                                            <span class="text-[10px] text-sf-300">Tap to record 10-15s sample</span>
+                                            <button onclick="startCloneRec()" class="w-12 h-12 rounded-full bg-copper-500/10 hover:bg-copper-500/20 border border-copper-500/20 text-copper-400 flex items-center justify-center transition-all"><i class="fas fa-microphone"></i></button>
+                                            <span class="text-[10px] text-sf-300">Tap to record sample</span>
                                         </div>
                                         <div id="clone-recording" class="hidden flex flex-col items-center gap-2">
                                             <div class="clone-wave"><span></span><span></span><span></span><span></span><span></span></div>
                                             <span class="text-xs text-coral-400 font-medium">Recording... <span id="clone-timer">0</span>s</span>
-                                            <button onclick="stopCloneRecording()" class="text-xs text-sf-300 hover:text-sf-100 transition-colors">Stop</button>
+                                            <button onclick="stopCloneRec()" class="text-xs text-sf-300 hover:text-sf-100">Stop</button>
                                         </div>
                                         <div id="clone-done" class="hidden flex flex-col items-center gap-2">
                                             <i class="fas fa-check-circle text-sage-400"></i>
                                             <span class="text-xs text-sage-400">Sample recorded</span>
-                                            <button onclick="uploadCloneVoice()" class="px-4 py-2 rounded-lg bg-copper-500/15 hover:bg-copper-500/25 border border-copper-500/20 text-copper-400 text-xs font-semibold transition-all">Clone Voice</button>
+                                            <button onclick="uploadClone()" class="px-4 py-2 rounded-lg bg-copper-500/15 hover:bg-copper-500/25 border border-copper-500/20 text-copper-400 text-xs font-semibold transition-all">Clone Voice</button>
                                         </div>
-                                        <div id="clone-loading" class="hidden flex flex-col items-center gap-2">
-                                            <div class="spinner"></div>
-                                            <span class="text-xs text-sf-300">Cloning voice...</span>
-                                        </div>
-                                        <div id="clone-success" class="hidden flex flex-col items-center gap-1">
-                                            <i class="fas fa-check-circle text-sage-400 text-lg"></i>
-                                            <span class="text-xs text-sage-400 font-medium">Voice cloned!</span>
-                                        </div>
+                                        <div id="clone-loading" class="hidden flex flex-col items-center gap-2"><div class="spinner"></div><span class="text-xs text-sf-300">Cloning...</span></div>
+                                        <div id="clone-success" class="hidden flex flex-col items-center gap-1"><i class="fas fa-check-circle text-sage-400 text-lg"></i><span class="text-xs text-sage-400 font-medium">Voice cloned!</span></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Mode -->
                 <div>
                     <label class="block text-sm font-medium text-sf-200 mb-3"><i class="fas fa-sliders text-copper-500 mr-1.5"></i>Practice Mode</label>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="mode-card glass rounded-xl p-5 border border-white/5 selected" data-mode="practice" role="radio" aria-checked="true" tabindex="0"><div class="ck"><i class="fas fa-check text-sf-900 text-xs"></i></div><div class="w-10 h-10 rounded-lg bg-copper-500/10 flex items-center justify-center mb-3"><i class="fas fa-microphone-lines text-copper-400"></i></div><h3 class="font-display font-semibold text-sf-50 mb-1">Practice Mode</h3><p class="text-sf-300 text-sm leading-relaxed">AI evaluates your spoken or typed responses for accuracy, grammar, and fluency.</p></div>
-                        <div class="mode-card glass rounded-xl p-5 border border-white/5" data-mode="presentation" role="radio" aria-checked="false" tabindex="0"><div class="ck"><i class="fas fa-check text-sf-900 text-xs"></i></div><div class="w-10 h-10 rounded-lg bg-sage-500/10 flex items-center justify-center mb-3"><i class="fas fa-masks-theater text-sage-400"></i></div><h3 class="font-display font-semibold text-sf-50 mb-1">Presentation Mode</h3><p class="text-sf-300 text-sm leading-relaxed">Lines are hidden. Get hints, record yourself, and auto-advance with silence detection.</p></div>
+                        <div class="mode-card glass rounded-xl p-5 border border-white/5 selected" data-mode="practice" role="radio" aria-checked="true" tabindex="0"><div class="ck"><i class="fas fa-check text-sf-900 text-xs"></i></div><div class="w-10 h-10 rounded-lg bg-copper-500/10 flex items-center justify-center mb-3"><i class="fas fa-microphone-lines text-copper-400"></i></div><h3 class="font-display font-semibold text-sf-50 mb-1">Practice Mode</h3><p class="text-sf-300 text-sm leading-relaxed">AI evaluates your responses for accuracy, grammar, and fluency.</p></div>
+                        <div class="mode-card glass rounded-xl p-5 border border-white/5" data-mode="presentation" role="radio" aria-checked="false" tabindex="0"><div class="ck"><i class="fas fa-check text-sf-900 text-xs"></i></div><div class="w-10 h-10 rounded-lg bg-sage-500/10 flex items-center justify-center mb-3"><i class="fas fa-masks-theater text-sage-400"></i></div><h3 class="font-display font-semibold text-sf-50 mb-1">Presentation Mode</h3><p class="text-sf-300 text-sm leading-relaxed">Read your lines aloud. AI scores your pronunciation and accuracy with silence auto-stop.</p></div>
                     </div>
                 </div>
-
-                <!-- Script -->
                 <div>
                     <div class="flex items-center justify-between mb-2">
                         <label class="text-sm font-medium text-sf-200"><i class="fas fa-scroll text-copper-500 mr-1.5"></i>Dialogue Script</label>
                         <button id="load-example" class="text-xs text-copper-500 hover:text-copper-400 transition-colors font-medium"><i class="fas fa-flask mr-1"></i>Load Example</button>
                     </div>
-                    <textarea id="script-input" rows="7" placeholder="Paste your dialogue script here...&#10;&#10;Format: [Role]: dialogue line&#10;Example:&#10;[Waiter]: Good evening, welcome!&#10;[Customer]: Thank you, I have a reservation." class="input-glow w-full bg-sf-800/60 border border-white/8 rounded-xl px-4 py-3 text-sm text-sf-50 placeholder-sf-300 outline-none transition-all resize-none leading-relaxed font-body" aria-label="Script"></textarea>
+                    <textarea id="script-input" rows="7" placeholder="Paste dialogue script...&#10;Format: [Role]: dialogue line" class="input-glow w-full bg-sf-800/60 border border-white/8 rounded-xl px-4 py-3 text-sm text-sf-50 placeholder-sf-300 outline-none transition-all resize-none leading-relaxed font-body" aria-label="Script"></textarea>
                     <div id="parse-status" class="mt-2 text-xs text-sf-300 h-5"></div>
                 </div>
-
-                <!-- Role -->
                 <div id="role-section" class="hidden">
                     <label class="block text-sm font-medium text-sf-200 mb-3"><i class="fas fa-user-tag text-copper-500 mr-1.5"></i>Choose Your Role</label>
                     <div id="role-pills" class="flex flex-wrap gap-2"></div>
                 </div>
-
                 <button id="start-btn" disabled class="w-full py-3.5 rounded-xl font-display font-semibold text-base transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed bg-gradient-to-r from-amber-500 to-yellow-500 text-sf-900 hover:from-amber-400 hover:to-yellow-400 hover:shadow-lg hover:shadow-amber-500/20">Begin Session</button>
             </div>
-            <p class="text-center text-sf-300 text-xs mt-6">GLM via z.ai &middot; Optional ElevenLabs for natural voices &middot; Your keys stay local</p>
+            <p class="text-center text-sf-300 text-xs mt-6">GLM via z.ai &middot; Optional ElevenLabs voices &middot; Keys stay local</p>
         </div>
     </div>
 
@@ -278,346 +263,87 @@
     </div>
 
 <script>
-/* ================================================================
-   SpeakFlow — Full Application
-   ================================================================ */
 var MODEL='glm-4-flash',API_URL='https://api.z.ai/v1/chat/completions',PROXY='https://corsproxy.io/?url=';
-
 var LANG={en:{name:'English',stt:'en-US',tts:'en-US',badge:'EN'},es:{name:'Espanol',stt:'es-ES',tts:'es-ES',badge:'ES'},fr:{name:'Francais',stt:'fr-FR',tts:'fr-FR',badge:'FR'},de:{name:'Deutsch',stt:'de-DE',tts:'de-DE',badge:'DE'},zh:{name:'Chinese',stt:'zh-CN',tts:'zh-CN',badge:'ZH'},ja:{name:'Japanese',stt:'ja-JP',tts:'ja-JP',badge:'JA'},ko:{name:'Korean',stt:'ko-KR',tts:'ko-KR',badge:'KO'},it:{name:'Italiano',stt:'it-IT',tts:'it-IT',badge:'IT'},pt:{name:'Portugues',stt:'pt-BR',tts:'pt-BR',badge:'PT'},ru:{name:'Russian',stt:'ru-RU',tts:'ru-RU',badge:'RU'},ar:{name:'Arabic',stt:'ar-SA',tts:'ar-SA',badge:'AR'}};
-
 var NATURAL_VOICES={en:'Brian',es:'Conchita',fr:'Celine',de:'Marlene',it:'Giorgio',pt:'Camila'};
-
 var EXAMPLE="[Waiter]: Good evening, welcome to La Maison. Do you have a reservation?\n[Customer]: Yes, I have a reservation for two under the name Johnson.\n[Waiter]: Ah yes, Mr. Johnson. Your table is ready. Please follow me.\n[Customer]: Thank you. Could we have a table by the window if possible?\n[Waiter]: Of course, I can arrange that for you. Here is the menu.\n[Customer]: Wonderful. What do you recommend for a starter?\n[Waiter]: Our chef's special today is the seared scallops with citrus butter.\n[Customer]: That sounds delicious. I'll have that to start.\n[Waiter]: Excellent choice. And would you like to see our wine list?\n[Customer]: Yes, please. Could you recommend something that pairs well with seafood?\n[Waiter]: Certainly. The Sauvignon Blanc from New Zealand would complement the scallops beautifully.\n[Customer]: Perfect, we'll take a glass of that. My friend will have the Caesar salad to start.\n[Waiter]: Very good. I'll be back shortly with your drinks and starters.";
 
-/* ── State ── */
-var S={
-    screen:'setup',apiKey:'',language:'en',mode:'practice',
-    lines:[],roles:[],userRole:'',currentLine:0,
-    isRecording:false,isProcessing:false,isSpeaking:false,
-    showExpected:true,hintRevealed:false,
-    userInput:'',presTimer:null,sessionStart:0,
-    recognition:null,mediaRecorder:null,audioChunks:[],audioStream:null,
-    ttsAudio:null,ttsNatural:true,ttsProvider:'free',
-    elevenlabsKey:'',elevenlabsVoiceId:'21m00Tcm4TlvDq8ikWAM',clonedVoiceId:'',
-    elVoicesFetched:false,
-    lineScores:{},lineDetails:{},userResponses:{},audioClips:{},
-    /* Silence detection */
-    audioContext:null,analyser:null,silenceInterval:null,silenceFrames:0,
-    recordStartTime:0,SILENCE_THRESH:12,SILENCE_MAX:30,MIN_REC_MS:1200,
-    /* Voice cloning */
-    cloneRecorder:null,cloneChunks:[],cloneBlob:null,cloneTimer:null,isCloning:false
-};
+var S={screen:'setup',apiKey:'',language:'en',mode:'practice',lines:[],roles:[],userRole:'',currentLine:0,
+    isRecording:false,isProcessing:false,isSpeaking:false,showExpected:true,
+    userInput:'',presTimer:null,sessionStart:0,recognition:null,mediaRecorder:null,audioChunks:[],audioStream:null,
+    ttsAudio:null,ttsNatural:true,ttsProvider:'free',elevenlabsKey:'',elevenlabsVoiceId:'21m00Tcm4TlvDq8ikWAM',clonedVoiceId:'',
+    lineScores:{},lineDetails:{},userResponses:{},audioClips:{},attemptCount:{},
+    audioContext:null,analyser:null,silenceInterval:null,silenceFrames:0,recordStartTime:0,
+    SILENCE_THRESH:12,SILENCE_MAX:40,MIN_REC_MS:1200,
+    cloneRecorder:null,cloneChunks:[],cloneBlob:null,cloneTimer:null,_cloneTI:null};
 
 var $=function(id){return document.getElementById(id)};
 function esc(t){var d=document.createElement('div');d.textContent=t;return d.innerHTML}
 
-/* ── Toast ── */
-function toast(msg,type){
-    type=type||'info';var ic={success:'fa-circle-check',error:'fa-circle-exclamation',info:'fa-circle-info'};
-    var t=document.createElement('div');t.className='toast toast-'+type;
-    t.innerHTML='<i class="fas '+(ic[type]||ic.info)+'"></i><span>'+esc(msg)+'</span>';
-    $('toast-container').appendChild(t);
-    setTimeout(function(){t.style.animation='to2 .3s ease forwards';setTimeout(function(){t.remove()},300)},4000);
-}
+function toast(msg,type){type=type||'info';var ic={success:'fa-circle-check',error:'fa-circle-exclamation',info:'fa-circle-info'};var t=document.createElement('div');t.className='toast toast-'+type;t.innerHTML='<i class="fas '+(ic[type]||ic.info)+'"></i><span>'+esc(msg)+'</span>';$('toast-container').appendChild(t);setTimeout(function(){t.style.animation='to2 .3s ease forwards';setTimeout(function(){t.remove()},300)},4000)}
+function toggleVis(iid,btn){var inp=$(iid),ic=btn.querySelector('i');if(inp.type==='password'){inp.type='text';ic.className='fas fa-eye-slash text-sm'}else{inp.type='password';ic.className='fas fa-eye text-sm'}}
+function toggleCollapse(id){var el=$(id),ar=$(id+'-arrow');el.classList.toggle('open');if(ar)ar.style.transform=el.classList.contains('open')?'rotate(180deg)':''}
+function setTTSProvider(p){S.ttsProvider=p;$('tts-free-btn').className='flex-1 px-3 py-2.5 rounded-lg text-xs font-semibold border transition-all '+(p==='free'?'bg-copper-500/15 border-copper-500/30 text-copper-400':'bg-white/3 border-white/8 text-sf-300 hover:text-sf-100');$('tts-el-btn').className='flex-1 px-3 py-2.5 rounded-lg text-xs font-semibold border transition-all '+(p==='elevenlabs'?'bg-copper-500/15 border-copper-500/30 text-copper-400':'bg-white/3 border-white/8 text-sf-300 hover:text-sf-100');$('el-settings').classList.toggle('hidden',p!=='elevenlabs')}
 
-/* ── UI Helpers ── */
-function toggleVis(inputId,btn){
-    var inp=$(inputId),ic=btn.querySelector('i');
-    if(inp.type==='password'){inp.type='text';ic.className='fas fa-eye-slash text-sm'}
-    else{inp.type='password';ic.className='fas fa-eye text-sm'}
-}
-function toggleCollapse(id){
-    var el=$(id),arrow=$(id+'-arrow');
-    el.classList.toggle('open');
-    if(arrow)arrow.style.transform=el.classList.contains('open')?'rotate(180deg)':'';
-}
-function setTTSProvider(p){
-    S.ttsProvider=p;
-    $('tts-free-btn').className='flex-1 px-3 py-2.5 rounded-lg text-xs font-semibold border transition-all '+(p==='free'?'bg-copper-500/15 border-copper-500/30 text-copper-400':'bg-white/3 border-white/8 text-sf-300 hover:text-sf-100');
-    $('tts-el-btn').className='flex-1 px-3 py-2.5 rounded-lg text-xs font-semibold border transition-all '+(p==='elevenlabs'?'bg-copper-500/15 border-copper-500/30 text-copper-400':'bg-white/3 border-white/8 text-sf-300 hover:text-sf-100');
-    $('el-settings').classList.toggle('hidden',p!=='elevenlabs');
-}
+function fetchELVoices(){var key=$('el-key').value.trim();if(!key){toast('Enter ElevenLabs API key.','info');return}S.elevenlabsKey=key;var sel=$('el-voice-select');sel.innerHTML='<option value="">Loading...</option>';fetch(PROXY+encodeURIComponent('https://api.elevenlabs.io/v1/voices'),{headers:{'xi-api-key':key}}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}).then(function(d){var h='';if(S.clonedVoiceId)h+='<option value="'+S.clonedVoiceId+'">Cloned Voice</option>';(d.voices||[]).forEach(function(v){h+='<option value="'+v.voice_id+'">'+esc(v.name)+'</option>'});sel.innerHTML=h||'<option value="21m00Tcm4TlvDq8ikWAM">Rachel</option>';toast('Voices loaded.','success')}).catch(function(e){toast('Failed: '+e.message,'error');sel.innerHTML='<option value="21m00Tcm4TlvDq8ikWAM">Rachel</option>'})}
 
-/* ── ElevenLabs Voice Fetching ── */
-function fetchElevenLabsVoices(){
-    var key=$('el-key').value.trim();
-    if(!key){toast('Enter your ElevenLabs API key first.','info');return}
-    S.elevenlabsKey=key;
-    var select=$('el-voice-select');
-    select.innerHTML='<option value="">Loading voices...</option>';
-    fetch(PROXY+encodeURIComponent('https://api.elevenlabs.io/v1/voices'),{
-        headers:{'xi-api-key':key}
-    }).then(function(r){
-        if(!r.ok)throw new Error('HTTP '+r.status);
-        return r.json();
-    }).then(function(data){
-        var html='';
-        if(S.clonedVoiceId)html+='<option value="'+S.clonedVoiceId+'">Cloned Voice</option>';
-        (data.voices||[]).forEach(function(v){
-            html+='<option value="'+v.voice_id+'">'+esc(v.name)+(v.labels&&v.labels.accent?' ('+v.labels.accent+')':'')+'</option>';
-        });
-        if(!html)html='<option value="21m00Tcm4TlvDq8ikWAM">Rachel (default)</option>';
-        select.innerHTML=html;
-        S.elVoicesFetched=true;
-        toast('Voices loaded!','success');
-    }).catch(function(e){toast('Failed to fetch voices: '+e.message,'error');select.innerHTML='<option value="21m00Tcm4TlvDq8ikWAM">Rachel (default)</option>'});
-}
+function startCloneRec(){navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){S.cloneChunks=[];var mime='';['audio/webm;codecs=opus','audio/webm','audio/mp4'].forEach(function(t){if(!mime&&typeof MediaRecorder!=='undefined'&&MediaRecorder.isTypeSupported(t))mime=t});S.cloneRecorder=new MediaRecorder(stream,mime?{mimeType:mime}:undefined);S.cloneRecorder.ondataavailable=function(e){if(e.data.size>0)S.cloneChunks.push(e.data)};S.cloneRecorder.onstop=function(){S.cloneBlob=new Blob(S.cloneChunks,{type:S.cloneRecorder.mimeType||'audio/webm'});stream.getTracks().forEach(function(t){t.stop()});$('clone-recording').classList.add('hidden');$('clone-done').classList.remove('hidden')};S.cloneRecorder.start();$('clone-idle').classList.add('hidden');$('clone-recording').classList.remove('hidden');S.cloneTimer=0;$('clone-timer').textContent='0';S._cloneTI=setInterval(function(){S.cloneTimer++;$('clone-timer').textContent=S.cloneTimer;if(S.cloneTimer>=15)stopCloneRec()},1000)}).catch(function(){toast('Microphone denied.','error')})}
+function stopCloneRec(){if(S._cloneTI)clearInterval(S._cloneTI);if(S.cloneRecorder&&S.cloneRecorder.state!=='inactive')S.cloneRecorder.stop()}
+function uploadClone(){var key=$('el-key').value.trim();if(!key){toast('Enter ElevenLabs key.','info');return}if(!S.cloneBlob){toast('Record sample first.','info');return}S.elevenlabsKey=key;$('clone-done').classList.add('hidden');$('clone-loading').classList.remove('hidden');var fd=new FormData();fd.append('name','SpeakFlow '+Date.now());fd.append('files',S.cloneBlob,'sample.'+(S.cloneBlob.type.indexOf('mp4')!==-1?'mp4':'webm'));fd.append('description','Cloned via SpeakFlow');fetch(PROXY+encodeURIComponent('https://api.elevenlabs.io/v1/voices/add'),{method:'POST',headers:{'xi-api-key':key},body:fd}).then(function(r){if(!r.ok)return r.text().then(function(t){throw new Error(t.slice(0,200))});return r.json()}).then(function(d){S.clonedVoiceId=d.voice_id;$('clone-loading').classList.add('hidden');$('clone-success').classList.remove('hidden');var opt=document.createElement('option');opt.value=S.clonedVoiceId;opt.textContent='Cloned Voice';var sel=$('el-voice-select');sel.insertBefore(opt,sel.firstChild);sel.value=S.clonedVoiceId;toast('Voice cloned!','success')}).catch(function(e){$('clone-loading').classList.add('hidden');$('clone-done').classList.remove('hidden');if(e.message.indexOf('402')!==-1)toast('Voice cloning requires Pro plan.','error');else toast('Clone failed: '+e.message.slice(0,100),'error')})}
 
-/* ── Voice Cloning ── */
-function startCloneRecording(){
-    navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
-        S.cloneChunks=[];
-        var mime='';['audio/webm;codecs=opus','audio/webm','audio/mp4'].forEach(function(t){if(!mime&&typeof MediaRecorder!=='undefined'&&MediaRecorder.isTypeSupported(t))mime=t});
-        S.cloneRecorder=new MediaRecorder(stream,mime?{mimeType:mime}:undefined);
-        S.cloneRecorder.ondataavailable=function(e){if(e.data.size>0)S.cloneChunks.push(e.data)};
-        S.cloneRecorder.onstop=function(){
-            S.cloneBlob=new Blob(S.cloneChunks,{type:S.cloneRecorder.mimeType||'audio/webm'});
-            stream.getTracks().forEach(function(t){t.stop()});
-            $('clone-recording').classList.add('hidden');
-            $('clone-done').classList.remove('hidden');
-        };
-        S.cloneRecorder.start();
-        $('clone-idle').classList.add('hidden');
-        $('clone-recording').classList.remove('hidden');
-        S.cloneTimer=0;
-        $('clone-timer').textContent='0';
-        var ct=setInterval(function(){S.cloneTimer++;$('clone-timer').textContent=S.cloneTimer;if(S.cloneTimer>=15)stopCloneRecording()},1000);
-        S._cloneTimerInterval=ct;
-    }).catch(function(e){toast('Microphone access denied.','error')});
-}
-function stopCloneRecording(){
-    if(S._cloneTimerInterval)clearInterval(S._cloneTimerInterval);
-    if(S.cloneRecorder&&S.cloneRecorder.state!=='inactive')S.cloneRecorder.stop();
-}
+function parseScript(text){var lines=[],m,rx=/^\[([^\]]+)\]:\s*(.+)$/gm;while((m=rx.exec(text))!==null)lines.push({role:m[1].trim(),text:m[2].trim()});if(!lines.length){var rx2=/^([^:\[\]]+):\s*(.+)$/gm;while((m=rx2.exec(text))!==null)lines.push({role:m[1].trim(),text:m[2].trim()})}return lines}
 
-function uploadCloneVoice(){
-    var key=$('el-key').value.trim();
-    if(!key){toast('Enter your ElevenLabs API key.','info');return}
-    if(!S.cloneBlob){toast('Record a voice sample first.','info');return}
-    S.elevenlabsKey=key;
-    $('clone-done').classList.add('hidden');
-    $('clone-loading').classList.remove('hidden');
+/* ── TTS ── */
+var voicesLoaded=false;function loadV(){if(typeof speechSynthesis!=='undefined'&&speechSynthesis.getVoices().length>0)voicesLoaded=true}
+if(typeof speechSynthesis!=='undefined'){speechSynthesis.onvoiceschanged=function(){voicesLoaded=true};loadV()}
+function getVoice(lc){if(!voicesLoaded)loadV();var v=speechSynthesis.getVoices();if(!v.length)return null;var p=lc.split('-')[0];return v.find(function(x){return x.lang===lc})||v.find(function(x){return x.lang.startsWith(p)})||v[0]}
 
-    var fd=new FormData();
-    fd.append('name','SpeakFlow Clone '+Date.now());
-    fd.append('files',S.cloneBlob,'sample.'+(S.cloneBlob.type.indexOf('mp4')!==-1?'mp4':'webm'));
-    fd.append('description','Cloned via SpeakFlow');
+function speak(text,onEnd,isUserLine){stopSpeaking();var key=$('el-key')?$('el-key').value.trim():S.elevenlabsKey;if(key)S.elevenlabsKey=key;var vid=S.elevenlabsVoiceId;if(isUserLine&&S.clonedVoiceId)vid=S.clonedVoiceId;if(S.ttsProvider==='elevenlabs'&&S.elevenlabsKey)speakEL(text,vid,onEnd);else if(S.ttsNatural&&NATURAL_VOICES[S.language])speakSE(text,onEnd);else speakBR(text,onEnd)}
 
-    fetch(PROXY+encodeURIComponent('https://api.elevenlabs.io/v1/voices/add'),{
-        method:'POST',headers:{'xi-api-key':key},body:fd
-    }).then(function(r){
-        if(!r.ok)return r.text().then(function(t){throw new Error('HTTP '+r.status+': '+t.slice(0,200))});
-        return r.json();
-    }).then(function(data){
-        S.clonedVoiceId=data.voice_id;
-        $('clone-loading').classList.add('hidden');
-        $('clone-success').classList.remove('hidden');
-        /* Add to voice dropdown */
-        var opt=document.createElement('option');opt.value=S.clonedVoiceId;opt.textContent='Cloned Voice';
-        var select=$('el-voice-select');select.insertBefore(opt,select.firstChild);select.value=S.clonedVoiceId;
-        toast('Voice cloned! Select "Cloned Voice" in the dropdown.','success');
-    }).catch(function(e){
-        $('clone-loading').classList.add('hidden');
-        $('clone-done').classList.remove('hidden');
-        if(e.message.indexOf('402')!==-1||e.message.indexOf('payment')!==-1)toast('Voice cloning requires ElevenLabs Pro/Creator plan.','error');
-        else if(e.message.indexOf('413')!==-1)toast('Audio sample too large. Record a shorter sample (10-15s).','error');
-        else toast('Clone failed: '+e.message,'error');
-    });
-}
+function speakEL(text,vid,onEnd){S.isSpeaking=true;fetch(PROXY+encodeURIComponent('https://api.elevenlabs.io/v1/text-to-speech/'+vid),{method:'POST',headers:{'xi-api-key':S.elevenlabsKey,'Content-Type':'application/json'},body:JSON.stringify({text:text,model_id:'eleven_monolingual_v1',voice_settings:{stability:0.5,similarity_boost:0.75}})}).then(function(r){if(!r.ok)throw new Error('');return r.blob()}).then(function(blob){if(blob.size<100)throw new Error('');var u=URL.createObjectURL(blob);S.ttsAudio=new Audio(u);S.ttsAudio.onended=function(){S.isSpeaking=false;URL.revokeObjectURL(u);if(onEnd)onEnd()};S.ttsAudio.onerror=function(){S.isSpeaking=false;URL.revokeObjectURL(u);speakBR(text,onEnd)};S.ttsAudio.play();$('tts-badge').classList.remove('hidden');$('tts-badge').innerHTML='<i class="fas fa-wave-square mr-1"></i>ElevenLabs'}).catch(function(){S.isSpeaking=false;if(S.ttsNatural&&NATURAL_VOICES[S.language])speakSE(text,onEnd);else speakBR(text,onEnd)})}
 
-/* ── Script Parser ── */
-function parseScript(text){
-    var lines=[],m,rx=/^\[([^\]]+)\]:\s*(.+)$/gm;
-    while((m=rx.exec(text))!==null)lines.push({role:m[1].trim(),text:m[2].trim()});
-    if(!lines.length){var rx2=/^([^:\[\]]+):\s*(.+)$/gm;while((m=rx2.exec(text))!==null)lines.push({role:m[1].trim(),text:m[2].trim()});}
-    return lines;
-}
+function speakSE(text,onEnd){var v=NATURAL_VOICES[S.language];S.isSpeaking=true;fetch(PROXY+encodeURIComponent('https://api.streamelements.com/kappa/v2/speech?voice='+v+'&text='+encodeURIComponent(text))).then(function(r){if(!r.ok)throw new Error('');return r.blob()}).then(function(blob){if(blob.size<100)throw new Error('');var u=URL.createObjectURL(blob);S.ttsAudio=new Audio(u);S.ttsAudio.onend=function(){S.isSpeaking=false;URL.revokeObjectURL(u);if(onEnd)onEnd()};S.ttsAudio.onerror=function(){S.isSpeaking=false;URL.revokeObjectURL(u);speakBR(text,onEnd)};S.ttsAudio.play();$('tts-badge').classList.remove('hidden');$('tts-badge').innerHTML='<i class="fas fa-wave-square mr-1"></i>Natural'}).catch(function(){S.ttsNatural=false;S.isSpeaking=false;speakBR(text,onEnd)})}
 
-/* ── Text-to-Speech (Multi-Provider) ── */
-var voicesLoaded=false;
-function loadVoices(){if(typeof speechSynthesis!=='undefined'&&speechSynthesis.getVoices().length>0)voicesLoaded=true}
-if(typeof speechSynthesis!=='undefined'){speechSynthesis.onvoiceschanged=function(){voicesLoaded=true};loadVoices()}
-function getVoice(lc){if(!voicesLoaded)loadVoices();var v=speechSynthesis.getVoices();if(!v.length)return null;var p=lc.split('-')[0];return v.find(function(x){return x.lang===lc})||v.find(function(x){return x.lang.startsWith(p)})||v[0]}
+function speakBR(text,onEnd){if(typeof speechSynthesis==='undefined'){if(onEnd)onEnd();return}speechSynthesis.cancel();var lc=LANG[S.language];var u=new SpeechSynthesisUtterance(text);u.lang=lc.tts;var v=getVoice(lc.tts);if(v)u.voice=v;u.rate=0.88;S.isSpeaking=true;u.onend=function(){S.isSpeaking=false;if(onEnd)onEnd()};u.onerror=function(){S.isSpeaking=false;if(onEnd)onEnd()};speechSynthesis.speak(u);$('tts-badge').classList.add('hidden')}
 
-function speak(text,onEnd,isUserLine){
-    stopSpeaking();
-    var key=$('el-key')?$('el-key').value.trim():S.elevenlabsKey;
-    if(key)S.elevenlabsKey=key;
-    var voiceId=S.elevenlabsVoiceId;
-    if(isUserLine&&S.clonedVoiceId)voiceId=S.clonedVoiceId;
+function stopSpeaking(){if(S.ttsAudio){S.ttsAudio.pause();S.ttsAudio.currentTime=0;S.ttsAudio=null}if(typeof speechSynthesis!=='undefined')speechSynthesis.cancel();S.isSpeaking=false}
 
-    if(S.ttsProvider==='elevenlabs'&&S.elevenlabsKey){
-        speakElevenLabs(text,voiceId,onEnd);
-    }else if(S.ttsNatural&&NATURAL_VOICES[S.language]){
-        speakStreamElements(text,onEnd);
-    }else{
-        speakBrowser(text,onEnd);
-    }
-}
-
-function speakElevenLabs(text,voiceId,onEnd){
-    S.isSpeaking=true;
-    var url='https://api.elevenlabs.io/v1/text-to-speech/'+voiceId;
-    fetch(PROXY+encodeURIComponent(url),{
-        method:'POST',
-        headers:{'xi-api-key':S.elevenlabsKey,'Content-Type':'application/json'},
-        body:JSON.stringify({text:text,model_id:'eleven_monolingual_v1',voice_settings:{stability:0.5,similarity_boost:0.75}})
-    }).then(function(r){
-        if(!r.ok)throw new Error('HTTP '+r.status);
-        return r.blob();
-    }).then(function(blob){
-        if(blob.size<100)throw new Error('Empty');
-        var u=URL.createObjectURL(blob);
-        S.ttsAudio=new Audio(u);
-        S.ttsAudio.onended=function(){S.isSpeaking=false;URL.revokeObjectURL(u);if(onEnd)onEnd()};
-        S.ttsAudio.onerror=function(){S.isSpeaking=false;URL.revokeObjectURL(u);speakBrowser(text,onEnd)};
-        S.ttsAudio.play();
-        $('tts-badge').classList.remove('hidden');$('tts-badge').innerHTML='<i class="fas fa-wave-square mr-1"></i>ElevenLabs';
-    }).catch(function(){
-        S.isSpeaking=false;
-        if(S.ttsNatural&&NATURAL_VOICES[S.language])speakStreamElements(text,onEnd);
-        else speakBrowser(text,onEnd);
-    });
-}
-
-function speakStreamElements(text,onEnd){
-    var voice=NATURAL_VOICES[S.language];
-    var url='https://api.streamelements.com/kappa/v2/speech?voice='+voice+'&text='+encodeURIComponent(text);
-    S.isSpeaking=true;
-    fetch(PROXY+encodeURIComponent(url)).then(function(r){
-        if(!r.ok)throw new Error('HTTP '+r.status);return r.blob();
-    }).then(function(blob){
-        if(blob.size<100)throw new Error('Empty');
-        var u=URL.createObjectURL(blob);S.ttsAudio=new Audio(u);
-        S.ttsAudio.onended=function(){S.isSpeaking=false;URL.revokeObjectURL(u);if(onEnd)onEnd()};
-        S.ttsAudio.onerror=function(){S.isSpeaking=false;URL.revokeObjectURL(u);speakBrowser(text,onEnd)};
-        S.ttsAudio.play();$('tts-badge').classList.remove('hidden');$('tts-badge').innerHTML='<i class="fas fa-wave-square mr-1"></i>Natural';
-    }).catch(function(){S.ttsNatural=false;S.isSpeaking=false;speakBrowser(text,onEnd)});
-}
-
-function speakBrowser(text,onEnd){
-    if(typeof speechSynthesis==='undefined'){if(onEnd)onEnd();return}
-    speechSynthesis.cancel();var lc=LANG[S.language];
-    var u=new SpeechSynthesisUtterance(text);u.lang=lc.tts;
-    var v=getVoice(lc.tts);if(v)u.voice=v;u.rate=0.88;S.isSpeaking=true;
-    u.onend=function(){S.isSpeaking=false;if(onEnd)onEnd()};
-    u.onerror=function(){S.isSpeaking=false;if(onEnd)onEnd()};
-    speechSynthesis.speak(u);$('tts-badge').classList.add('hidden');
-}
-
-function stopSpeaking(){
-    if(S.ttsAudio){S.ttsAudio.pause();S.ttsAudio.currentTime=0;S.ttsAudio=null}
-    if(typeof speechSynthesis!=='undefined')speechSynthesis.cancel();
-    S.isSpeaking=false;
-}
-
-/* ── MediaRecorder ── */
-function getSupportedMime(){var t=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg'];for(var i=0;i<t.length;i++){if(typeof MediaRecorder!=='undefined'&&MediaRecorder.isTypeSupported(t[i]))return t[i]}return ''}
-
-function startMediaRecorder(stream){
-    S.audioStream=stream;
-    var mime=getSupportedMime();
-    S.mediaRecorder=new MediaRecorder(stream,mime?{mimeType:mime}:undefined);
-    S.audioChunks=[];
-    S.mediaRecorder.ondataavailable=function(e){if(e.data.size>0)S.audioChunks.push(e.data)};
-    S.mediaRecorder.onstop=function(){
-        if(S.audioChunks.length)S.audioClips[S.currentLine]=new Blob(S.audioChunks,{type:S.mediaRecorder.mimeType||'audio/webm'});
-    };
-    S.mediaRecorder.start();
-}
-
-function stopMediaRecorder(){
-    if(S.mediaRecorder&&S.mediaRecorder.state!=='inactive'){try{S.mediaRecorder.stop()}catch(e){}}
-}
-
-/* ── Silence Detection ── */
-function startSilenceDetection(stream){
-    try{
-        S.audioContext=new(window.AudioContext||window.webkitAudioContext)();
-        S.analyser=S.audioContext.createAnalyser();S.analyser.fftSize=2048;
-        var source=S.audioContext.createMediaStreamSource(stream);
-        source.connect(S.analyser);S.silenceFrames=0;S.recordStartTime=Date.now();
-        S.silenceInterval=setInterval(function(){
-            if(!S.isRecording){stopSilenceDetection();return}
-            if(Date.now()-S.recordStartTime<S.MIN_REC_MS)return;
-            var data=new Uint8Array(S.analyser.frequencyBinCount);
-            S.analyser.getByteFrequencyData(data);
-            var sum=0;for(var i=0;i<data.length;i++)sum+=data[i];
-            var avg=sum/data.length;
-            if(avg<S.SILENCE_THRESH)S.silenceFrames++;else S.silenceFrames=0;
-            if(S.silenceFrames>=S.SILENCE_MAX){stopAllRecording()}
-        },50);
-    }catch(e){console.warn('Silence detection unavailable:',e)}
-}
-function stopSilenceDetection(){
-    clearInterval(S.silenceInterval);S.silenceFrames=0;
-    if(S.audioContext){try{S.audioContext.close()}catch(e){}S.audioContext=null;S.analyser=null}
-}
+/* ── MediaRecorder + Silence Detection ── */
+function getMime(){var t=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg'];for(var i=0;i<t.length;i++){if(typeof MediaRecorder!=='undefined'&&MediaRecorder.isTypeSupported(t[i]))return t[i]}return ''}
+function startMR(stream){S.audioStream=stream;var m=getMime();S.mediaRecorder=new MediaRecorder(stream,m?{mimeType:m}:undefined);S.audioChunks=[];S.mediaRecorder.ondataavailable=function(e){if(e.data.size>0)S.audioChunks.push(e.data)};S.mediaRecorder.onstop=function(){if(S.audioChunks.length)S.audioClips[S.currentLine]=new Blob(S.audioChunks,{type:S.mediaRecorder.mimeType||'audio/webm'})};S.mediaRecorder.start()}
+function stopMR(){if(S.mediaRecorder&&S.mediaRecorder.state!=='inactive'){try{S.mediaRecorder.stop()}catch(e){}}}
+function startSilence(stream){try{S.audioContext=new(window.AudioContext||window.webkitAudioContext)();S.analyser=S.audioContext.createAnalyser();S.analyser.fftSize=2048;S.audioContext.createMediaStreamSource(stream).connect(S.analyser);S.silenceFrames=0;S.recordStartTime=Date.now();S.silenceInterval=setInterval(function(){if(!S.isRecording){stopSilence();return}if(Date.now()-S.recordStartTime<S.MIN_REC_MS)return;var d=new Uint8Array(S.analyser.frequencyBinCount);S.analyser.getByteFrequencyData(d);var sum=0;for(var i=0;i<d.length;i++)sum+=d[i];if(sum/d.length<S.SILENCE_THRESH)S.silenceFrames++;else S.silenceFrames=0;if(S.silenceFrames>=S.SILENCE_MAX)stopAllRec()},50)}catch(e){}}
+function stopSilence(){clearInterval(S.silenceInterval);S.silenceFrames=0;if(S.audioContext){try{S.audioContext.close()}catch(e){}S.audioContext=null;S.analyser=null}}
 
 /* ── Speech Recognition ── */
 var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+function startRec(){if(!SR){toast('Speech recognition not supported.','error');return}if(S.isRecording){stopAllRec();return}if(S.isSpeaking)stopSpeaking();S.recognition=S.recognition||new SR();S.recognition.lang=LANG[S.language].stt;S.recognition.continuous=false;S.recognition.interimResults=true;S.recognition.maxAlternatives=1;S.isRecording=true;S.userInput='';navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){startMR(stream);startSilence(stream);renderIA();S.recognition.onresult=function(e){var t='';for(var i=0;i<e.results.length;i++)t+=e.results[i][0].transcript;S.userInput=t;if(S.mode==='presentation')renderIA()};S.recognition.onend=function(){if(!S.isRecording)return;S.isRecording=false;stopMR();stopSilence();S.userResponses[S.currentLine]=S.userInput.trim()||null;if(S.mode==='presentation'){handlePresEval()}else{if(S.userInput.trim())handleSubmission();else renderIA()}};S.recognition.onerror=function(e){S.isRecording=false;stopMR();stopSilence();if(e.error==='no-speech')toast('No speech detected.','info');else if(e.error==='not-allowed')toast('Microphone denied.','error');else if(e.error!=='aborted')toast('Recognition: '+e.error,'error');renderIA()};try{S.recognition.start()}catch(e){S.isRecording=false;stopMR();stopSilence();toast('Could not start.','error');renderIA()}}).catch(function(){S.isRecording=false;toast('Microphone denied.','error');renderIA()})}
 
-function startRecording(){
-    if(!SR){toast('Speech recognition not supported. Use Chrome or Edge.','error');return}
-    if(S.isRecording){stopAllRecording();return}
-    if(S.isSpeaking)stopSpeaking();
-    S.recognition=S.recognition||new SR();
-    S.recognition.lang=LANG[S.language].stt;S.recognition.continuous=false;S.recognition.interimResults=true;S.recognition.maxAlternatives=1;
-    S.isRecording=true;S.userInput='';
-    navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
-        startMediaRecorder(stream);
-        startSilenceDetection(stream);
-        renderInteraction();
-        S.recognition.onresult=function(e){
-            var t='';for(var i=0;i<e.results.length;i++)t+=e.results[i][0].transcript;S.userInput=t;renderInteraction();
-        };
-        S.recognition.onend=function(){
-            if(!S.isRecording)return;S.isRecording=false;stopMediaRecorder();stopSilenceDetection();
-            S.userResponses[S.currentLine]=S.userInput.trim()||null;
-            if(S.mode==='presentation'&&S.hintRevealed){S.presTimer=setTimeout(function(){advanceLine()},1500)}
-            else if(S.mode==='practice'){if(S.userInput.trim())handleSubmission();else renderInteraction()}
-        };
-        S.recognition.onerror=function(e){
-            S.isRecording=false;stopMediaRecorder();stopSilenceDetection();
-            if(e.error==='no-speech')toast('No speech detected.','info');
-            else if(e.error==='not-allowed')toast('Microphone access denied.','error');
-            else if(e.error!=='aborted')toast('Recognition: '+e.error,'error');
-            renderInteraction();
-        };
-        try{S.recognition.start()}catch(e){S.isRecording=false;stopMediaRecorder();stopSilenceDetection();toast('Could not start.','error');renderInteraction()}
-    }).catch(function(e){S.isRecording=false;toast('Microphone access denied.','error');renderInteraction()});
-}
-
-function stopAllRecording(){
-    S.isRecording=false;clearTimeout(S.presTimer);stopSilenceDetection();
-    try{if(S.recognition)S.recognition.stop()}catch(e){}
-    stopMediaRecorder();
-}
+function stopAllRec(){S.isRecording=false;clearTimeout(S.presTimer);stopSilence();try{if(S.recognition)S.recognition.stop()}catch(e){}stopMR()}
 
 /* ── GLM API ── */
-function callGLM(messages){
-    var ctrl=new AbortController(),timer=setTimeout(function(){ctrl.abort()},25000);
-    return fetch(PROXY+encodeURIComponent(API_URL),{
-        method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+S.apiKey},
-        body:JSON.stringify({model:MODEL,messages:messages,temperature:0.3,max_tokens:600}),signal:ctrl.signal
-    }).then(function(r){clearTimeout(timer);
-        if(!r.ok)return r.text().then(function(b){if(r.status===401)throw new Error('Invalid API key.');if(r.status===429)throw new Error('Rate limited.');throw new Error('API ('+r.status+'): '+b.slice(0,200))});
-        return r.json();
-    }).then(function(d){if(!d.choices||!d.choices[0]||!d.choices[0].message)throw new Error('Bad response.');return d.choices[0].message.content||''})
-    .catch(function(e){clearTimeout(timer);if(e.name==='AbortError')throw new Error('Timed out.');if(e.message&&e.message.indexOf('Failed to fetch')!==-1)throw new Error('Network error — proxy may be down.');throw e});
-}
+function callGLM(msgs){var c=new AbortController(),t=setTimeout(function(){c.abort()},25000);return fetch(PROXY+encodeURIComponent(API_URL),{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+S.apiKey},body:JSON.stringify({model:MODEL,messages:msgs,temperature:0.3,max_tokens:600}),signal:c.signal}).then(function(r){clearTimeout(t);if(!r.ok)return r.text().then(function(b){if(r.status===401)throw new Error('Invalid API key.');if(r.status===429)throw new Error('Rate limited.');throw new Error('API ('+r.status+'): '+b.slice(0,200))});return r.json()}).then(function(d){if(!d.choices||!d.choices[0]||!d.choices[0].message)throw new Error('Bad response.');return d.choices[0].message.content||''}).catch(function(e){clearTimeout(t);if(e.name==='AbortError')throw new Error('Timed out.');if(e.message&&e.message.indexOf('Failed to fetch')!==-1)throw new Error('Network error — proxy may be down.');throw e})}
 
-function evaluateResponse(ctx,expected,response){
+function evalResponse(ctx,expected,response,isPres){
     var ln=LANG[S.language].name,cs=ctx.map(function(l){return l.role+': '+l.text}).join('\n');
-    return callGLM([
-        {role:'system',content:'You are an expert '+ln+' dialogue coach. Respond with ONLY valid JSON — no markdown, no fences.'},
-        {role:'user',content:'Context:\n'+cs+'\n\nExpected for "'+S.userRole+'": "'+expected+'"\nStudent said: "'+response+'"\n\nJSON:\n{"score":<0-100>,"accuracy":"<1 sentence>","grammar":"<1 sentence>","fluency":"<1 sentence>","corrections":["..."],"encouragement":"<positive>","suggestions":["..."]}'}
-    ]).then(function(raw){
+    var sysPrompt=isPres
+        ?'You are an expert '+ln+' pronunciation and dialogue coach. A student read a line aloud in presentation mode. Evaluate their spoken delivery. Respond with ONLY valid JSON — no markdown, no fences.'
+        :'You are an expert '+ln+' dialogue coach. Evaluate the response. Respond with ONLY valid JSON — no markdown, no fences.';
+    var userPrompt=isPres
+        ?'Context:\n'+cs+'\n\nExpected line for "'+S.userRole+'": "'+expected+'"\nStudent actually said: "'+response+'"\n\nEvaluate pronunciation and accuracy. JSON:\n{"score":<0-100>,"correct_words":"<yes or no, did they say the right words?>","pronunciation":"<brief pronunciation feedback>","accuracy":"<brief accuracy feedback>","fluency":"<brief fluency>","corrections":["<what they should have said differently>"],"encouragement":"<positive>","suggestions":["<tips for improvement>"]}'
+        :'Context:\n'+cs+'\n\nExpected for "'+S.userRole+'": "'+expected+'"\nStudent said: "'+response+'"\n\nJSON:\n{"score":<0-100>,"accuracy":"<1 sentence>","grammar":"<1 sentence>","fluency":"<1 sentence>","corrections":["..."],"encouragement":"<positive>","suggestions":["..."]}';
+    return callGLM([{role:'system',content:sysPrompt},{role:'user',content:userPrompt}]).then(function(raw){
         var p;try{p=JSON.parse(raw)}catch(e){}
         if(!p){var m=raw.match(/```(?:json)?\s*([\s\S]*?)```/);if(m)try{p=JSON.parse(m[1].trim())}catch(e){}}
         if(!p){var j=raw.match(/\{[\s\S]*\}/);if(j)try{p=JSON.parse(j[0])}catch(e){}}
-        if(p)return{score:Math.min(100,Math.max(0,parseInt(p.score)||0)),accuracy:p.accuracy||'--',grammar:p.grammar||'--',fluency:p.fluency||'--',corrections:Array.isArray(p.corrections)?p.corrections:[],encouragement:p.encouragement||'Keep practicing!',suggestions:Array.isArray(p.suggestions)?p.suggestions:[]};
-        return{score:50,accuracy:'Parse error.',grammar:'--',fluency:'--',corrections:[],encouragement:raw.slice(0,200),suggestions:[]};
+        if(p){
+            var base={score:Math.min(100,Math.max(0,parseInt(p.score)||0)),accuracy:p.accuracy||'--',grammar:p.grammar||(p.pronunciation||'--'),fluency:p.fluency||'--',corrections:Array.isArray(p.corrections)?p.corrections:[],encouragement:p.encouragement||'Keep practicing!',suggestions:Array.isArray(p.suggestions)?p.suggestions:[]};
+            if(isPres)base.correct_words=p.correct_words||'--';
+            return base;
+        }
+        var fb={score:50,accuracy:'Parse error.',grammar:'--',fluency:'--',corrections:[],encouragement:raw.slice(0,200),suggestions:[]};
+        if(isPres)fb.correct_words='--';
+        return fb;
     });
 }
 
@@ -625,85 +351,41 @@ function evaluateResponse(ctx,expected,response){
 function switchScreen(n){S.screen=n;document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});$(n+'-screen').classList.add('active')}
 
 /* ── Setup ── */
-function updateParse(){
-    var text=$('script-input').value.trim(),el=$('parse-status');
-    if(!text){el.textContent='';$('role-section').classList.add('hidden');S.lines=[];updateStartBtn();return}
-    var lines=parseScript(text);
-    if(!lines.length){el.innerHTML='<span class="text-coral-400"><i class="fas fa-triangle-exclamation mr-1"></i>No valid lines. Use [Role]: line</span>';$('role-section').classList.add('hidden');S.lines=[]}
-    else{var roles=[];lines.forEach(function(l){if(roles.indexOf(l.role)===-1)roles.push(l.role)});
-        el.innerHTML='<span class="text-sage-400"><i class="fas fa-circle-check mr-1"></i>'+lines.length+' lines &middot; '+roles.map(function(r){return '<span class="text-sf-50">'+esc(r)+'</span>'}).join(', ')+'</span>';
-        S.lines=lines;S.roles=roles;renderPills();$('role-section').classList.remove('hidden');
-        if(!S.userRole||roles.indexOf(S.userRole)===-1)S.userRole='';
-    }updateStartBtn();
-}
-function renderPills(){
-    $('role-pills').innerHTML=S.roles.map(function(r){return '<button class="role-pill '+(S.userRole===r?'selected':'')+'" data-role="'+r+'">'+esc(r)+'</button>'}).join('');
-    $('role-pills').querySelectorAll('.role-pill').forEach(function(p){p.onclick=function(){S.userRole=p.dataset.role;renderPills();updateStartBtn()}});
-}
+function updateParse(){var text=$('script-input').value.trim(),el=$('parse-status');if(!text){el.textContent='';$('role-section').classList.add('hidden');S.lines=[];updateStartBtn();return}var lines=parseScript(text);if(!lines.length){el.innerHTML='<span class="text-coral-400"><i class="fas fa-triangle-exclamation mr-1"></i>No valid lines.</span>';$('role-section').classList.add('hidden');S.lines=[]}else{var roles=[];lines.forEach(function(l){if(roles.indexOf(l.role)===-1)roles.push(l.role)});el.innerHTML='<span class="text-sage-400"><i class="fas fa-circle-check mr-1"></i>'+lines.length+' lines &middot; '+roles.map(function(r){return '<span class="text-sf-50">'+esc(r)+'</span>'}).join(', ')+'</span>';S.lines=lines;S.roles=roles;renderPills();$('role-section').classList.remove('hidden');if(!S.userRole||roles.indexOf(S.userRole)===-1)S.userRole=''}updateStartBtn()}
+function renderPills(){$('role-pills').innerHTML=S.roles.map(function(r){return '<button class="role-pill '+(S.userRole===r?'selected':'')+'" data-role="'+r+'">'+esc(r)+'</button>'}).join('');$('role-pills').querySelectorAll('.role-pill').forEach(function(p){p.onclick=function(){S.userRole=p.dataset.role;renderPills();updateStartBtn()}})}
 function updateStartBtn(){$('start-btn').disabled=!(S.apiKey&&S.lines.length&&S.userRole)}
 
 /* ── Session ── */
-function startSession(){
-    var ok=false;S.lines.forEach(function(l){if(l.role===S.userRole)ok=true});
-    if(!ok){toast('"'+S.userRole+'" has no lines!','error');return}
-    var key=$('el-key')?$('el-key').value.trim():S.elevenlabsKey;
-    S.elevenlabsKey=key;
-    if($('el-voice-select'))S.elevenlabsVoiceId=$('el-voice-select').value;
-    S.currentLine=0;S.showExpected=true;S.hintRevealed=false;S.userInput='';S.isProcessing=false;
-    S.sessionStart=Date.now();S.lineScores={};S.lineDetails={};S.userResponses={};S.audioClips={};S.ttsNatural=true;
-    stopSpeaking();stopAllRecording();
-    $('mode-badge').textContent=S.mode==='practice'?'Practice':'Presentation';
-    $('lang-badge').textContent=LANG[S.language].badge;
-    switchScreen('session');renderSession();
-    if(S.mode==='presentation')handlePresLine();
-}
-function renderSession(){renderProgress();renderContext();renderInteraction()}
-function renderProgress(){
-    var t=S.lines.length,c=S.currentLine+1;
-    $('progress-text').textContent=c+' / '+t;$('progress-fill').style.width=(c/t*100)+'%';
-    var d=$('line-dots');
-    if(t<=25){d.classList.remove('hidden');d.innerHTML=S.lines.map(function(l,i){var cls='line-dot';if(i<S.currentLine)cls+=' done';else if(i===S.currentLine)cls+=' current';return '<div class="'+cls+'"></div>'}).join('')}else d.classList.add('hidden');
-}
-function renderContext(){
-    var c=$('dialogue-context'),start=Math.max(0,S.currentLine-8),end=S.currentLine+1;
-    c.innerHTML=S.lines.slice(start,end).map(function(line,vi){
-        var ri=start+vi,isU=line.role===S.userRole,isC=ri===S.currentLine,isP=ri<S.currentLine;
-        var bc=isU?'bubble-user':'bubble-other';if(isC)bc+=' bubble-current';if(isP)bc+=' bubble-past';
-        var sc=S.lineScores[ri];
-        var badge=(isP&&isU&&sc!=null)?'<span class="inline-block ml-2 px-2 py-0.5 rounded text-[10px] font-bold '+(sc>=80?'bg-sage-500/20 text-sage-400':sc>=50?'bg-copper-500/20 text-copper-400':'bg-coral-500/20 text-coral-400')+'">'+sc+'</span>':'';
-        var rep=(!isU&&(isP||isC))?'<button class="replay-btn" onclick="replayLine('+ri+')" aria-label="Replay"><i class="fas fa-volume-up"></i></button>':'';
-        return '<div class="bubble '+bc+'"><div class="bubble-label">'+esc(line.role)+badge+'</div><div class="text-sm leading-relaxed text-sf-50">'+esc(line.text)+'</div>'+rep+'</div>';
-    }).join('');
-    requestAnimationFrame(function(){c.scrollTop=c.scrollHeight});
-}
+function startSession(){var ok=false;S.lines.forEach(function(l){if(l.role===S.userRole)ok=true});if(!ok){toast('"'+S.userRole+'" has no lines!','error');return}var key=$('el-key')?$('el-key').value.trim():S.elevenlabsKey;S.elevenlabsKey=key;if($('el-voice-select'))S.elevenlabsVoiceId=$('el-voice-select').value;S.currentLine=0;S.showExpected=true;S.userInput='';S.isProcessing=false;S.sessionStart=Date.now();S.lineScores={};S.lineDetails={};S.userResponses={};S.audioClips={};S.attemptCount={};S.ttsNatural=true;stopSpeaking();stopAllRec();$('mode-badge').textContent=S.mode==='practice'?'Practice':'Presentation';$('lang-badge').textContent=LANG[S.language].badge;switchScreen('session');renderSession();if(S.mode==='presentation')handlePresLine()}
+function renderSession(){renderProgress();renderContext();renderIA()}
+function renderProgress(){var t=S.lines.length,c=S.currentLine+1;$('progress-text').textContent=c+' / '+t;$('progress-fill').style.width=(c/t*100)+'%';var d=$('line-dots');if(t<=25){d.classList.remove('hidden');d.innerHTML=S.lines.map(function(l,i){var cls='line-dot';if(i<S.currentLine)cls+=S.lineScores[i]!=null&&S.lineScores[i]<50?' done low':' done';else if(i===S.currentLine)cls+=' current';return '<div class="'+cls+'"></div>'}).join('')}else d.classList.add('hidden')}
 
-function renderInteraction(){
-    var area=$('interaction-area'),line=S.lines[S.currentLine];if(!line)return;
-    var isU=line.role===S.userRole;
+function renderContext(){var c=$('dialogue-context'),start=Math.max(0,S.currentLine-8),end=S.currentLine+1;c.innerHTML=S.lines.slice(start,end).map(function(line,vi){var ri=start+vi,isU=line.role===S.userRole,isC=ri===S.currentLine,isP=ri<S.currentLine;var bc=isU?'bubble-user':'bubble-other';if(isC)bc+=' bubble-current';if(isP)bc+=' bubble-past';var sc=S.lineScores[ri];var badge=(isP&&isU&&sc!=null)?'<span class="inline-block ml-2 px-2 py-0.5 rounded text-[10px] font-bold '+(sc>=80?'bg-sage-500/20 text-sage-400':sc>=50?'bg-copper-500/20 text-copper-400':'bg-coral-500/20 text-coral-400')+'">'+sc+'</span>':'';var rep=(!isU&&(isP||isC))?'<button class="replay-btn" onclick="replayLine('+ri+')" aria-label="Replay"><i class="fas fa-volume-up"></i></button>':'';return '<div class="bubble '+bc+'"><div class="bubble-label">'+esc(line.role)+badge+'</div><div class="text-sm leading-relaxed text-sf-50">'+esc(line.text)+'</div>'+rep+'</div>'}).join('');requestAnimationFrame(function(){c.scrollTop=c.scrollHeight})}
+
+function renderIA(){
+    var area=$('interaction-area'),line=S.lines[S.currentLine];if(!line)return;var isU=line.role===S.userRole;
     if(S.mode==='practice'){
         if(isU){
-            var hasClip=S.audioClips[S.currentLine]&&!S.isRecording;
+            var hc=S.audioClips[S.currentLine]&&!S.isRecording;
             var h='<div class="flex flex-col gap-3">';
-            h+=S.showExpected?'<div class="bg-white/3 rounded-lg px-4 py-2.5 border border-white/5"><div class="text-xs text-sage-400 font-semibold mb-1 flex items-center justify-between"><span><i class="fas fa-bullseye mr-1"></i>Expected Line</span><button onclick="S.showExpected=false;renderInteraction()" class="text-sf-300 hover:text-sf-50 text-xs"><i class="fas fa-eye-slash mr-1"></i>Hide</button></div><p class="text-sm text-sf-100 italic">'+esc(line.text)+'</p></div>':'<div class="flex justify-center"><button onclick="S.showExpected=true;renderInteraction()" class="text-xs text-copper-500 hover:text-copper-400"><i class="fas fa-eye mr-1"></i>Show expected</button></div>';
+            h+=S.showExpected?'<div class="bg-white/3 rounded-lg px-4 py-2.5 border border-white/5"><div class="text-xs text-sage-400 font-semibold mb-1 flex items-center justify-between"><span><i class="fas fa-bullseye mr-1"></i>Expected Line</span><button onclick="S.showExpected=false;renderIA()" class="text-sf-300 hover:text-sf-50 text-xs"><i class="fas fa-eye-slash mr-1"></i>Hide</button></div><p class="text-sm text-sf-100 italic">'+esc(line.text)+'</p></div>':'<div class="flex justify-center"><button onclick="S.showExpected=true;renderIA()" class="text-xs text-copper-500 hover:text-copper-400"><i class="fas fa-eye mr-1"></i>Show expected</button></div>';
             if(S.isProcessing)h+='<div class="flex items-center justify-center gap-2.5 py-3"><div class="spinner"></div><span class="text-sm text-sf-300">Evaluating...</span></div>';
-            else{h+='<div class="flex items-center gap-2"><input id="txt-in" type="text" placeholder="Type or use mic..." value="'+esc(S.userInput)+'" class="input-glow flex-1 bg-sf-800/60 border border-white/8 rounded-xl px-4 py-3 text-sm text-sf-50 placeholder-sf-300 outline-none transition-all" '+(S.isRecording?'readonly':'')+' aria-label="Response"><button class="mic-btn '+(S.isRecording?'recording':'')+'" onclick="startRecording()" aria-label="'+(S.isRecording?'Stop':'Record')+'"><i class="fas '+(S.isRecording?'fa-stop':'fa-microphone')+'"></i></button><button onclick="handleSubmission()" class="h-14 px-5 rounded-xl bg-copper-500/15 hover:bg-copper-500/25 border border-copper-500/20 text-copper-400 font-semibold text-sm transition-all flex-shrink-0"><i class="fas fa-paper-plane"></i></button></div>';
-            if(hasClip)h+='<div class="flex items-center gap-2 text-xs text-sf-300"><i class="fas fa-circle text-sage-500" style="font-size:6px"></i>Recorded <button onclick="playClip('+S.currentLine+')" class="text-copper-400 hover:text-copper-300 ml-1"><i class="fas fa-play" style="font-size:10px"></i> Play</button></div>';}
-            h+='</div>';area.innerHTML=h;
-            var inp=$('txt-in');if(inp&&!S.isRecording){inp.oninput=function(e){S.userInput=e.target.value};inp.onkeydown=function(e){if(e.key==='Enter'&&S.userInput.trim())handleSubmission()};inp.focus()}
-        }else{
-            area.innerHTML='<div class="flex flex-col items-center gap-3 py-1"><div class="flex items-center gap-3"><button onclick="replayLine('+S.currentLine+')" class="w-10 h-10 rounded-lg bg-sage-500/10 hover:bg-sage-500/20 flex items-center justify-center text-sage-400 transition-colors"><i class="fas fa-volume-up"></i></button><span class="text-sm text-sf-300">Listen to '+esc(line.role)+'</span></div><button onclick="advanceLine()" class="px-6 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/8 text-sf-100 font-semibold text-sm transition-all">Continue <i class="fas fa-arrow-right ml-2"></i></button></div>';
-            if(!S.isSpeaking)speak(line.text,false,false);
-        }
+            else{h+='<div class="flex items-center gap-2"><input id="txt-in" type="text" placeholder="Type or use mic..." value="'+esc(S.userInput)+'" class="input-glow flex-1 bg-sf-800/60 border border-white/8 rounded-xl px-4 py-3 text-sm text-sf-50 placeholder-sf-300 outline-none transition-all" '+(S.isRecording?'readonly':'')+' aria-label="Response"><button class="mic-btn '+(S.isRecording?'recording':'')+'" onclick="startRec()" aria-label="'+(S.isRecording?'Stop':'Record')+'"><i class="fas '+(S.isRecording?'fa-stop':'fa-microphone')+'"></i></button><button onclick="handleSubmission()" class="h-14 px-5 rounded-xl bg-copper-500/15 hover:bg-copper-500/25 border border-copper-500/20 text-copper-400 font-semibold text-sm transition-all flex-shrink-0"><i class="fas fa-paper-plane"></i></button></div>';if(hc)h+='<div class="flex items-center gap-2 text-xs text-sf-300"><i class="fas fa-circle text-sage-500" style="font-size:6px"></i>Recorded <button onclick="playClip('+S.currentLine+')" class="text-copper-400 hover:text-copper-300 ml-1"><i class="fas fa-play" style="font-size:10px"></i> Play</button></div>';}
+            h+='</div>';area.innerHTML=h;var inp=$('txt-in');if(inp&&!S.isRecording){inp.oninput=function(e){S.userInput=e.target.value};inp.onkeydown=function(e){if(e.key==='Enter'&&S.userInput.trim())handleSubmission()};inp.focus()}
+        }else{area.innerHTML='<div class="flex flex-col items-center gap-3 py-1"><div class="flex items-center gap-3"><button onclick="replayLine('+S.currentLine+')" class="w-10 h-10 rounded-lg bg-sage-500/10 hover:bg-sage-500/20 flex items-center justify-center text-sage-400 transition-colors"><i class="fas fa-volume-up"></i></button><span class="text-sm text-sf-300">Listen to '+esc(line.role)+'</span></div><button onclick="advanceLine()" class="px-6 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/8 text-sf-100 font-semibold text-sm transition-all">Continue <i class="fas fa-arrow-right ml-2"></i></button></div>';if(!S.isSpeaking)speak(line.text,false,false)}
     }else{
         /* ── PRESENTATION MODE ── */
         if(isU){
-            if(!S.hintRevealed){
-                area.innerHTML='<div class="flex flex-col items-center gap-5 py-3"><div class="text-center"><div class="text-xs text-copper-400 font-semibold mb-1"><i class="fas fa-user mr-1"></i>Your Turn — '+esc(line.role)+'</div><p class="text-sm text-sf-300">Try saying your line from memory</p></div><button onclick="revealHint()" class="px-6 py-3.5 rounded-xl bg-copper-500/10 hover:bg-copper-500/20 border border-copper-500/20 text-copper-400 font-display font-semibold text-sm transition-all"><i class="fas fa-lightbulb mr-2"></i>Need a hint?</button><button onclick="skipLine()" class="text-xs text-sf-300 hover:text-sf-100 transition-colors">Skip this line</button></div>';
+            if(S.isProcessing){
+                area.innerHTML='<div class="flex flex-col items-center gap-3 py-4"><div class="spinner"></div><span class="text-sm text-sf-300">Evaluating your delivery...</span></div>';
+            }else if(S.lineDetails[S.currentLine]){
+                /* Show eval card */
+                showPresEvalCard();
             }else{
-                var recHtml=S.isRecording?'<button class="mic-btn mic-btn-lg recording" onclick="stopAllRecording()" aria-label="Stop"><i class="fas fa-stop"></i></button><p class="text-sm text-coral-400 font-medium mt-1">Listening...</p><p class="text-xs text-sf-300 mt-1">Auto-stops when you pause</p>'
-                    :S.userInput?'<div class="text-sm text-sage-400"><i class="fas fa-check-circle mr-1.5"></i>"'+esc(S.userInput.slice(0,80))+(S.userInput.length>80?'...':'')+'"</div><p class="text-xs text-sf-300 mt-1">Advancing...</p>'
-                    :'<button class="mic-btn mic-btn-lg" onclick="startRecording()" aria-label="Record"><i class="fas fa-microphone"></i></button><p class="text-xs text-sf-300 mt-1">Tap to start</p>';
-                area.innerHTML='<div class="flex flex-col items-center gap-3 py-3"><div class="text-center"><div class="text-xs text-copper-400 font-semibold mb-2"><i class="fas fa-eye mr-1"></i>Your Line</div><p class="text-base text-sf-50 font-medium leading-relaxed">'+esc(line.text)+'</p></div>'+recHtml+'<button onclick="skipLine()" class="text-xs text-sf-300 hover:text-sf-100 transition-colors mt-1">Skip</button></div>';
+                /* Show line + large mic */
+                var att=S.attemptCount[S.currentLine]||0;
+                var attLabel=att>0?'<span class="text-[10px] text-copper-400 ml-2">Attempt #'+(att+1)+'</span>':'';
+                area.innerHTML='<div class="flex flex-col items-center gap-4 py-3"><div class="text-center max-w-lg"><div class="text-xs text-copper-400 font-semibold mb-2"><i class="fas fa-user mr-1"></i>Your Turn — '+esc(line.role)+attLabel+'</div><p class="text-lg text-sf-50 font-medium leading-relaxed">'+esc(line.text)+'</p></div><button class="mic-btn mic-btn-lg '+(S.isRecording?'recording':'')+'" onclick="startRec()" aria-label="'+(S.isRecording?'Stop':'Record your line')+'"><i class="fas '+(S.isRecording?'fa-stop':'fa-microphone')+'"></i></button>'+(S.isRecording?'<p class="text-sm text-coral-400 font-medium">Listening... auto-stops on silence</p>':'<p class="text-xs text-sf-300">Tap to record your line</p>')+'<button onclick="skipLine()" class="text-xs text-sf-300 hover:text-sf-100 transition-colors">Skip</button></div>';
             }
         }else{
             area.innerHTML='<div class="flex flex-col items-center gap-3 py-1">'+(S.isSpeaking?'<div class="flex items-center gap-2"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div><span class="text-sm text-sf-300 ml-1">'+esc(line.role)+' speaking...</span></div>':'<button onclick="replayLine('+S.currentLine+')" class="w-10 h-10 rounded-lg bg-sage-500/10 hover:bg-sage-500/20 flex items-center justify-center text-sage-400 transition-colors"><i class="fas fa-volume-up"></i></button>')+'<button onclick="advanceLine()" class="px-6 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/8 text-sf-100 font-semibold text-sm transition-all '+(S.isSpeaking?'opacity-40 cursor-not-allowed':'')+'" '+(S.isSpeaking?'disabled':'')+'>Next Line <i class="fas fa-arrow-right ml-2"></i></button></div>';
@@ -711,98 +393,123 @@ function renderInteraction(){
     }
 }
 
-function handlePresLine(){clearTimeout(S.presTimer);var line=S.lines[S.currentLine];if(!line)return;if(line.role!==S.userRole){S.presTimer=setTimeout(function(){speak(line.text,false,false)},500)}S.hintRevealed=false;renderInteraction()}
-function revealHint(){S.hintRevealed=true;renderInteraction();setTimeout(function(){startRecording()},350)}
-function skipLine(){S.userResponses[S.currentLine]=null;advanceLine()}
+function handlePresLine(){clearTimeout(S.presTimer);var line=S.lines[S.currentLine];if(!line)return;if(line.role!==S.userRole){S.presTimer=setTimeout(function(){speak(line.text,false,false)},500)}renderIA()}
 
-function handleSubmission(){
-    var input=S.userInput.trim();if(!input){toast('Type or speak a response.','info');return}if(S.isProcessing)return;
-    stopAllRecording();S.isProcessing=true;renderInteraction();
-    evaluateResponse(S.lines.slice(Math.max(0,S.currentLine-4),S.currentLine),S.lines[S.currentLine].text,input).then(function(ev){
-        S.lineScores[S.currentLine]=ev.score;S.lineDetails[S.currentLine]=ev;S.userResponses[S.currentLine]=input;showEval(ev);
-    }).catch(function(e){toast(e.message,'error');S.isProcessing=false;renderInteraction()});
+function handlePresEval(){
+    var resp=S.userResponses[S.currentLine];
+    if(!resp){S.lineScores[S.currentLine]=null;S.lineDetails[S.currentLine]=null;advanceLine();return}
+    S.isProcessing=true;renderIA();
+    evalResponse(S.lines.slice(Math.max(0,S.currentLine-4),S.currentLine),S.lines[S.currentLine].text,resp,true).then(function(ev){
+        S.lineScores[S.currentLine]=ev.score;S.lineDetails[S.currentLine]=ev;S.isProcessing=false;
+        if(!S.attemptCount[S.currentLine])S.attemptCount[S.currentLine]=0;
+        S.attemptCount[S.currentLine]++;
+        showPresEvalCard();
+    }).catch(function(e){toast(e.message,'error');S.isProcessing=false;renderIA()});
 }
 
-function showEval(ev){
-    S.isProcessing=false;var sc=ev.score,col=sc>=80?'#5BB882':sc>=50?'#E8B88A':'#D4736E';
-    var lbl=sc>=80?'Excellent':sc>=50?'Good Effort':'Keep Practicing';var C=326.73,off=C*(1-sc/100);var hc=!!S.audioClips[S.currentLine];
-    var h='<div class="eval-in"><div class="flex items-start gap-4 sm:gap-5"><div class="flex-shrink-0"><svg viewBox="0 0 120 120" width="88" height="88"><circle cx="60" cy="60" r="52" fill="none" class="score-ring-bg" stroke-width="8"/><circle cx="60" cy="60" r="52" fill="none" stroke="'+col+'" stroke-width="8" stroke-dasharray="'+C+'" stroke-dashoffset="'+C+'" stroke-linecap="round" transform="rotate(-90 60 60)" class="score-ring-fill" id="ev-ring"/><text x="60" y="52" text-anchor="middle" fill="#E8E6E1" font-size="26" font-weight="700" font-family="Space Grotesk">'+sc+'</text><text x="60" y="70" text-anchor="middle" fill="'+col+'" font-size="8" font-weight="600" letter-spacing=".5">'+lbl.toUpperCase()+'</text></svg></div><div class="flex-1 min-w-0 space-y-2"><div class="egrid grid gap-2" style="grid-template-columns:repeat(3,1fr)"><div class="bg-white/3 rounded-lg px-3 py-2"><div class="text-[10px] text-sf-300 font-semibold uppercase">Accuracy</div><div class="text-xs text-sf-100 mt-0.5 leading-snug">'+esc(ev.accuracy)+'</div></div><div class="bg-white/3 rounded-lg px-3 py-2"><div class="text-[10px] text-sf-300 font-semibold uppercase">Grammar</div><div class="text-xs text-sf-100 mt-0.5 leading-snug">'+esc(ev.grammar)+'</div></div><div class="bg-white/3 rounded-lg px-3 py-2"><div class="text-[10px] text-sf-300 font-semibold uppercase">Fluency</div><div class="text-xs text-sf-100 mt-0.5 leading-snug">'+esc(ev.fluency)+'</div></div></div>';
+function showPresEvalCard(){
+    var ev=S.lineDetails[S.currentLine];if(!ev){renderIA();return}
+    var sc=ev.score,col=sc>=80?'#5BB882':sc>=50?'#E8B88A':'#D4736E';
+    var lbl=sc>=80?'Excellent':sc>=50?'Good Effort':'Keep Practicing';
+    var C=326.73,off=C*(1-sc/100);
+    var cw=ev.correct_words||'--';var isYes=cw.toLowerCase().indexOf('yes')!==-1;
+    var hc=!!S.audioClips[S.currentLine];
+    var h='<div class="eval-in"><div class="flex items-start gap-4 sm:gap-5"><div class="flex-shrink-0"><svg viewBox="0 0 120 120" width="88" height="88"><circle cx="60" cy="60" r="52" fill="none" class="score-ring-bg" stroke-width="8"/><circle cx="60" cy="60" r="52" fill="none" stroke="'+col+'" stroke-width="8" stroke-dasharray="'+C+'" stroke-dashoffset="'+C+'" stroke-linecap="round" transform="rotate(-90 60 60)" class="score-ring-fill" id="ev-ring"/><text x="60" y="52" text-anchor="middle" fill="#E8E6E1" font-size="26" font-weight="700" font-family="Space Grotesk">'+sc+'</text><text x="60" y="70" text-anchor="middle" fill="'+col+'" font-size="8" font-weight="600" letter-spacing=".5">'+lbl.toUpperCase()+'</text></svg></div>';
+    h+='<div class="flex-1 min-w-0 space-y-2.5">';
+    h+='<div class="pres-eval-grid grid gap-2" style="grid-template-columns:repeat(2,1fr)">';
+    h+='<div class="bg-white/3 rounded-lg px-3 py-2"><div class="text-[10px] text-sf-300 font-semibold uppercase mb-1">Correct Words?</div><span class="check-badge '+(isYes?'check-yes':'check-no')+'"><i class="fas '+(isYes?'fa-check':'fa-xmark')+'"></i>'+esc(cw)+'</span></div>';
+    h+='<div class="bg-white/3 rounded-lg px-3 py-2"><div class="text-[10px] text-sf-300 font-semibold uppercase mb-1">Pronunciation</div><div class="text-xs text-sf-100 leading-snug">'+esc(ev.grammar)+'</div></div>';
+    h+='<div class="bg-white/3 rounded-lg px-3 py-2"><div class="text-[10px] text-sf-300 font-semibold uppercase mb-1">Accuracy</div><div class="text-xs text-sf-100 leading-snug">'+esc(ev.accuracy)+'</div></div>';
+    h+='<div class="bg-white/3 rounded-lg px-3 py-2"><div class="text-[10px] text-sf-300 font-semibold uppercase mb-1">Fluency</div><div class="text-xs text-sf-100 leading-snug">'+esc(ev.fluency)+'</div></div>';
+    h+='</div>';
     if(ev.encouragement)h+='<p class="text-sm text-sage-400"><i class="fas fa-heart mr-1.5 text-xs"></i>'+esc(ev.encouragement)+'</p>';
-    if(ev.corrections.length){h+='<div><div class="text-[10px] text-coral-400 font-semibold uppercase mb-1">Corrections</div><ul class="space-y-0.5">';ev.corrections.forEach(function(c){h+='<li class="text-xs text-sf-200"><i class="fas fa-xmark text-coral-400 mr-1.5" style="font-size:10px"></i>'+esc(c)+'</li>'});h+='</ul></div>'}
+    if(ev.corrections.length){h+='<div><div class="text-[10px] text-coral-400 font-semibold uppercase mb-1">What to fix</div><ul class="space-y-0.5">';ev.corrections.forEach(function(c){h+='<li class="text-xs text-sf-200"><i class="fas fa-xmark text-coral-400 mr-1.5" style="font-size:10px"></i>'+esc(c)+'</li>'});h+='</ul></div>'}
     if(ev.suggestions.length){h+='<div><div class="text-[10px] text-copper-400 font-semibold uppercase mb-1">Tips</div><ul class="space-y-0.5">';ev.suggestions.forEach(function(s){h+='<li class="text-xs text-sf-200"><i class="fas fa-lightbulb text-copper-400 mr-1.5" style="font-size:10px"></i>'+esc(s)+'</li>'});h+='</ul></div>'}
     if(hc)h+='<button onclick="playClip('+S.currentLine+')" class="text-xs text-sf-300 hover:text-copper-400 transition-colors"><i class="fas fa-play mr-1"></i>Play your recording</button>';
-    h+='<button onclick="advanceLine()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-sf-900 font-display font-semibold text-sm hover:from-amber-400 hover:to-yellow-400 transition-all mt-1">'+(S.currentLine>=S.lines.length-1?'Finish Session':'Next Line')+' <i class="fas fa-arrow-right ml-2"></i></button></div></div></div>';
+    h+='<div class="flex gap-2 mt-1"><button onclick="retryPresLine()" class="flex-1 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/8 text-sf-100 font-display font-semibold text-sm transition-all"><i class="fas fa-rotate-right mr-2"></i>Retry</button><button onclick="advanceLine()" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-sf-900 font-display font-semibold text-sm hover:from-amber-400 hover:to-yellow-400 transition-all">'+(S.currentLine>=S.lines.length-1?'Finish':'Continue')+' <i class="fas fa-arrow-right ml-2"></i></button></div>';
+    h+='</div></div></div>';
     $('interaction-area').innerHTML=h;
     requestAnimationFrame(function(){requestAnimationFrame(function(){var r=$('ev-ring');if(r)r.style.strokeDashoffset=off})});
 }
 
-function advanceLine(){stopSpeaking();stopAllRecording();clearTimeout(S.presTimer);if(S.currentLine>=S.lines.length-1){showReport();return}S.currentLine++;S.userInput='';S.isProcessing=false;S.hintRevealed=false;renderSession();if(S.mode==='presentation')handlePresLine()}
+function retryPresLine(){
+    /* Clear eval for this line so we go back to mic view */
+    delete S.lineScores[S.currentLine];delete S.lineDetails[S.currentLine];
+    delete S.audioClips[S.currentLine];S.userInput='';S.isProcessing=false;
+    renderIA();
+}
+
+function skipLine(){S.userResponses[S.currentLine]=null;advanceLine()}
+function handleSubmission(){var input=S.userInput.trim();if(!input){toast('Type or speak.','info');return}if(S.isProcessing)return;stopAllRec();S.isProcessing=true;renderIA();evalResponse(S.lines.slice(Math.max(0,S.currentLine-4),S.currentLine),S.lines[S.currentLine].text,input,false).then(function(ev){S.lineScores[S.currentLine]=ev.score;S.lineDetails[S.currentLine]=ev;S.userResponses[S.currentLine]=input;showPracticeEval(ev)}).catch(function(e){toast(e.message,'error');S.isProcessing=false;renderIA()})}
+
+function showPracticeEval(ev){
+    S.isProcessing=false;var sc=ev.score,col=sc>=80?'#5BB882':sc>=50?'#E8B88A':'#D4736E';var lbl=sc>=80?'Excellent':sc>=50?'Good Effort':'Keep Practicing';var C=326.73,off=C*(1-sc/100);var hc=!!S.audioClips[S.currentLine];
+    var h='<div class="eval-in"><div class="flex items-start gap-4 sm:gap-5"><div class="flex-shrink-0"><svg viewBox="0 0 120 120" width="88" height="88"><circle cx="60" cy="60" r="52" fill="none" class="score-ring-bg" stroke-width="8"/><circle cx="60" cy="60" r="52" fill="none" stroke="'+col+'" stroke-width="8" stroke-dasharray="'+C+'" stroke-dashoffset="'+C+'" stroke-linecap="round" transform="rotate(-90 60 60)" class="score-ring-fill" id="ev-ring"/><text x="60" y="52" text-anchor="middle" fill="#E8E6E1" font-size="26" font-weight="700" font-family="Space Grotesk">'+sc+'</text><text x="60" y="70" text-anchor="middle" fill="'+col+'" font-size="8" font-weight="600" letter-spacing=".5">'+lbl.toUpperCase()+'</text></svg></div><div class="flex-1 min-w-0 space-y-2"><div class="egrid grid gap-2" style="grid-template-columns:repeat(3,1fr)"><div class="bg-white/3 rounded-lg px-3 py-2"><div class="text-[10px] text-sf-300 font-semibold uppercase">Accuracy</div><div class="text-xs text-sf-100 mt-0.5 leading-snug">'+esc(ev.accuracy)+'</div></div><div class="bg-white/3 rounded-lg px-3 py-2"><div class="text-[10px] text-sf-300 font-semibold uppercase">Grammar</div><div class="text-xs text-sf-100 mt-0.5 leading-snug">'+esc(ev.grammar)+'</div></div><div class="bg-white/3 rounded-lg px-3 py-2"><div class="text-[10px] text-sf-300 font-semibold uppercase">Fluency</div><div class="text-xs text-sf-100 mt-0.5 leading-snug">'+esc(ev.fluency)+'</div></div></div>';
+    if(ev.encouragement)h+='<p class="text-sm text-sage-400"><i class="fas fa-heart mr-1.5 text-xs"></i>'+esc(ev.encouragement)+'</p>';
+    if(ev.corrections.length){h+='<div><div class="text-[10px] text-coral-400 font-semibold uppercase mb-1">Corrections</div><ul class="space-y-0.5">';ev.corrections.forEach(function(c){h+='<li class="text-xs text-sf-200"><i class="fas fa-xmark text-coral-400 mr-1.5" style="font-size:10px"></i>'+esc(c)+'</li>'});h+='</ul></div>'}
+    if(ev.suggestions.length){h+='<div><div class="text-[10px] text-copper-400 font-semibold uppercase mb-1">Tips</div><ul class="space-y-0.5">';ev.suggestions.forEach(function(s){h+='<li class="text-xs text-sf-200"><i class="fas fa-lightbulb text-copper-400 mr-1.5" style="font-size:10px"></i>'+esc(s)+'</li>'});h+='</ul></div>'}
+    if(hc)h+='<button onclick="playClip('+S.currentLine+')" class="text-xs text-sf-300 hover:text-copper-400 transition-colors"><i class="fas fa-play mr-1"></i>Play recording</button>';
+    h+='<button onclick="advanceLine()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-sf-900 font-display font-semibold text-sm hover:from-amber-400 hover:to-yellow-400 transition-all mt-1">'+(S.currentLine>=S.lines.length-1?'Finish Session':'Next Line')+' <i class="fas fa-arrow-right ml-2"></i></button></div></div></div>';
+    $('interaction-area').innerHTML=h;requestAnimationFrame(function(){requestAnimationFrame(function(){var r=$('ev-ring');if(r)r.style.strokeDashoffset=off})})}
+
+function advanceLine(){stopSpeaking();stopAllRec();clearTimeout(S.presTimer);if(S.currentLine>=S.lines.length-1){showReport();return}S.currentLine++;S.userInput='';S.isProcessing=false;renderSession();if(S.mode==='presentation')handlePresLine()}
 function replayLine(i){var l=S.lines[i];if(l)speak(l.text,false,l.role===S.userRole)}
 function playClip(i){var b=S.audioClips[i];if(!b)return;var u=URL.createObjectURL(b),a=new Audio(u);a.onended=function(){URL.revokeObjectURL(u)};a.play().catch(function(){URL.revokeObjectURL(u)})}
 
 /* ── Report ── */
 function showReport(){
-    stopSpeaking();stopAllRecording();
+    stopSpeaking();stopAllRec();
     var scores=[],k;for(k in S.lineScores){if(S.lineScores[k]!=null)scores.push(S.lineScores[k])}
     var avg=scores.length?Math.round(scores.reduce(function(a,b){return a+b},0)/scores.length):0;
     var best=scores.length?Math.max.apply(null,scores):0;
-    var elapsed=Math.round((Date.now()-S.sessionStart)/1000);
-    var ts=elapsed>=60?Math.floor(elapsed/60)+'m '+elapsed%60+'s':elapsed+'s';
-    switchScreen('complete');
-    $('st-lines').textContent=S.lines.length;$('st-eval').textContent=scores.length;$('st-best').textContent=best;$('st-time').textContent=ts;$('final-score').textContent=avg;
-    var C=326.73,off=C*(1-avg/100),ring=$('final-ring');ring.style.strokeDashoffset=C;
-    requestAnimationFrame(function(){requestAnimationFrame(function(){ring.style.strokeDashoffset=off})});
+    var elapsed=Math.round((Date.now()-S.sessionStart)/1000);var ts=elapsed>=60?Math.floor(elapsed/60)+'m '+elapsed%60+'s':elapsed+'s';
+    switchScreen('complete');$('st-lines').textContent=S.lines.length;$('st-eval').textContent=scores.length;$('st-best').textContent=best;$('st-time').textContent=ts;$('final-score').textContent=avg;
+    var C=326.73,off=C*(1-avg/100),ring=$('final-ring');ring.style.strokeDashoffset=C;requestAnimationFrame(function(){requestAnimationFrame(function(){ring.style.strokeDashoffset=off})});
     var rc=$('report-lines');
     rc.innerHTML=S.lines.map(function(line,i){
         var isU=line.role===S.userRole,sc=S.lineScores[i],det=S.lineDetails[i],resp=S.userResponses[i],clip=S.audioClips[i],isLow=sc!=null&&sc<50;
         if(!isU)return '<div class="report-card bg-white/2 rounded-xl px-4 py-3 border border-white/5 flex items-start gap-3"><span class="text-xs text-sf-300 font-mono w-6 text-right flex-shrink-0 pt-0.5">'+(i+1)+'</span><div class="flex-1 min-w-0"><span class="text-xs text-sage-400 font-semibold">'+esc(line.role)+'</span><p class="text-sm text-sf-200 mt-0.5 truncate">'+esc(line.text)+'</p></div><span class="text-[10px] text-sf-300 flex-shrink-0 pt-1">other</span></div>';
-        var sb=sc!=null?'<span class="px-2.5 py-1 rounded-lg text-sm font-bold '+(sc>=80?'bg-sage-500/15 text-sage-400':sc>=50?'bg-copper-500/15 text-copper-400':'bg-coral-500/15 text-coral-400')+'">'+sc+'</span>':'<span class="px-2.5 py-1 rounded-lg text-sm text-sf-300 bg-white/3">N/A</span>';
-        var dh='';if(det){dh='<div class="mt-2 space-y-1.5"><div class="grid grid-cols-3 gap-2"><div class="text-[10px]"><span class="text-sf-300">Accuracy:</span> <span class="text-sf-100">'+esc(det.accuracy)+'</span></div><div class="text-[10px]"><span class="text-sf-300">Grammar:</span> <span class="text-sf-100">'+esc(det.grammar)+'</span></div><div class="text-[10px]"><span class="text-sf-300">Fluency:</span> <span class="text-sf-100">'+esc(det.fluency)+'</span></div></div>';
-        if(det.corrections.length){dh+='<div class="text-xs text-coral-400">';det.corrections.forEach(function(c){dh+='<div><i class="fas fa-xmark mr-1" style="font-size:10px"></i>'+esc(c)+'</div>'});dh+='</div>'}
-        if(det.suggestions.length){dh+='<div class="text-xs text-copper-400">';det.suggestions.forEach(function(s){dh+='<div><i class="fas fa-lightbulb mr-1" style="font-size:10px"></i>'+esc(s)+'</div>'});dh+='</div>'}
-        if(det.encouragement)dh+='<p class="text-xs text-sage-400 italic">'+esc(det.encouragement)+'</p>';dh+='</div>'}
+        var sb=sc!=null?'<span class="px-2.5 py-1 rounded-lg text-sm font-bold '+(sc>=80?'bg-sage-500/15 text-sage-400':sc>=50?'bg-copper-500/15 text-copper-400':'bg-coral-500/15 text-coral-400')+'">'+sc+'</span>':'<span class="px-2.5 py-1 rounded-lg text-sm text-sf-300 bg-white/3">Skip</span>';
+        var dh='';if(det){
+            dh='<div class="mt-2 space-y-1.5">';
+            /* What they said vs expected */
+            dh+='<div class="bg-white/3 rounded-lg p-2.5"><div class="text-[10px] text-sf-300 font-semibold uppercase mb-1">Expected</div><p class="text-xs text-sf-100">'+esc(line.text)+'</p></div>';
+            dh+='<div class="bg-white/3 rounded-lg p-2.5"><div class="text-[10px] text-sf-300 font-semibold uppercase mb-1">You Said</div><p class="text-xs '+(isLow?'text-coral-400':'text-sf-100')+'">'+(resp?esc(resp):'<span class="text-sf-300 italic">No response</span>')+'</p></div>';
+            /* Eval grid */
+            dh+='<div class="grid grid-cols-2 gap-2">';
+            if(det.correct_words!=null){var isYes=det.correct_words.toLowerCase().indexOf('yes')!==-1;dh+='<div class="text-[10px]"><span class="text-sf-300">Correct Words:</span> <span class="check-badge '+(isYes?'check-yes':'check-no')+' inline-flex"><i class="fas '+(isYes?'fa-check':'fa-xmark')+'"></i>'+esc(det.correct_words)+'</span></div>'}
+            dh+='<div class="text-[10px]"><span class="text-sf-300">Pronunciation:</span> <span class="text-sf-100">'+esc(det.grammar)+'</span></div>';
+            dh+='<div class="text-[10px]"><span class="text-sf-300">Accuracy:</span> <span class="text-sf-100">'+esc(det.accuracy)+'</span></div>';
+            dh+='<div class="text-[10px]"><span class="text-sf-300">Fluency:</span> <span class="text-sf-100">'+esc(det.fluency)+'</span></div>';
+            dh+='</div>';
+            if(det.corrections.length){dh+='<div class="text-xs text-coral-400">';det.corrections.forEach(function(c){dh+='<div><i class="fas fa-xmark mr-1" style="font-size:10px"></i>'+esc(c)+'</div>'});dh+='</div>'}
+            if(det.encouragement)dh+='<p class="text-xs text-sage-400 italic">'+esc(det.encouragement)+'</p>';
+            dh+='</div>';
+        }
         var ah='';if(clip){ah='<div class="mt-2"><audio controls src="'+URL.createObjectURL(clip)+'" class="w-full h-8"></audio></div>'}
-        return '<div class="report-card '+(isLow?'low':'')+' bg-white/2 rounded-xl px-4 py-3 border '+(isLow?'border-coral-500/25':'border-white/5')+'"><div class="flex items-start gap-3"><span class="text-xs '+(isLow?'text-coral-400':'text-sf-300')+' font-mono w-6 text-right flex-shrink-0 pt-0.5">'+(i+1)+'</span><div class="flex-1 min-w-0"><div class="flex items-center gap-2 flex-wrap"><span class="text-xs '+(isLow?'text-coral-400':'text-copper-400')+' font-semibold">'+esc(line.role)+'</span>'+sb+(isLow?'<span class="text-[10px] bg-coral-500/15 text-coral-400 px-2 py-0.5 rounded font-semibold">Needs work</span>':'')+'</div><p class="text-sm text-sf-300 mt-1 truncate"><span class="text-sf-200 font-medium">Expected:</span> '+esc(line.text)+'</p>'+(resp?'<p class="text-sm text-sf-300 mt-0.5 truncate"><span class="text-sf-200 font-medium">You said:</span> '+esc(resp)+'</p>':'<p class="text-xs text-sf-300 mt-1 italic">No response</p>')+dh+ah+'</div></div></div>';
+        return '<div class="report-card '+(isLow?'low':'')+' bg-white/2 rounded-xl px-4 py-3 border '+(isLow?'border-coral-500/25':'border-white/5')+'"><div class="flex items-start gap-3"><span class="text-xs '+(isLow?'text-coral-400':'text-sf-300')+' font-mono w-6 text-right flex-shrink-0 pt-0.5">'+(i+1)+'</span><div class="flex-1 min-w-0"><div class="flex items-center gap-2 flex-wrap"><span class="text-xs '+(isLow?'text-coral-400':'text-copper-400')+' font-semibold">'+esc(line.role)+'</span>'+sb+(isLow?'<span class="text-[10px] bg-coral-500/15 text-coral-400 px-2 py-0.5 rounded font-semibold">Needs work</span>':'')+(S.attemptCount[i]>1?'<span class="text-[10px] bg-white/5 text-sf-300 px-2 py-0.5 rounded">'+S.attemptCount[i]+' attempts</span>':'')+'</div>'+dh+ah+'</div></div></div>';
     }).join('');
 }
 
-/* ── Export ── */
-function exportJSON(){
-    var scores=[],k;for(k in S.lineScores){if(S.lineScores[k]!=null)scores.push(S.lineScores[k])}
-    var data={session:{language:S.language,mode:S.mode,duration:Math.round((Date.now()-S.sessionStart)/1000),timestamp:new Date().toISOString(),model:MODEL,tts:S.ttsProvider},overall:{avgScore:scores.length?Math.round(scores.reduce(function(a,b){return a+b},0)/scores.length):0,bestScore:scores.length?Math.max.apply(null,scores):0,linesEvaluated:scores.length,totalLines:S.lines.length},lines:S.lines.map(function(l,i){return{index:i,role:l.role,isUser:l.role===S.userRole,expectedText:l.text,userResponse:S.userResponses[i]||null,score:S.lineScores[i]!=null?S.lineScores[i]:null,feedback:S.lineDetails[i]||null,hasAudio:!!S.audioClips[i]}})};
-    var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});var u=URL.createObjectURL(blob);
-    var a=document.createElement('a');a.href=u;a.download='speakflow-report-'+Date.now()+'.json';a.click();URL.revokeObjectURL(u);toast('Exported JSON.','success');
-}
-function exportPrint(){
-    var scores=[],k;for(k in S.lineScores){if(S.lineScores[k]!=null)scores.push(S.lineScores[k])}
-    var avg=scores.length?Math.round(scores.reduce(function(a,b){return a+b},0)/scores.length):0;
-    var elapsed=Math.round((Date.now()-S.sessionStart)/1000);
-    var rows=S.lines.map(function(l,i){var sc=S.lineScores[i],resp=S.userResponses[i],det=S.lineDetails[i],isU=l.role===S.userRole;
-    return '<tr style="border-bottom:1px solid #eee;'+( !isU?'opacity:.6':'')+'"><td style="padding:8px;font-size:13px">'+(i+1)+'</td><td style="padding:8px;font-size:13px;font-weight:600">'+esc(l.role)+'</td><td style="padding:8px;font-size:13px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(l.text)+'</td><td style="padding:8px;font-size:13px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(resp?esc(resp):'--')+'</td><td style="padding:8px;font-size:13px;text-align:center;'+(sc!=null&&sc<50?'color:#D4736E;font-weight:700':'')+'">'+(sc!=null?sc:'N/A')+'</td><td style="padding:8px;font-size:12px;color:#666;max-width:180px">'+(det?esc(det.encouragement):'--')+'</td></tr>'}).join('');
-    var html='<!DOCTYPE html><html><head><title>SpeakFlow Report</title><style>body{font-family:system-ui,sans-serif;max-width:900px;margin:40px auto;padding:0 20px;color:#222}h1{font-size:28px;margin-bottom:4px}h2{font-size:16px;color:#666;font-weight:400;margin-bottom:20px}.stats{display:flex;gap:24px;margin-bottom:24px}.stat{text-align:center}.stat .val{font-size:32px;font-weight:700}.stat .lbl{font-size:12px;color:#888}table{width:100%;border-collapse:collapse}th{text-align:left;padding:8px;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:#888;border-bottom:2px solid #ddd}</style></head><body><h1>SpeakFlow Report</h1><h2>'+LANG[S.language].name+' &middot; '+(S.mode==='practice'?'Practice':'Presentation')+' &middot; '+new Date().toLocaleDateString()+'</h2><div class="stats"><div class="stat"><div class="val">'+avg+'</div><div class="lbl">Average</div></div><div class="stat"><div class="val">'+(scores.length?Math.max.apply(null,scores):0)+'</div><div class="lbl">Best</div></div><div class="stat"><div class="val">'+S.lines.length+'</div><div class="lbl">Lines</div></div><div class="stat"><div class="val">'+(elapsed>=60?Math.floor(elapsed/60)+'m '+elapsed%60+'s':elapsed+'s')+'</div><div class="lbl">Time</div></div></div><table><thead><tr><th>#</th><th>Role</th><th>Expected</th><th>Response</th><th>Score</th><th>Feedback</th></tr></thead><tbody>'+rows+'</tbody></table><script>window.onload=function(){window.print()}<\/script></body></html>';
-    var w=window.open('','_blank');if(w){w.document.write(html);w.document.close()}else toast('Pop-up blocked.','error');
-}
+function exportJSON(){var scores=[],k;for(k in S.lineScores){if(S.lineScores[k]!=null)scores.push(S.lineScores[k])}var data={session:{language:S.language,mode:S.mode,duration:Math.round((Date.now()-S.sessionStart)/1000),timestamp:new Date().toISOString(),model:MODEL},overall:{avgScore:scores.length?Math.round(scores.reduce(function(a,b){return a+b},0)/scores.length):0,bestScore:scores.length?Math.max.apply(null,scores):0,linesEvaluated:scores.length,totalLines:S.lines.length},lines:S.lines.map(function(l,i){return{index:i,role:l.role,isUser:l.role===S.userRole,expectedText:l.text,userResponse:S.userResponses[i]||null,score:S.lineScores[i]!=null?S.lineScores[i]:null,feedback:S.lineDetails[i]||null,attempts:S.attemptCount[i]||0,hasAudio:!!S.audioClips[i]}})};var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});var u=URL.createObjectURL(blob);var a=document.createElement('a');a.href=u;a.download='speakflow-report-'+Date.now()+'.json';a.click();URL.revokeObjectURL(u);toast('Exported.','success')}
+function exportPrint(){var scores=[],k;for(k in S.lineScores){if(S.lineScores[k]!=null)scores.push(S.lineScores[k])}var avg=scores.length?Math.round(scores.reduce(function(a,b){return a+b},0)/scores.length):0;var elapsed=Math.round((Date.now()-S.sessionStart)/1000);var rows=S.lines.map(function(l,i){var sc=S.lineScores[i],resp=S.userResponses[i],det=S.lineDetails[i],isU=l.role===S.userRole;return '<tr style="border-bottom:1px solid #eee;'+(!isU?'opacity:.6':'')+'"><td style="padding:8px;font-size:13px">'+(i+1)+'</td><td style="padding:8px;font-size:13px;font-weight:600">'+esc(l.role)+'</td><td style="padding:8px;font-size:13px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(l.text)+'</td><td style="padding:8px;font-size:13px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(resp?esc(resp):'--')+'</td><td style="padding:8px;font-size:13px;text-align:center;'+(sc!=null&&sc<50?'color:#D4736E;font-weight:700':'')+'">'+(sc!=null?sc:'--')+'</td><td style="padding:8px;font-size:12px;color:#666;max-width:160px">'+(det&&det.encouragement?esc(det.encouragement):'--')+'</td></tr>'}).join('');var html='<!DOCTYPE html><html><head><title>SpeakFlow Report</title><style>body{font-family:system-ui,sans-serif;max-width:900px;margin:40px auto;padding:0 20px;color:#222}h1{font-size:28px;margin-bottom:4px}h2{font-size:16px;color:#666;font-weight:400;margin-bottom:20px}.stats{display:flex;gap:24px;margin-bottom:24px}.stat{text-align:center}.stat .val{font-size:32px;font-weight:700}.stat .lbl{font-size:12px;color:#888}table{width:100%;border-collapse:collapse}th{text-align:left;padding:8px;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:#888;border-bottom:2px solid #ddd}</style></head><body><h1>SpeakFlow Report</h1><h2>'+LANG[S.language].name+' &middot; '+(S.mode==='practice'?'Practice':'Presentation')+' &middot; '+new Date().toLocaleDateString()+'</h2><div class="stats"><div class="stat"><div class="val">'+avg+'</div><div class="lbl">Average</div></div><div class="stat"><div class="val">'+(scores.length?Math.max.apply(null,scores):0)+'</div><div class="lbl">Best</div></div><div class="stat"><div class="val">'+S.lines.length+'</div><div class="lbl">Lines</div></div><div class="stat"><div class="val">'+(elapsed>=60?Math.floor(elapsed/60)+'m '+elapsed%60+'s':elapsed+'s')+'</div><div class="lbl">Time</div></div></div><table><thead><tr><th>#</th><th>Role</th><th>Expected</th><th>You Said</th><th>Score</th><th>Feedback</th></tr></thead><tbody>'+rows+'</tbody></table><script>window.onload=function(){window.print()}<\/script></body></html>';var w=window.open('','_blank');if(w){w.document.write(html);w.document.close()}else toast('Pop-up blocked.','error')}
 
-function restartSession(){S.currentLine=0;S.hintRevealed=false;S.userInput='';S.isProcessing=false;S.sessionStart=Date.now();S.lineScores={};S.lineDetails={};S.userResponses={};S.audioClips={};S.ttsNatural=true;stopSpeaking();stopAllRecording();switchScreen('session');renderSession();if(S.mode==='presentation')handlePresLine()}
+function restartSession(){S.currentLine=0;S.userInput='';S.isProcessing=false;S.sessionStart=Date.now();S.lineScores={};S.lineDetails={};S.userResponses={};S.audioClips={};S.attemptCount={};S.ttsNatural=true;stopSpeaking();stopAllRec();switchScreen('session');renderSession();if(S.mode==='presentation')handlePresLine()}
 function newDialogue(){switchScreen('setup')}
 
-/* ── Events ── */
 document.addEventListener('DOMContentLoaded',function(){
     $('api-key').oninput=function(e){S.apiKey=e.target.value.trim();updateStartBtn()};
     $('language-select').onchange=function(e){S.language=e.target.value};
     $('el-key').oninput=function(){S.elevenlabsKey=$('el-key').value.trim()};
     $('el-voice-select').onchange=function(){S.elevenlabsVoiceId=$('el-voice-select').value};
-    document.querySelectorAll('.mode-card').forEach(function(c){
-        c.onclick=function(){document.querySelectorAll('.mode-card').forEach(function(x){x.classList.remove('selected');x.setAttribute('aria-checked','false')});c.classList.add('selected');c.setAttribute('aria-checked','true');S.mode=c.dataset.role};
-        c.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();c.click()}};
-    });
+    document.querySelectorAll('.mode-card').forEach(function(c){c.onclick=function(){document.querySelectorAll('.mode-card').forEach(function(x){x.classList.remove('selected');x.setAttribute('aria-checked','false')});c.classList.add('selected');c.setAttribute('aria-checked','true');S.mode=c.dataset.role};c.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();c.click()}}});
     var pt;$('script-input').oninput=function(){clearTimeout(pt);pt=setTimeout(updateParse,350)};
     $('load-example').onclick=function(){$('script-input').value=EXAMPLE;S.language='en';$('language-select').value='en';updateParse();toast('Example loaded.','success')};
     $('start-btn').onclick=startSession;
-    $('back-btn').onclick=function(){stopSpeaking();stopAllRecording();clearTimeout(S.presTimer);switchScreen('setup')};
+    $('back-btn').onclick=function(){stopSpeaking();stopAllRec();clearTimeout(S.presTimer);switchScreen('setup')};
     $('restart-btn').onclick=restartSession;
     $('new-dialogue-btn').onclick=newDialogue;
-    document.onkeydown=function(e){if(e.key==='Escape'&&S.screen==='session'){stopSpeaking();stopAllRecording();clearTimeout(S.presTimer);switchScreen('setup')}};
+    document.onkeydown=function(e){if(e.key==='Escape'&&S.screen==='session'){stopSpeaking();stopAllRec();clearTimeout(S.presTimer);switchScreen('setup')}};
 });
 </script>
 </body>
