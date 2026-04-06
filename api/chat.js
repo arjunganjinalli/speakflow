@@ -21,7 +21,7 @@ export default async function handler(req, res) {
         'Authorization': 'Bearer ' + apiKey
       },
       body: JSON.stringify({
-        model: body.model || 'glm-4-air-x',
+        model: body.model || 'glm-3-turbo',
         messages: body.messages,
         temperature: body.temperature || 0.3,
         max_tokens: body.max_tokens || 800
