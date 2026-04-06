@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script>
-    tailwind.config={theme:{extend:{colors:{copper:{300:'#F0CFA8',400:'#E8B88A',500:'#C8956C',600:'#A87A55'},sage:{300:'#A8E0C0',400:'#7EC9A0',500:'#5BB882',600:'#449966'},coral:{400:'#E89590',500:'#D4736E'},sf:{50:'#E8E6E1',100:'#C8C6C1',200:'#8A8885',300:'#6E6D69',700:'#1E1E22',800:'#161619',900:'#0D0D0F'}},fontFamily:{display:['"Space Grotesk"','sans-serif'],body:['"DM Sans"','sans-serif']}}}}
+    tailwind.config={theme:{extend:{colors:{copper:{300:'#F0CFA8',400:'#E8B88A',500:'#C8956C',600:'#A87A55'},sage:{300:'#A8E0C0',400:'#7EC9A0',500:'#5BB882',600:'#44996s6'},coral:{400:'#E89590',500:'#D4736E'},sf:{50:'#E8E6E1',100:'#C8C6C1',200:'#8A8885',300:'#6E6D69',700:'#1E1E22',800:'#161619',900:'#0D0D0F'}},fontFamily:{display:['"Space Grotesk"','sans-serif'],body:['"DM Sans"','sans-serif']}}}}
     </script>
     <style>
         *,*::before,*::after{box-sizing:border-box}
@@ -326,6 +326,12 @@
 var MODEL='glm-4-flash';
 var API_URL='https://api.z.ai/v1/chat/completions';
 var PROXY='https://corsproxy.io/?url=';
+/* Multiple CORS proxy fallbacks — if one is down, try the next */
+var CORS_PROXIES=[
+    'https://corsproxy.io/?url=',
+    'https://api.allorigins.win/raw?url=',
+    'https://cors.sh/?url='
+];
 
 var LANG={
     en:{name:'English',stt:'en-US',tts:'en-US',badge:'EN'},
@@ -463,11 +469,28 @@ function fetchELVoices(){
    SCRIPT PARSING
 ═══════════════════════════════════════════════════════════════ */
 function parseScript(text){
-    var lines=[],m,rx=/^\[([^\]]+)\]:\s*(.+)$/gm;
+    var lines=[],m;
+    /* Pattern 1: [Name]: text (primary format) */
+    var rx=/^\[([^\]]+)\]:\s*(.+)$/gm;
     while((m=rx.exec(text))!==null)lines.push({role:m[1].trim(),text:m[2].trim()});
+    /* Pattern 2: Name: text (fallback — but skip common non-dialogue prefixes) */
     if(!lines.length){
+        var skipPrefixes=/^(scene|act|stage direction|note|setting|narrator\s*:|\d+|chapter|pg|page|int\.|ext\.|fade|cut)/i;
         var rx2=/^([^:\[\]]+):\s*(.+)$/gm;
-        while((m=rx2.exec(text))!==null)lines.push({role:m[1].trim(),text:m[2].trim()});
+        while((m=rx2.exec(text))!==null){
+            var roleName=m[1].trim();
+            if(!skipPrefixes.test(roleName)&&roleName.length<40){
+                lines.push({role:roleName,text:m[2].trim()});
+            }
+        }
+    }
+    /* Pattern 3: Name (uppercase only): text — common screenplay format */
+    if(!lines.length){
+        var rx3=/^([A-Z][A-Z\s]{1,25})\n([\s\S]+?)(?=\n[A-Z][A-Z\s]{1,25}\n|$)/gm;
+        while((m=rx3.exec(text))!==null){
+            var rn=m[1].trim();
+            if(rn.indexOf('(')===-1)lines.push({role:rn,text:m[2].trim()});
+        }
     }
     return lines;
 }
@@ -478,14 +501,20 @@ function autoDetectScript(){
     if(!S.apiKey){toast('Enter GLM API key first.','info');return}
     $('auto-detect-btn').disabled=true;
     $('parse-status').innerHTML='<span class="text-copper-400"><i class="fas fa-spinner fa-spin mr-1"></i>Analyzing with AI...</span>';
+    /* Use higher max_tokens for potentially long scripts */
     callGLM([
-        {role:'system',content:'Extract ALL spoken dialogue from the given text into format: [CharacterName]: dialogue text\n\nRules:\n- Use actual character names if available, otherwise Speaker1/Speaker2\n- Include ALL dialogue lines in order\n- No stage directions, narration, or explanations\n- Keep original language\n- Output ONLY formatted lines'},
+        {role:'system',content:'Extract ALL spoken dialogue from the given text into format: [CharacterName]: dialogue text\n\nRules:\n- Use actual character names if available, otherwise Speaker1/Speaker2\n- Include ALL dialogue lines in order\n- No stage directions, narration, or explanations\n- Keep original language\n- Output ONLY formatted lines — every line MUST follow [Name]: text format'},
         {role:'user',content:text}
-    ]).then(function(r){
+    ],2000).then(function(r){
         $('script-input').value=r.trim();
         updateParse();
         $('auto-detect-btn').disabled=false;
-        toast('Detected '+S.lines.length+' lines.','success');
+        if(S.lines.length===0){
+            $('parse-status').innerHTML='<span class="text-coral-400"><i class="fas fa-triangle-exclamation mr-1"></i>AI returned text but it couldn\'t be parsed. Try re-formatting or paste in [Name]: text format.</span>';
+            toast('AI response could not be parsed as dialogue.','error');
+        }else{
+            toast('Detected '+S.lines.length+' lines with '+S.roles.length+' character(s).','success');
+        }
     }).catch(function(e){
         $('parse-status').innerHTML='';
         $('auto-detect-btn').disabled=false;
@@ -518,17 +547,22 @@ function speak(text,onEnd,isUserLine){
 function speakBrowser(text,onEnd){
     if(typeof speechSynthesis==='undefined'){if(onEnd)onEnd();return}
     speechSynthesis.cancel();
+    /* Chrome bug workaround: small delay after cancel() before speak() */
     var lc=LANG[S.language];
-    var u=new SpeechSynthesisUtterance(text);
-    u.lang=lc.tts;
-    var v=getVoice(lc.tts);
-    if(v)u.voice=v;
-    u.rate=0.9;
-    S.isSpeaking=true;
-    u.onend=function(){S.isSpeaking=false;if(onEnd)onEnd()};
-    u.onerror=function(){S.isSpeaking=false;if(onEnd)onEnd()};
-    speechSynthesis.speak(u);
+    setTimeout(function(){
+        var u=new SpeechSynthesisUtterance(text);
+        u.lang=lc.tts;
+        var v=getVoice(lc.tts);
+        if(v)u.voice=v;
+        u.rate=0.9;
+        S.isSpeaking=true;
+        u.onend=function(){S.isSpeaking=false;if(onEnd)onEnd()};
+        u.onerror=function(){S.isSpeaking=false;if(onEnd)onEnd()};
+        speechSynthesis.speak(u);
+    },100);
+    return;
 }
+
 function speakEL(text,vid,onEnd){
     S.isSpeaking=true;
     fetch(PROXY+encodeURIComponent('https://api.elevenlabs.io/v1/text-to-speech/'+vid),{
@@ -551,6 +585,13 @@ function stopSpeaking(){
     if(S.ttsAudio){S.ttsAudio.pause();S.ttsAudio.currentTime=0;S.ttsAudio=null}
     if(typeof speechSynthesis!=='undefined')speechSynthesis.cancel();
     S.isSpeaking=false;
+}
+
+/* ── Track blob URLs for cleanup ── */
+var _reportBlobURLs=[];
+function revokeReportBlobs(){
+    _reportBlobURLs.forEach(function(u){try{URL.revokeObjectURL(u)}catch(e){}});
+    _reportBlobURLs=[];
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -577,10 +618,8 @@ function stopMR(){
     if(S.mediaRecorder&&S.mediaRecorder.state!=='inactive'){
         try{S.mediaRecorder.stop()}catch(e){}
     }
-    if(S.audioStream){
-        S.audioStream.getTracks().forEach(function(t){t.stop()});
-        S.audioStream=null;
-    }
+    /* Do NOT kill the mic stream tracks here — reuse them across recordings */
+    S.audioStream=null;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -632,13 +671,18 @@ function startSilenceDetection(stream){
                 stopAllRec();
             }
         },50);
-    }catch(e){console.warn('Silence detection unavailable:',e)}
+    }catch(e){console.warn('Silence detection unavailable:',e);
+        /* If silence detection fails, set a 30-second safety timeout to prevent infinite recording */
+        S._recSafetyTimeout=setTimeout(function(){if(S.isRecording){toast('Auto-stopped: no silence detection available.','info');stopAllRec()}},30000);
+    }
 }
 function stopSilenceDetection(){
     clearInterval(S.silenceInterval);
     S.silenceInterval=null;
     S.silenceFrames=0;
     S.currentRMS=0;
+    clearTimeout(S._recSafetyTimeout);
+    S._recSafetyTimeout=null;
     if(S.audioContext){try{S.audioContext.close()}catch(e){}S.audioContext=null;S.analyser=null}
 }
 
@@ -646,6 +690,23 @@ function stopSilenceDetection(){
    SPEECH RECOGNITION
 ═══════════════════════════════════════════════════════════════ */
 var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+
+/* ── Get mic stream ONCE and reuse it for the whole session ── */
+function ensureMicStream(){
+    /* If we already have a live stream, reuse it */
+    if(S._micStream&&S._micStream.active)return Promise.resolve(S._micStream);
+    /* Otherwise request a fresh one */
+    return navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+        S._micStream=stream;
+        return stream;
+    });
+}
+function releaseMicStream(){
+    if(S._micStream){
+        S._micStream.getTracks().forEach(function(t){t.stop()});
+        S._micStream=null;
+    }
+}
 
 function startRec(){
     if(!SR){toast('Speech recognition not supported in this browser.','error');return}
@@ -660,11 +721,12 @@ function startRec(){
     S.isRecording=true;
     S.userInput='';
     S.presState=PS.REC;
+    renderIA();
 
-    navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+    /* Reuse stored mic stream — avoids re-asking for permission every time */
+    ensureMicStream().then(function(stream){
         startMR(stream);
         startSilenceDetection(stream);
-        renderIA();
 
         S.recognition.onresult=function(e){
             var t='';
@@ -698,7 +760,8 @@ function startRec(){
         }
     }).catch(function(){
         S.isRecording=false;
-        toast('Microphone access denied.','error');
+        S._micStream=null; /* stream is dead, force re-request next time */
+        toast('Microphone access denied. Please allow mic access in your browser settings.','error');
         S.presState=PS.HINT;
         renderIA();
     });
@@ -742,12 +805,13 @@ function stopAllRec(){
 /* ═══════════════════════════════════════════════════════════════
    GLM API
 ═══════════════════════════════════════════════════════════════ */
-function callGLM(msgs){
+/* ── callGLM: try direct API first, then cycle through CORS proxies ── */
+function fetchGLM(url,msgs,maxTok){
     var c=new AbortController(),t=setTimeout(function(){c.abort()},30000);
-    return fetch(PROXY+encodeURIComponent(API_URL),{
+    return fetch(url,{
         method:'POST',
         headers:{'Content-Type':'application/json','Authorization':'Bearer '+S.apiKey},
-        body:JSON.stringify({model:MODEL,messages:msgs,temperature:0.3,max_tokens:800}),
+        body:JSON.stringify({model:MODEL,messages:msgs,temperature:0.3,max_tokens:maxTok||800}),
         signal:c.signal
     }).then(function(r){
         clearTimeout(t);
@@ -760,11 +824,31 @@ function callGLM(msgs){
     }).then(function(d){
         if(!d.choices||!d.choices[0]||!d.choices[0].message)throw new Error('Bad API response.');
         return d.choices[0].message.content||'';
-    }).catch(function(e){
-        clearTimeout(t);
-        if(e.name==='AbortError')throw new Error('Request timed out (30s).');
-        if(e.message&&e.message.indexOf('Failed to fetch')!==-1)throw new Error('Network error — CORS proxy may be down. Try a VPN or different network.');
-        throw e;
+    });
+}
+function callGLM(msgs,maxTok){
+    var tk=maxTok||800;
+    /* Build list of URLs to try: direct first, then each proxy */
+    var urls=[API_URL];
+    CORS_PROXIES.forEach(function(p){urls.push(p+encodeURIComponent(API_URL))});
+
+    /* Try each URL in sequence; if it's a network/CORS error, try the next */
+    var chain=Promise.reject(new Error('start'));
+    urls.forEach(function(url, idx){
+        chain=chain.catch(function(prevErr){
+            /* If it's NOT a network error (e.g. 401, 429), don't retry — just throw */
+            var msg=prevErr.message||'';
+            if(idx>0 && msg.indexOf('Invalid API key')!==-1)throw prevErr;
+            if(idx>0 && msg.indexOf('Rate limited')!==-1)throw prevErr;
+            if(idx>0 && msg.indexOf('API error')!==-1)throw prevErr;
+            if(idx>0 && msg.indexOf('Bad API response')!==-1)throw prevErr;
+            /* Otherwise try this URL */
+            return fetchGLM(url,msgs,tk);
+        });
+    });
+    /* If ALL URLs failed, give a clear error */
+    return chain.catch(function(lastErr){
+        throw new Error('Could not reach API. Tried direct connection and '+CORS_PROXIES.length+' proxies. Please check: 1) Your internet connection 2) Your API key is valid 3) Try refreshing the page');
     });
 }
 
@@ -809,6 +893,8 @@ function switchScreen(n){
     S.screen=n;
     document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
     $(n+'-screen').classList.add('active');
+    /* Clean up report blob URLs when leaving report screen */
+    if(n!=='complete')revokeReportBlobs();
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -915,11 +1001,11 @@ function renderContext(){
         var badge=(isP&&isU&&sc!=null)?'<span class="inline-block ml-2 px-2 py-0.5 rounded text-[10px] font-bold '+(sc>=80?'bg-sage-500/20 text-sage-400':sc>=50?'bg-copper-500/20 text-copper-400':'bg-coral-500/20 text-coral-400')+'">'+sc+'</span>':'';
         var rep=(!isU&&(isP||isC))?'<button class="replay-btn" onclick="replayLine('+ri+')" aria-label="Replay"><i class="fas fa-volume-up"></i></button>':'';
 
-        /* In presentation mode, hide the CURRENT user line text in bubble if not yet shown/evaluated */
+        /* In presentation mode, hide the CURRENT user line text in bubble until evaluated */
         var lineText=line.text;
         var textCls='text-sm leading-relaxed text-sf-50';
         if(isU&&isC&&S.mode==='presentation'){
-            var shouldHideInBubble=(S.presState===PS.HIDDEN);
+            var shouldHideInBubble=(S.presState===PS.HIDDEN||S.presState===PS.HINT||S.presState===PS.REC);
             if(shouldHideInBubble){
                 textCls='text-sm leading-relaxed text-sf-50 line-hidden';
             }
@@ -1304,6 +1390,7 @@ function playClip(i){
 ═══════════════════════════════════════════════════════════════ */
 function showReport(){
     stopSpeaking();
+    releaseMicStream();
     var scores=[],k;
     for(k in S.lineScores){if(S.lineScores[k]!=null)scores.push(S.lineScores[k])}
     var avg=scores.length?Math.round(scores.reduce(function(a,b){return a+b},0)/scores.length):0;
@@ -1335,7 +1422,7 @@ function showReport(){
             if(det.corrections&&det.corrections.length){dh+='<div class="text-xs text-coral-400">';det.corrections.forEach(function(c){dh+='<div><i class="fas fa-xmark mr-1" style="font-size:10px"></i>'+esc(c)+'</div>'});dh+='</div>'}
             dh+='</div>';
         }
-        var ah='';if(clip)ah='<div class="mt-2"><audio controls src="'+URL.createObjectURL(clip)+'" class="w-full h-8"></audio></div>';
+        var ah='';if(clip){var clipUrl=URL.createObjectURL(clip);_reportBlobURLs.push(clipUrl);ah='<div class="mt-2"><audio controls src="'+clipUrl+'" class="w-full h-8"></audio></div>';}
         return '<div class="report-card '+(isLow?'low':'')+' bg-white/2 rounded-xl px-4 py-3 border '+(isLow?'border-coral-500/25':'border-white/5')+'"><div class="flex items-start gap-3"><span class="text-xs '+(isLow?'text-coral-400':'text-sf-300')+' font-mono w-6 text-right flex-shrink-0 pt-0.5">'+(i+1)+'</span><div class="flex-1 min-w-0"><div class="flex items-center gap-2 flex-wrap"><span class="text-xs '+(isLow?'text-coral-400':'text-copper-400')+' font-semibold">'+esc(line.role)+'</span>'+sb+(isLow?'<span class="text-[10px] bg-coral-500/15 text-coral-400 px-2 py-0.5 rounded font-semibold">Needs work</span>':'')+(S.attemptCount[i]>1?'<span class="text-[10px] bg-white/5 text-sf-300 px-2 py-0.5 rounded">'+S.attemptCount[i]+' attempts</span>':'')+'</div>'+dh+ah+'</div></div></div>';
     }).join('');
 }
@@ -1362,6 +1449,7 @@ function exportPrint(){
 }
 
 function restartSession(){
+    releaseMicStream();
     S.currentLine=0;S.userInput='';S.isProcessing=false;S.sessionStart=Date.now();
     S.lineScores={};S.lineDetails={};S.userResponses={};S.audioClips={};S.attemptCount={};S.hintShown={};S.presState=PS.HIDDEN;
     stopSpeaking();
@@ -1371,7 +1459,7 @@ function restartSession(){
     renderSession();
     if(S.mode==='practice'){var fl=S.lines[0];if(fl&&fl.role!==S.userRole)speak(fl.text,null,false)}
 }
-function newDialogue(){switchScreen('setup')}
+function newDialogue(){releaseMicStream();switchScreen('setup')}
 
 /* ═══════════════════════════════════════════════════════════════
    EVENT LISTENERS
@@ -1410,12 +1498,11 @@ document.addEventListener('DOMContentLoaded',function(){
     $('start-btn').onclick=startSession;
     $('back-btn').onclick=function(){
         stopSpeaking();
-        var wasRecording=S.isRecording;
         S.isRecording=false;
         stopSilenceDetection();
         try{if(S.recognition)S.recognition.stop()}catch(e){}
         stopMR();
-        if(wasRecording){}
+        releaseMicStream();
         switchScreen('setup');
     };
 
@@ -1426,6 +1513,7 @@ document.addEventListener('DOMContentLoaded',function(){
             stopSilenceDetection();
             try{if(S.recognition)S.recognition.stop()}catch(e){}
             stopMR();
+            releaseMicStream();
             switchScreen('setup');
         }
     };
