@@ -124,6 +124,19 @@
             white-space:nowrap;
         }
         .hint-reveal-btn:hover{background:rgba(200,149,108,.18);border-color:#C8956C}
+
+        /* Help modal */
+        .help-overlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:16px}
+        .help-overlay.open{display:flex}
+        .help-modal{background:#161619;border:1px solid rgba(200,149,108,.12);border-radius:20px;max-width:520px;width:100%;max-height:85vh;overflow-y:auto;padding:28px 28px 24px;box-shadow:0 24px 64px rgba(0,0,0,.5)}
+        .help-modal h2{font-size:20px;font-weight:700;color:#E8E6E1;margin-bottom:16px}
+        .help-modal h3{font-size:13px;font-weight:700;color:#E8B88A;text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px}
+        .help-modal p,.help-modal li{font-size:14px;color:#C8C6C1;line-height:1.6}
+        .help-modal ul{list-style:none;padding:0;margin:0}
+        .help-modal li{padding:4px 0 4px 20px;position:relative}
+        .help-modal li::before{content:'';position:absolute;left:0;top:12px;width:6px;height:6px;border-radius:50%;background:#C8956C}
+        .help-modal .close-help{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:10px;background:rgba(255,255,255,.05);border:none;color:#8A8885;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .2s ease}
+        .help-modal .close-help:hover{background:rgba(255,255,255,.1);color:#E8E6E1}
     </style>
 </head>
 <body class="min-h-screen">
@@ -276,6 +289,7 @@
             <div class="flex items-center gap-4 flex-shrink-0">
                 <div id="line-dots" class="hidden sm:flex items-center gap-1.5"></div>
                 <span id="progress-text" class="text-sm font-medium text-sf-200 tabular-nums">1 / 1</span>
+                <button id="help-btn" class="w-9 h-9 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors flex-shrink-0" aria-label="Help" title="How does this work?"><i class="fas fa-question text-sm text-sf-200"></i></button>
             </div>
         </header>
         <div class="progress-track flex-shrink-0"><div id="progress-fill" class="progress-fill" style="width:0%"></div></div>
@@ -348,7 +362,7 @@ var LANG={
     ar:{name:'Arabic',stt:'ar-SA',tts:'ar-SA',badge:'AR'}
 };
 
-var EXAMPLE="[Presenter]: Good morning everyone. Today I'll be presenting on the geography of the United States and how its land shaped the story of American independence.\n[Presenter]: The United States is the third largest country in the world by land area, stretching over three thousand miles from the Atlantic Ocean on the east to the Pacific Ocean on the west. In between, you'll find the vast Great Plains, the towering Rocky Mountains, and the fertile Mississippi River Valley.\n[Presenter]: Geography played a massive role in how the American colonies developed. The thirteen original colonies were clustered along the Atlantic coastline, with natural harbors that made trade and commerce possible. Cities like Boston, New York, and Philadelphia became centers of political activity because of their ports.\n[Presenter]: Now let's talk about how the colonies gained their independence. By the mid seventeen hundreds, the British Empire was heavily in debt from the French and Indian War. To raise money, Parliament passed a series of taxes on the colonies, including the Stamp Act of seventeen sixty-five and the Townshend Acts.\n[Presenter]: The colonists were furious. They argued that since they had no elected representatives in Parliament, these taxes were unconstitutional. This gave birth to the famous slogan 'No taxation without representation.' Protests erupted across all thirteen colonies.\n[Presenter]: Tensions reached a boiling point in seventeen seventy, when British soldiers fired into a crowd in Boston, an event that became known as the Boston Massacre. Three years later, protesters dumped three hundred and forty-two chests of British tea into Boston Harbor, the famous Boston Tea Party.\n[Presenter]: In response, King George the Third passed the Intolerable Acts, which essentially shut down Boston's port and stripped Massachusetts of its self-government. The colonies realized they needed to work together, so they formed the First Continental Congress in seventeen seventy-four.\n[Presenter]: On April nineteenth, seventeen seventy-five, the Revolutionary War began with the battles of Lexington and Concord. The famous 'shot heard round the world' was fired that day. The colonies were now at war with the most powerful military on Earth.\n[Presenter]: On July fourth, seventeen seventy-six, the Second Continental Congress adopted the Declaration of Independence. Written primarily by Thomas Jefferson, it declared that all men are created equal and have unalienable rights to life, liberty, and the pursuit of happiness.\n[Presenter]: Geography once again shaped the outcome of the war. The vast Atlantic Ocean meant Britain had to supply and reinforce its army from over three thousand miles away, while the colonists fought on their own land. The American knowledge of local terrain gave them a critical advantage.\n[Presenter]: After eight long years of war, the decisive victory came at the Battle of Yorktown in seventeen eighty-one, where combined American and French forces trapped the British army on a peninsula in Virginia. General Cornwallis surrendered, and the war was effectively over.\n[Presenter]: The Treaty of Paris was signed in seventeen eighty-three, officially recognizing the United States as an independent nation. The country's boundaries stretched from the Atlantic to the Mississippi River, and from the Great Lakes to Florida.\n[Presenter]: In conclusion, the geography of the United States, from its natural harbors that fostered trade and political organization, to its sheer distance from Britain that made the war sustainable, was fundamental to the founding of this nation. The land itself was a silent partner in the fight for freedom.\n[Presenter]: Thank you for listening. I'm happy to take any questions you might have.";
+var EXAMPLE="[Joe]: Alright everyone, settle in. Today we're doing a group presentation on US geography and the American Revolution. I'll start with the big picture, then Max will cover the buildup to war, and Paul will take us through the war itself.\n[Joe]: So, the United States is the third largest country in the world by land area. It stretches over three thousand miles from the Atlantic Ocean all the way to the Pacific. In between you've got the Great Plains, the Rocky Mountains, and the Mississippi River Valley.\n[Joe]: But here's what's really interesting: geography directly shaped how the colonies developed. The original thirteen colonies sat along the Atlantic coast, and their natural harbors made trade and shipping possible. That's why cities like Boston, New York, and Philadelphia became political hubs.\n[Joe]: So before I hand it over to Max, remember this: the layout of the land decided where people lived, where they traded, and eventually where they fought. Alright Max, take it away.\n[Max]: Thanks Joe. So by the mid seventeen hundreds, the British Empire was drowning in debt after the French and Indian War. Parliament's solution? Tax the colonies. They passed the Stamp Act in seventeen sixty-five and then the Townshend Acts shortly after.\n[Max]: The colonists were absolutely furious. Their argument was straightforward: no elected representation in Parliament meant no right to tax them. That's where the slogan 'No taxation without representation' came from, and protests spread across every single colony.\n[Paul]: And the situation only got worse from there. In seventeen seventy, British soldiers fired into a crowd in Boston, killing five people. That became known as the Boston Massacre. Then in seventeen seventy-three, protesters dumped three hundred and forty-two chests of British tea straight into the harbor, the Boston Tea Party.\n[Paul]: King George the Third responded with the Intolerable Acts, which shut down Boston's port and stripped Massachusetts of its self-government. The colonies realized they had to unite, so they formed the First Continental Congress in seventeen seventy-four.\n[Paul]: On April nineteenth, seventeen seventy-five, everything exploded. The Revolutionary War began at Lexington and Concord. The 'shot heard round the world' was fired that morning. Thirteen colonies were now going to war against the most powerful military on the planet.\n[Max]: That's right Paul. And it's worth noting that geography was a massive advantage for the colonists during the war. Britain had to supply its army from over three thousand miles across the Atlantic. Meanwhile the Americans were fighting on their own soil and knew every hill, forest, and river.\n[Paul]: Exactly. On July fourth, seventeen seventy-six, the Declaration of Independence was adopted. Thomas Jefferson wrote most of it, arguing that all men are created equal with unalienable rights to life, liberty, and the pursuit of happiness.\n[Paul]: The war dragged on for eight years. The turning point was Yorktown in seventeen eighty-one, where American and French forces trapped the British on a peninsula in Virginia. Cornwallis surrendered, and that was effectively the end.\n[Joe]: And the final result was the Treaty of Paris in seventeen eighty-three. The United States was officially recognized as an independent nation, with borders stretching from the Atlantic to the Mississippi, and from the Great Lakes down to Florida.\n[Joe]: So to wrap it all up: geography gave the colonies their economic power through those coastal harbors, and that same geography, the sheer distance from Britain, helped them win the war. The land literally built the nation. Thanks everyone, we'll take questions now.";
 
 /* ═══════════════════════════════════════════════════════════════
    PRESENTATION MODE STATES
@@ -1788,6 +1802,7 @@ document.addEventListener('DOMContentLoaded',function(){
     };
 
     $('start-btn').onclick=startSession;
+    $('help-btn').onclick=openHelp;
     $('back-btn').onclick=function(){
         stopSpeaking();
         S.isRecording=false;
@@ -1812,6 +1827,70 @@ document.addEventListener('DOMContentLoaded',function(){
 
     renderAllHintPills();
 });
+
+/* ── HELP MODAL ── */
+function openHelp(){
+    var el=document.getElementById('help-overlay');
+    if(!el){
+        el=document.createElement('div');
+        el.id='help-overlay';
+        el.className='help-overlay';
+        el.innerHTML='<div class="help-modal" style="position:relative">'
+            +'<button class="close-help" onclick="closeHelp()" aria-label="Close"><i class="fas fa-xmark"></i></button>'
+            +'<h2><i class="fas fa-circle-question mr-2 text-copper-400"></i>How SpeakFlow Works</h2>'
+            +'<p>SpeakFlow helps you practice dialogues and presentations using AI-powered speech evaluation. Here\'s how to use it:</p>'
+            +'<h3><i class="fas fa-gear mr-1.5"></i>Setup</h3>'
+            +'<ul>'
+            +'<li>Enter your <strong>GLM API key</strong> from z.ai</li>'
+            +'<li>Choose the <strong>language</strong> of your script</li>'
+            +'<li>Pick <strong>Practice</strong> or <strong>Presentation</strong> mode</li>'
+            +'<li>Paste your script in the text box or click <strong>Example</strong></li>'
+            +'<li>Use <strong>Auto-Detect</strong> to extract dialogue from messy text</li>'
+            +'<li>Select <strong>which role</strong> you want to play</li>'
+            +'</ul>'
+            +'<h3><i class="fas fa-microphone-lines mr-1.5"></i>Practice Mode</h3>'
+            +'<ul>'
+            +'<li>Other characters\' lines are read aloud to you automatically</li>'
+            +'<li>When it\'s your turn, <strong>speak your line</strong> or type it</li>'
+            +'<li>Click the mic to record, or type in the text box and press Send</li>'
+            +'<li>The AI evaluates your <strong>accuracy, grammar, and fluency</strong></li>'
+            +'<li>Click Next Line to continue through the dialogue</li>'
+            +'</ul>'
+            +'<h3><i class="fas fa-masks-theater mr-1.5"></i>Presentation Mode</h3>'
+            +'<ul>'
+            +'<li>Lines start <strong>hidden (blurred)</strong> so you can\'t read them</li>'
+            +'<li>When it\'s your turn, a <strong>hint</strong> is shown (first word or full text)</li>'
+            +'<li><strong>Recording starts automatically</strong> — just speak!</li>'
+            +'<li>After <strong>2 seconds of silence</strong>, it auto-stops and advances</li>'
+            +'<li>You can also tap the stop button to move on early</li>'
+            +'<li>At the end, you get a <strong>full report</strong> with scores for every line</li>'
+            +'</ul>'
+            +'<h3><i class="fas fa-chart-bar mr-1.5"></i>The Report</h3>'
+            +'<ul>'
+            +'<li>See your <strong>average score</strong> and per-line breakdown</li>'
+            +'<li><strong>Green</strong> = Excellent (80+), <strong>Amber</strong> = Good (50-79), <strong>Red</strong> = Needs Work</li>'
+            +'<li>Compare what you said vs. the expected line</li>'
+            +'<li>Get corrections, tips, and encouragement from the AI</li>'
+            +'<li>Export your report as JSON or print it</li>'
+            +'</ul>'
+            +'<h3><i class="fas fa-lightbulb mr-1.5"></i>Tips</h3>'
+            +'<ul>'
+            +'<li>Use <strong>Hint: Full</strong> if you\'re learning the lines for the first time</li>'
+            +'<li>Use <strong>Hint: Off</strong> to test yourself from memory</li>'
+            +'<li>Speak clearly and at a normal pace for best speech recognition</li>'
+            +'<li>Allow microphone access when prompted — it\'s only needed once per session</li>'
+            +'<li>Press <strong>Escape</strong> or the back arrow to exit at any time</li>'
+            +'</ul>'
+            +'</div>';
+        el.addEventListener('click',function(e){if(e.target===el)closeHelp()});
+        document.body.appendChild(el);
+    }
+    el.classList.add('open');
+}
+function closeHelp(){
+    var el=document.getElementById('help-overlay');
+    if(el)el.classList.remove('open');
+}
 </script>
 </body>
 </html>
