@@ -167,9 +167,9 @@
             <div class="glass rounded-2xl p-6 sm:p-8 space-y-6">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-sf-200 mb-2"><i class="fas fa-key text-copper-500 mr-1.5"></i>GLM API Key</label>
+                        <label class="block text-sm font-medium text-sf-200 mb-2"><i class="fas fa-key text-copper-500 mr-1.5"></i>API Key</label>
                         <div class="relative">
-                            <input id="api-key" type="password" placeholder="z.ai API key..." class="input-glow w-full bg-sf-800/60 border border-white/8 rounded-xl px-4 py-3 text-sm text-sf-50 placeholder-sf-300 outline-none transition-all pr-20" aria-label="GLM API Key" autocomplete="off">
+                            <input id="api-key" type="password" placeholder="Your AI provider API key..." class="input-glow w-full bg-sf-800/60 border border-white/8 rounded-xl px-4 py-3 text-sm text-sf-50 placeholder-sf-300 outline-none transition-all pr-20" aria-label="API Key" autocomplete="off">
                             <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                                 <button id="test-api-btn" onclick="testAPIConnection()" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors" title="Test API connection" aria-label="Test API"><i class="fas fa-plug text-xs text-sf-300"></i></button>
                                 <button onclick="toggleVis('api-key',this)" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"><i class="fas fa-eye text-xs text-sf-300"></i></button>
@@ -279,7 +279,7 @@
 
                 <button id="start-btn" disabled class="w-full py-3.5 rounded-xl font-display font-semibold text-base transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed bg-gradient-to-r from-amber-500 to-yellow-500 text-sf-900 hover:from-amber-400 hover:to-yellow-400 hover:shadow-lg hover:shadow-amber-500/20">Begin Session</button>
             </div>
-            <p class="text-center text-sf-300 text-xs mt-6">GLM via z.ai &middot; Browser TTS &middot; Optional ElevenLabs &middot; Keys stay local</p>
+            <p class="text-center text-sf-300 text-xs mt-6">OpenAI-Compatible API &middot; Browser TTS &middot; Optional ElevenLabs &middot; Keys stay local</p>
         </div>
     </div>
 
@@ -347,11 +347,40 @@
 
 <script>
 /* ═══════════════════════════════════════════════════════════════
-   CONFIG
+   CONFIG — Change these to match your provider
 ═══════════════════════════════════════════════════════════════ */
-var MODEL='glm-5-turbo';
-/* On Vercel: calls /api/chat which proxies to api.z.ai server-side (no CORS!) */
-var API_PROXY='/api/chat';
+/*
+   ┌──────────────────────────────────────────────────────────┐
+   │  MODEL — Change ONE word to switch AI providers:        │
+   │                                                          │
+   │  GLM (z.ai):   glm-4-air, glm-4-air-x, glm-4-plus,     │
+   │                 glm-4-flash, glm-4-long, glm-3-turbo     │
+   │  OpenAI:       gpt-4o, gpt-4o-mini, gpt-3.5-turbo      │
+   │  Anthropic:    claude-3-sonnet (via compatible proxy)   │
+   │  Groq:         llama-3.3-70b-versatile, mixtral-8x7b   │
+   │  DeepSeek:     deepseek-chat, deepseek-reasoner         │
+   └──────────────────────────────────────────────────────────┘
+*/
+var MODEL = 'glm-4-air';
+
+/*
+   MODEL_FALLBACK — If MODEL fails with "Unknown Model", the app
+   automatically tries each model in this list until one works.
+   The working model is cached for the rest of the session.
+*/
+var MODEL_FALLBACK = [
+    'glm-4-air', 'glm-4-air-x', 'glm-4-plus', 'glm-4-flash',
+    'glm-4-long', 'glm-4v', 'glm-3-turbo'
+];
+var _workingModel = null; /* cached once a working model is found */
+
+/*
+   API_PROXY — URL of your server-side proxy.
+   Default: '/api/chat' (Vercel serverless function in /api/ folder)
+   The proxy forwards requests to your AI provider's API endpoint.
+   Update api/chat.js if you switch providers.
+*/
+var API_PROXY = '/api/chat';
 
 var LANG={
     en:{name:'English',stt:'en-US',tts:'en-US',badge:'EN'},
@@ -529,17 +558,26 @@ function testAPIConnection(){
     btn.disabled=true;
 
     var c=new AbortController(),t=setTimeout(function(){c.abort()},30000);
+    /* Standard OpenAI-compatible test call */
     fetch(API_PROXY,{
         method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({apiKey:key,model:MODEL,messages:[{role:'user',content:'Say hello in one word.'}],max_tokens:20}),
+        headers:{
+            'Content-Type':'application/json',
+            'Authorization':'Bearer '+key
+        },
+        body:JSON.stringify({
+            model:_workingModel||MODEL,
+            messages:[{role:'user',content:'Say hello in one word.'}],
+            max_tokens:20
+        }),
         signal:c.signal
     }).then(function(r){
         clearTimeout(t);
         if(!r.ok)return r.text().then(function(b){
             if(b.trim().charAt(0)==='<')throw new Error('api/chat.js not found — is it deployed in the /api/ folder on Vercel?');
-            try{var err=JSON.parse(b);throw new Error(err.error)}
-            catch(e){if(e.message&&e.message.indexOf('api/chat')!==-1)throw e;throw new Error('Error '+r.status+': '+b.slice(0,100))}
+            var errObj=extractJSON(b);
+            if(errObj)throw new Error(errObj.error||errObj.message||('Error '+r.status));
+            throw new Error('Error '+r.status+': '+b.slice(0,100));
         });
         return r.text();
     }).then(function(resp){
@@ -559,7 +597,7 @@ function testAPIConnection(){
 function autoDetectScript(){
     var text=$('script-input').value.trim();
     if(!text){toast('Paste text first.','info');return}
-    if(!S.apiKey){toast('Enter GLM API key first.','info');return}
+    if(!S.apiKey){toast('Enter your API key first.','info');return}
     $('auto-detect-btn').disabled=true;
     $('parse-status').innerHTML='<span class="text-copper-400"><i class="fas fa-spinner fa-spin mr-1"></i>Analyzing with AI...</span>';
     /* Use high max_tokens — long scripts can have 30+ dialogue lines */
@@ -898,42 +936,88 @@ function stopAllRec(){
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   GLM API
+   JSON EXTRACTOR — Sanitizes AI responses before parsing
+   Handles: markdown code blocks, leading text, nested JSON, etc.
 ═══════════════════════════════════════════════════════════════ */
-/* ── callGLM: send to /api/chat Vercel serverless function (NO CORS!) ── */
+function extractJSON(raw){
+    if(!raw||typeof raw!=='string')return null;
+    var text=raw.trim();
+    /* 1) Try direct parse */
+    try{return JSON.parse(text)}catch(e){}
+    /* 2) Strip ```json ... ``` code blocks */
+    var cb=text.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if(cb)try{return JSON.parse(cb[1].trim())}catch(e){}
+    /* 3) Strip ``` ... ``` (no language tag) */
+    var cb2=text.match(/```([\s\S]*?)```/);
+    if(cb2)try{return JSON.parse(cb2[1].trim())}catch(e){}
+    /* 4) Find outermost { ... } or [ ... ] */
+    var brace=text.match(/\{[\s\S]*\}/);
+    if(brace)try{return JSON.parse(brace[0])}catch(e){}
+    var bracket=text.match(/\[[\s\S]*\]/);
+    if(bracket)try{return JSON.parse(bracket[0])}catch(e){}
+    /* 5) Strip leading conversational text ("Here is the evaluation:", etc.)
+       and try to find JSON after the first { */
+    var firstBrace=text.indexOf('{');
+    if(firstBrace>0){
+        var substr=text.substring(firstBrace);
+        var subMatch=substr.match(/\{[\s\S]*\}/);
+        if(subMatch)try{return JSON.parse(subMatch[0])}catch(e){}
+    }
+    return null;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   callGLM — Standard OpenAI-compatible API call
+   - Uses Authorization: Bearer header (universal format)
+   - Auto-retries with MODEL_FALLBACK on "Unknown Model" error
+   - Caches the working model for the session
+═══════════════════════════════════════════════════════════════ */
 function callGLM(msgs,maxTok){
     var tk=maxTok||800;
-    var c=new AbortController(),t=setTimeout(function(){c.abort()},60000);
-    return fetch(API_PROXY,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-            apiKey:S.apiKey,
-            model:MODEL,
-            messages:msgs,
-            temperature:0.3,
-            max_tokens:tk
-        }),
-        signal:c.signal
-    }).then(function(r){
-        clearTimeout(t);
-        if(!r.ok)return r.text().then(function(b){
-            /* Check if response is HTML (not our JSON error) = serverless func not found */
-            if(b.trim().charAt(0)==='<'){
-                throw new Error('Serverless function not found. Make sure api/chat.js is deployed on Vercel in the /api/ folder at your project root.');
+    function tryModel(modelList){
+        var model=modelList.shift();
+        if(!model)return Promise.reject(new Error('No working model found for your API key.'));
+        var c=new AbortController(),t=setTimeout(function(){c.abort()},60000);
+        return fetch(API_PROXY,{
+            method:'POST',
+            headers:{
+                'Content-Type':'application/json',
+                'Authorization':'Bearer '+S.apiKey
+            },
+            body:JSON.stringify({
+                model:model,
+                messages:msgs,
+                temperature:0.3,
+                max_tokens:tk
+            }),
+            signal:c.signal
+        }).then(function(r){
+            clearTimeout(t);
+            if(!r.ok)return r.text().then(function(b){
+                if(b.trim().charAt(0)==='<')throw new Error('api/chat.js not found — deploy it in /api/ folder on Vercel.');
+                var errObj=extractJSON(b);
+                if(errObj)throw new Error(errObj.error||errObj.message||('API error '+r.status));
+                throw new Error('API error ('+r.status+'): '+b.slice(0,200));
+            });
+            return r.text();
+        }).then(function(raw){
+            if(!raw)throw new Error('Empty response from API.');
+            /* Remember the working model */
+            _workingModel=model;
+            return raw;
+        }).catch(function(err){
+            clearTimeout(t);
+            /* If "Unknown Model", try the next one in the list */
+            if(err.message&&err.message.indexOf('Unknown Model')!==-1&&modelList.length){
+                console.warn('Model "'+model+'" not available, trying next...');
+                return tryModel(modelList);
             }
-            try{var err=JSON.parse(b);throw new Error(err.error||('API error '+r.status))}
-            catch(e){
-                if(e.message&&e.message.indexOf('Serverless')!==-1)throw e;
-                if(e.message&&e.message.indexOf('API error')===-1)throw new Error('API error ('+r.status+'): '+b.slice(0,200));
-                throw e;
-            }
+            throw err;
         });
-        return r.text();
-    }).then(function(raw){
-        if(!raw)throw new Error('Empty response from API.');
-        return raw;
-    });
+    }
+    /* If we already found a working model, use it directly */
+    var models=_workingModel?[_workingModel]:MODEL_FALLBACK.slice();
+    return tryModel(models);
 }
 
 function evalResponse(ctx,expected,response,isPres){
@@ -948,10 +1032,7 @@ function evalResponse(ctx,expected,response,isPres){
         :'Context:\n'+cs+'\n\nExpected for "'+S.userRole+'": "'+expected+'"\nStudent said: "'+response+'"\n\nReturn JSON:\n{"score":<0-100>,"accuracy":"<1 sentence>","grammar":"<1 sentence>","fluency":"<1 sentence>","corrections":["..."],"encouragement":"<positive>","suggestions":["..."]}';
 
     return callGLM([{role:'system',content:sysPrompt},{role:'user',content:userPrompt}]).then(function(raw){
-        var p;
-        try{p=JSON.parse(raw)}catch(e){}
-        if(!p){var m=raw.match(/```(?:json)?\s*([\s\S]*?)```/);if(m)try{p=JSON.parse(m[1].trim())}catch(e){}}
-        if(!p){var j=raw.match(/\{[\s\S]*\}/);if(j)try{p=JSON.parse(j[0])}catch(e){}}
+        var p=extractJSON(raw);
         if(p){
             /* Use local word diff as a sanity check — if AI is too harsh,
                blend with the word-level accuracy for a fairer score */
@@ -1792,7 +1873,7 @@ function showReport(){
 function exportJSON(){
     var scores=[],k;
     for(k in S.lineScores){if(S.lineScores[k]!=null)scores.push(S.lineScores[k])}
-    var data={session:{language:S.language,mode:S.mode,hintLevel:S.hintLevel,duration:Math.round((Date.now()-S.sessionStart)/1000),timestamp:new Date().toISOString(),model:MODEL},overall:{avgScore:scores.length?Math.round(scores.reduce(function(a,b){return a+b},0)/scores.length):0,bestScore:scores.length?Math.max.apply(null,scores):0,linesEvaluated:scores.length,totalLines:S.lines.length},lines:S.lines.map(function(l,i){return{index:i,role:l.role,isUser:l.role===S.userRole,expectedText:l.text,userResponse:S.userResponses[i]||null,score:S.lineScores[i]!=null?S.lineScores[i]:null,feedback:S.lineDetails[i]||null,attempts:S.attemptCount[i]||0,hasAudio:!!S.audioClips[i]}})};
+    var data={session:{language:S.language,mode:S.mode,hintLevel:S.hintLevel,duration:Math.round((Date.now()-S.sessionStart)/1000),timestamp:new Date().toISOString(),model:_workingModel||MODEL},overall:{avgScore:scores.length?Math.round(scores.reduce(function(a,b){return a+b},0)/scores.length):0,bestScore:scores.length?Math.max.apply(null,scores):0,linesEvaluated:scores.length,totalLines:S.lines.length},lines:S.lines.map(function(l,i){return{index:i,role:l.role,isUser:l.role===S.userRole,expectedText:l.text,userResponse:S.userResponses[i]||null,score:S.lineScores[i]!=null?S.lineScores[i]:null,feedback:S.lineDetails[i]||null,attempts:S.attemptCount[i]||0,hasAudio:!!S.audioClips[i]}})};
     var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
     var u=URL.createObjectURL(blob);
     var a=document.createElement('a');a.href=u;a.download='speakflow-report-'+Date.now()+'.json';a.click();URL.revokeObjectURL(u);
@@ -1948,7 +2029,7 @@ function openHelp(){
             +'<p>SpeakFlow helps you practice dialogues and presentations using AI-powered speech evaluation. Here\'s how to use it:</p>'
             +'<h3><i class="fas fa-gear mr-1.5"></i>Setup</h3>'
             +'<ul>'
-            +'<li>Enter your <strong>GLM API key</strong> from z.ai</li>'
+            +'<li>Enter your <strong>API key</strong> (OpenAI-compatible provider)</li>'
             +'<li>Choose the <strong>language</strong> of your script</li>'
             +'<li>Pick <strong>Practice</strong> or <strong>Presentation</strong> mode</li>'
             +'<li>Paste your script in the text box or click <strong>Example</strong></li>'
