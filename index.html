@@ -774,7 +774,13 @@ function finishRecording(){
     S.userResponses[S.currentLine]=S.userInput.trim()||null;
 
     if(S.mode==='presentation'){
-        handlePresEval();
+        /* Auto-flow: save response, advance to next line */
+        S.attemptCount[S.currentLine]=(S.attemptCount[S.currentLine]||0)+1;
+        if(S.currentLine>=S.lines.length-1){
+            finishPresentation();
+        }else{
+            advanceLine();
+        }
     }else{
         /* Practice mode */
         if(S.userInput.trim()){
@@ -795,7 +801,13 @@ function stopAllRec(){
     S.userResponses[S.currentLine]=S.userInput.trim()||null;
 
     if(S.mode==='presentation'){
-        handlePresEval();
+        /* Auto-flow: save response, advance to next line */
+        S.attemptCount[S.currentLine]=(S.attemptCount[S.currentLine]||0)+1;
+        if(S.currentLine>=S.lines.length-1){
+            finishPresentation();
+        }else{
+            advanceLine();
+        }
     }else{
         if(S.userInput.trim()){handleSubmission()}
         else renderIA();
@@ -958,14 +970,159 @@ function startSession(){
     switchScreen('session');
     renderSession();
 
-    /* In presentation mode — DO NOT auto-speak or auto-advance. User controls everything. */
-    /* In practice mode — speak other characters' lines automatically. */
     if(S.mode==='practice'){
         var firstLine=S.lines[0];
         if(firstLine&&firstLine.role!==S.userRole){
             speak(firstLine.text,null,false);
         }
+    }else{
+        /* Presentation mode — auto-flow starts after a brief pause */
+        setTimeout(presentationAutoFlow,600);
     }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PRESENTATION AUTO-FLOW
+   Drives continuous flow: NPC lines auto-speak, user lines auto-record.
+   At the very end, batch-evaluates everything and shows the report.
+═══════════════════════════════════════════════════════════════ */
+function presentationAutoFlow(){
+    if(S.screen!=='session'||S.mode!=='presentation')return;
+
+    var line=S.lines[S.currentLine];
+    if(!line){finishPresentation();return}
+
+    var isUser=line.role===S.userRole;
+
+    if(!isUser){
+        /* ── NPC line: auto-speak, then auto-advance ── */
+        S.presState=PS.HIDDEN;
+        renderSession();
+
+        speak(line.text,function(){
+            if(S.screen!=='session'||S.mode!=='presentation')return;
+            if(S.currentLine>=S.lines.length-1){
+                finishPresentation();
+            }else{
+                advanceLine();
+            }
+        },false);
+    }else{
+        /* ── User line: show hint, then auto-start recording ── */
+        S.presState=PS.HIDDEN;
+        renderSession();
+
+        /* Brief pause so user sees "Your Turn" before recording starts */
+        setTimeout(function(){
+            if(S.screen!=='session'||S.mode!=='presentation')return;
+
+            /* Auto-reveal hint based on hint level */
+            if(S.hintLevel!=='none'){
+                S.hintShown[S.currentLine]=true;
+                S.presState=PS.HINT;
+                renderContext();
+                renderIA();
+            }else{
+                S.presState=PS.HINT;
+                renderIA();
+            }
+
+            /* Start recording after another brief pause */
+            setTimeout(function(){
+                if(S.screen!=='session'||S.mode!=='presentation'||S.isRecording)return;
+                startRec();
+            },600);
+        },500);
+    }
+}
+
+/* ── Called when all lines are done — batch evaluates then shows report ── */
+function finishPresentation(){
+    S.screen='report_pending';
+    releaseMicStream();
+
+    /* Switch to report screen and show loading */
+    switchScreen('complete');
+    $('st-lines').textContent=S.lines.length;
+    $('st-eval').innerHTML='<div class="spinner" style="width:16px;height:16px;display:inline-block;vertical-align:middle;border-width:2px"></div>';
+    $('st-best').textContent='...';
+    var elapsed=Math.round((Date.now()-S.sessionStart)/1000);
+    var ts=elapsed>=60?Math.floor(elapsed/60)+'m '+elapsed%60+'s':elapsed+'s';
+    $('st-time').textContent=ts;
+    $('final-score').textContent='...';
+    $('report-lines').innerHTML='<div class="flex items-center justify-center gap-3 py-12"><div class="spinner" style="width:32px;height:32px;border-width:3px"></div><span class="text-sf-300">Evaluating your performance...</span></div>';
+
+    batchEvaluatePresentation();
+}
+
+function batchEvaluatePresentation(){
+    /* Collect all user lines that have responses */
+    var userLines=[];
+    S.lines.forEach(function(line,i){
+        if(line.role===S.userRole&&S.userResponses[i]){
+            userLines.push({index:i,line:line,response:S.userResponses[i]});
+        }
+    });
+
+    if(userLines.length===0){renderReportUI();return}
+
+    var evalIndex=0;
+    function evalNext(){
+        if(evalIndex>=userLines.length){renderReportUI();return}
+        var item=userLines[evalIndex];
+        var ctx=S.lines.slice(Math.max(0,item.index-4),item.index);
+
+        evalResponse(ctx,item.line.text,item.response,true)
+            .then(function(ev){
+                S.lineScores[item.index]=ev.score;
+                S.lineDetails[item.index]=ev;
+                S.attemptCount[item.index]=1;
+                evalIndex++;
+                evalNext();
+            })
+            .catch(function(){
+                evalIndex++;
+                evalNext();
+            });
+    }
+    evalNext();
+}
+
+/* ── Render the actual report (called after batch eval finishes) ── */
+function renderReportUI(){
+    S.screen='complete';
+    var scores=[],k;
+    for(k in S.lineScores){if(S.lineScores[k]!=null)scores.push(S.lineScores[k])}
+    var avg=scores.length?Math.round(scores.reduce(function(a,b){return a+b},0)/scores.length):0;
+    var best=scores.length?Math.max.apply(null,scores):0;
+
+    $('st-eval').textContent=scores.length;
+    $('st-best').textContent=best;
+    $('final-score').textContent=avg;
+
+    var C=326.73,off=C*(1-avg/100),ring=$('final-ring');
+    ring.style.strokeDashoffset=C;
+    requestAnimationFrame(function(){requestAnimationFrame(function(){ring.style.strokeDashoffset=off})});
+
+    var rc=$('report-lines');
+    rc.innerHTML=S.lines.map(function(line,i){
+        var isU=line.role===S.userRole,sc=S.lineScores[i],det=S.lineDetails[i],resp=S.userResponses[i],clip=S.audioClips[i],isLow=sc!=null&&sc<50;
+        if(!isU)return '<div class="report-card bg-white/2 rounded-xl px-4 py-3 border border-white/5 flex items-start gap-3"><span class="text-xs text-sf-300 font-mono w-6 text-right flex-shrink-0 pt-0.5">'+(i+1)+'</span><div class="flex-1 min-w-0"><span class="text-xs text-sage-400 font-semibold">'+esc(line.role)+'</span><p class="text-sm text-sf-200 mt-0.5 truncate">'+esc(line.text)+'</p></div><span class="text-[10px] text-sf-300 flex-shrink-0 pt-1">other</span></div>';
+        var sb=sc!=null?'<span class="px-2.5 py-1 rounded-lg text-sm font-bold '+(sc>=80?'bg-sage-500/15 text-sage-400':sc>=50?'bg-copper-500/15 text-copper-400':'bg-coral-500/15 text-coral-400')+'">'+sc+'</span>':'<span class="px-2.5 py-1 rounded-lg text-sm text-sf-300 bg-white/3">No speech</span>';
+        var dh='';
+        if(det){
+            dh='<div class="mt-2 space-y-1.5"><div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5"><div class="bg-white/3 rounded-lg p-2.5"><div class="text-[10px] text-sf-300 font-semibold uppercase mb-0.5">Expected</div><p class="text-xs text-sf-100">'+esc(line.text)+'</p></div><div class="bg-white/3 rounded-lg p-2.5"><div class="text-[10px] text-sf-300 font-semibold uppercase mb-0.5">You Said</div><p class="text-xs '+(isLow?'text-coral-400':'text-sf-100')+'">'+(resp?esc(resp):'<span class="text-sf-300 italic">No response</span>')+'</p></div></div>';
+            if(det.correct_words!=null){var iy=det.correct_words.toLowerCase().indexOf('yes')!==-1;dh+='<div class="text-[10px] bg-white/2 rounded px-2 py-1.5"><span class="text-sf-300">Correct: </span><span class="check-badge '+(iy?'check-yes':'check-no')+' text-[11px]"><i class="fas '+(iy?'fa-check':'fa-xmark')+'"></i>'+esc(det.correct_words)+'</span></div>'}
+            if(det.encouragement)dh+='<p class="text-xs text-sage-400 italic">'+esc(det.encouragement)+'</p>';
+            if(det.corrections&&det.corrections.length){dh+='<div class="text-xs text-coral-400">';det.corrections.forEach(function(c){dh+='<div><i class="fas fa-xmark mr-1" style="font-size:10px"></i>'+esc(c)+'</div>'});dh+='</div>'}
+            if(det.suggestions&&det.suggestions.length){dh+='<div class="text-xs text-copper-400">';det.suggestions.forEach(function(sg){dh+='<div><i class="fas fa-lightbulb mr-1" style="font-size:10px"></i>'+esc(sg)+'</div>'});dh+='</div>'}
+            dh+='</div>';
+        }else if(resp){
+            dh='<div class="mt-2"><div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5"><div class="bg-white/3 rounded-lg p-2.5"><div class="text-[10px] text-sf-300 font-semibold uppercase mb-0.5">Expected</div><p class="text-xs text-sf-100">'+esc(line.text)+'</p></div><div class="bg-white/3 rounded-lg p-2.5"><div class="text-[10px] text-sf-300 font-semibold uppercase mb-0.5">You Said</div><p class="text-xs text-sf-100">'+esc(resp)+'</p></div></div></div>';
+        }
+        var ah='';if(clip){var clipUrl=URL.createObjectURL(clip);_reportBlobURLs.push(clipUrl);ah='<div class="mt-2"><audio controls src="'+clipUrl+'" class="w-full h-8"></audio></div>'}
+        return '<div class="report-card '+(isLow?'low':'')+' bg-white/2 rounded-xl px-4 py-3 border '+(isLow?'border-coral-500/25':'border-white/5')+'"><div class="flex items-start gap-3"><span class="text-xs '+(isLow?'text-coral-400':'text-sf-300')+' font-mono w-6 text-right flex-shrink-0 pt-0.5">'+(i+1)+'</span><div class="flex-1 min-w-0"><div class="flex items-center gap-2 flex-wrap"><span class="text-xs '+(isLow?'text-coral-400':'text-copper-400')+' font-semibold">'+esc(line.role)+'</span>'+sb+(isLow?'<span class="text-[10px] bg-coral-500/15 text-coral-400 px-2 py-0.5 rounded font-semibold">Needs work</span>':'')+'</div>'+dh+ah+'</div></div></div>';
+    }).join('');
 }
 
 function renderSession(){renderProgress();renderContext();renderIA()}
@@ -1379,7 +1536,10 @@ function showPracticeEval(ev){
 ═══════════════════════════════════════════════════════════════ */
 function advanceLine(){
     stopSpeaking();
-    if(S.currentLine>=S.lines.length-1){showReport();return}
+    if(S.currentLine>=S.lines.length-1){
+        if(S.mode==='presentation'){finishPresentation();return}
+        showReport();return;
+    }
     S.currentLine++;
     S.userInput='';
     S.isProcessing=false;
@@ -1392,6 +1552,11 @@ function advanceLine(){
         if(nextLine&&nextLine.role!==S.userRole){
             speak(nextLine.text,null,false);
         }
+    }
+
+    /* Presentation mode: continue the auto-flow */
+    if(S.mode==='presentation'){
+        setTimeout(presentationAutoFlow,400);
     }
 }
 
