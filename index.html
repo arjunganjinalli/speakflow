@@ -137,6 +137,14 @@
         .help-modal li::before{content:'';position:absolute;left:0;top:12px;width:6px;height:6px;border-radius:50%;background:#C8956C}
         .help-modal .close-help{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:10px;background:rgba(255,255,255,.05);border:none;color:#8A8885;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .2s ease}
         .help-modal .close-help:hover{background:rgba(255,255,255,.1);color:#E8E6E1}
+
+        /* Word diff in report */
+        .wd-ok{color:#7EC9A0}
+        .wd-miss{color:#E89590;text-decoration:underline wavy #D4736E;text-underline-offset:3px}
+        .wd-section{background:rgba(255,255,255,.02);border-radius:8px;padding:8px 12px;border:1px solid rgba(255,255,255,.04)}
+        .wd-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#8A8885;margin-bottom:4px}
+        .wd-words{font-size:13px;line-height:1.8;word-wrap:break-word}
+        .wd-pct{font-size:11px;font-weight:700;margin-left:6px}
     </style>
 </head>
 <body class="min-h-screen">
@@ -1198,6 +1206,8 @@ function renderReportUI(){
         }else if(resp){
             dh='<div class="mt-2"><div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5"><div class="bg-white/3 rounded-lg p-2.5"><div class="text-[10px] text-sf-300 font-semibold uppercase mb-0.5">Expected</div><p class="text-xs text-sf-100">'+esc(line.text)+'</p></div><div class="bg-white/3 rounded-lg p-2.5"><div class="text-[10px] text-sf-300 font-semibold uppercase mb-0.5">You Said</div><p class="text-xs text-sf-100">'+esc(resp)+'</p></div></div></div>';
         }
+        /* Word-level diff: show green/red words */
+        if(resp)dh+=renderWordDiffHTML(line.text,resp);
         var ah='';if(clip){var clipUrl=URL.createObjectURL(clip);_reportBlobURLs.push(clipUrl);ah='<div class="mt-2"><audio controls src="'+clipUrl+'" class="w-full h-8"></audio></div>'}
         var gradeLabel=sc!=null?(sc>=80?'<span class="text-[10px] bg-sage-500/15 text-sage-400 px-2 py-0.5 rounded font-semibold">Excellent</span>':sc>=50?'<span class="text-[10px] bg-copper-500/15 text-copper-400 px-2 py-0.5 rounded font-semibold">Good</span>':'<span class="text-[10px] bg-coral-500/15 text-coral-400 px-2 py-0.5 rounded font-semibold">Needs Work</span>'):(resp?'<span class="text-[10px] bg-white/5 text-sf-300 px-2 py-0.5 rounded font-semibold">No eval</span>':'');
         return '<div class="report-card '+(isLow?'low':'')+' bg-white/2 rounded-xl px-4 py-3 border '+(isLow?'border-coral-500/25':'border-white/5')+'"><div class="flex items-start gap-3"><span class="text-xs '+(isLow?'text-coral-400':'text-sf-300')+' font-mono w-6 text-right flex-shrink-0 pt-0.5">'+(i+1)+'</span><div class="flex-1 min-w-0"><div class="flex items-center gap-2 flex-wrap"><span class="text-xs '+(isLow?'text-coral-400':'text-copper-400')+' font-semibold">'+esc(line.role)+'</span>'+sb+gradeLabel+'</div>'+dh+ah+'</div></div></div>';
@@ -1727,6 +1737,8 @@ function showReport(){
             if(det.corrections&&det.corrections.length){dh+='<div class="text-xs text-coral-400">';det.corrections.forEach(function(c){dh+='<div><i class="fas fa-xmark mr-1" style="font-size:10px"></i>'+esc(c)+'</div>'});dh+='</div>'}
             dh+='</div>';
         }
+        /* Word-level diff: show green/red words */
+        if(resp)dh+=renderWordDiffHTML(line.text,resp);
         var ah='';if(clip){var clipUrl=URL.createObjectURL(clip);_reportBlobURLs.push(clipUrl);ah='<div class="mt-2"><audio controls src="'+clipUrl+'" class="w-full h-8"></audio></div>';}
         var gradeLabel=sc!=null?(sc>=80?'<span class="text-[10px] bg-sage-500/15 text-sage-400 px-2 py-0.5 rounded font-semibold">Excellent</span>':sc>=50?'<span class="text-[10px] bg-copper-500/15 text-copper-400 px-2 py-0.5 rounded font-semibold">Good</span>':'<span class="text-[10px] bg-coral-500/15 text-coral-400 px-2 py-0.5 rounded font-semibold">Needs Work</span>'):'';
         return '<div class="report-card '+(isLow?'low':'')+' bg-white/2 rounded-xl px-4 py-3 border '+(isLow?'border-coral-500/25':'border-white/5')+'"><div class="flex items-start gap-3"><span class="text-xs '+(isLow?'text-coral-400':'text-sf-300')+' font-mono w-6 text-right flex-shrink-0 pt-0.5">'+(i+1)+'</span><div class="flex-1 min-w-0"><div class="flex items-center gap-2 flex-wrap"><span class="text-xs '+(isLow?'text-coral-400':'text-copper-400')+' font-semibold">'+esc(line.role)+'</span>'+sb+gradeLabel+(S.attemptCount[i]>1?'<span class="text-[10px] bg-white/5 text-sf-300 px-2 py-0.5 rounded">'+S.attemptCount[i]+' attempts</span>':'')+'</div>'+dh+ah+'</div></div></div>';
@@ -1766,6 +1778,57 @@ function restartSession(){
     if(S.mode==='practice'){var fl=S.lines[0];if(fl&&fl.role!==S.userRole)speak(fl.text,null,false)}
 }
 function newDialogue(){releaseMicStream();switchScreen('setup')}
+
+/* ═══════════════════════════════════════════════════════════════
+   WORD-LEVEL DIFF
+   Compare expected vs spoken word-by-word, ignoring punctuation.
+   Uses 3-pass matching: exact position, exact anywhere, fuzzy (Levenshtein).
+═══════════════════════════════════════════════════════════════ */
+function levenshtein(a,b){
+    if(a===b)return 0;if(!a.length)return b.length;if(!b.length)return a.length;
+    var m=[];for(var i=0;i<=b.length;i++)m[i]=[i];
+    for(var j=0;j<=a.length;j++)m[0][j]=j;
+    for(var i=1;i<=b.length;i++)for(var j=1;j<=a.length;j++)
+        m[i][j]=b[i-1]===a[j-1]?m[i-1][j-1]:Math.min(m[i-1][j-1]+1,m[i][j-1]+1,m[i-1][j]+1);
+    return m[b.length][a.length];
+}
+function wordDiff(expected,actual){
+    /* Strip punctuation, normalize whitespace, lowercase */
+    var clean=function(s){return s.replace(/[.,;:!?"'()\[\]{}\-–—…\u00A0]/g,' ').replace(/\s+/g,' ').trim().toLowerCase()};
+    var expW=clean(expected).split(' ').filter(function(w){return w.length>0});
+    var actW=clean(actual).split(' ').filter(function(w){return w.length>0});
+    if(!expW.length)return{html:'',pct:0,correct:0,total:0};
+    if(!actW.length)return{html:'<span class="wd-miss">'+esc(expected)+'</span>',pct:0,correct:0,total:expW.length};
+    /* Pass 1: exact match in same position */
+    var matched=new Array(expW.length).fill(false);
+    var used=new Array(actW.length).fill(false);
+    for(var i=0;i<Math.min(expW.length,actW.length);i++){
+        if(expW[i]===actW[i]){matched[i]=true;used[i]=true}
+    }
+    /* Pass 2: exact match anywhere else */
+    for(var i=0;i<expW.length;i++){if(matched[i])continue;for(var j=0;j<actW.length;j++){if(!used[j]&&expW[i]===actW[j]){matched[i]=true;used[j]=true;break}}}
+    /* Pass 3: fuzzy match (Levenshtein distance ≤ threshold) */
+    for(var i=0;i<expW.length;i++){if(matched[i])continue;
+        var thr=Math.max(1,Math.floor(Math.min(expW[i].length,4)/3));
+        for(var j=0;j<actW.length;j++){if(!used[j]&&levenshtein(expW[i],actW[j])<=thr){matched[i]=true;used[j]=true;break}}
+    }
+    /* Build colored HTML */
+    var html='',correct=0;
+    for(var i=0;i<expW.length;i++){
+        if(matched[i]){html+='<span class="wd-ok">'+esc(expW[i])+'</span> ';correct++}
+        else html+='<span class="wd-miss">'+esc(expW[i])+'</span> ';
+    }
+    return{html:html,pct:Math.round(correct/expW.length*100),correct:correct,total:expW.length};
+}
+function renderWordDiffHTML(expected,actual){
+    if(!actual)return'';
+    var wd=wordDiff(expected,actual);
+    var pctColor=wd.pct>=80?'text-sage-400':wd.pct>=50?'text-copper-400':'text-coral-400';
+    return '<div class="wd-section mt-2">'
+        +'<div class="wd-label"><i class="fas fa-spell-check mr-1"></i>Word Match: <span class="'+pctColor+'">'+wd.pct+'%</span> <span class="text-sf-300">('+wd.correct+'/'+wd.total+')</span></div>'
+        +'<div class="wd-words">'+wd.html+'</div>'
+        +'</div>';
+}
 
 /* ═══════════════════════════════════════════════════════════════
    EVENT LISTENERS
