@@ -350,7 +350,8 @@
    CONFIG
 ═══════════════════════════════════════════════════════════════ */
 var MODEL='glm-4-flash';
-var API_URL='https://api.z.ai/v1/chat/completions';
+/* On Vercel: calls /api/chat which proxies to api.z.ai server-side (no CORS!) */
+var API_PROXY='/api/chat';
 
 var LANG={
     en:{name:'English',stt:'en-US',tts:'en-US',badge:'EN'},
@@ -516,7 +517,7 @@ function parseScript(text){
 
 /* ═══════════════════════════════════════════════════════════════
    TEST API CONNECTION
-   Tries direct + each CORS proxy, reports which one works.
+   Quick test: sends a tiny request to /api/chat to verify it works.
 ═══════════════════════════════════════════════════════════════ */
 function testAPIConnection(){
     var key=S.apiKey||$('api-key').value.trim();
@@ -527,41 +528,32 @@ function testAPIConnection(){
     btn.innerHTML='<i class="fas fa-spinner fa-spin text-xs text-copper-400"></i>';
     btn.disabled=true;
 
-    var endpoints=[
-        {label:'Direct',url:API_URL},
-        {label:'corsproxy.io',url:'https://corsproxy.io/?url='+encodeURIComponent(API_URL)},
-        {label:'cors.sh',url:'https://cors.sh/?url='+encodeURIComponent(API_URL)},
-        {label:'codetabs',url:'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(API_URL)},
-        {label:'thingproxy',url:'https://thingproxy.freeboard.io/fetch/'+API_URL}
-    ];
-    var results=[],idx=0;
-    function tryNext(){
-        if(idx>=endpoints.length){
-            btn.innerHTML=origHTML;btn.disabled=false;
-            var ok=results.filter(function(r){return r.ok});
-            if(ok.length){
-                toast('Works via '+ok.map(function(r){return r.label}).join(', ')+'!','success');
-            }else{
-                var fails=results.map(function(r){return r.label+': '+(r.error||'?')}).join(' | ');
-                toast('All failed. '+fails,'error');
-                console.error('API test results:',results);
-            }
-            return;
-        }
-        var ep=endpoints[idx];
-        var c=new AbortController(),t=setTimeout(function(){c.abort()},20000);
-        fetch(ep.url,{
-            method:'POST',
-            headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
-            body:JSON.stringify({model:MODEL,messages:[{role:'user',content:'Say hi'}],max_tokens:10}),
-            signal:c.signal
-        }).then(function(r){clearTimeout(t);return r.text()})
-        .then(function(body){
-            if(body.charAt(0)==='<'){results.push({label:ep.label,ok:false,error:'CORS blocked'});idx++;tryNext();return}
-            results.push({label:ep.label,ok:true});idx++;tryNext();
-        }).catch(function(err){clearTimeout(t);results.push({label:ep.label,ok:false,error:(err.message||'').slice(0,50)});idx++;tryNext()});
-    }
-    tryNext();
+    var c=new AbortController(),t=setTimeout(function(){c.abort()},30000);
+    fetch(API_PROXY,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({apiKey:key,model:MODEL,messages:[{role:'user',content:'Say hello in one word.'}],max_tokens:20}),
+        signal:c.signal
+    }).then(function(r){
+        clearTimeout(t);
+        if(!r.ok)return r.text().then(function(b){
+            if(b.trim().charAt(0)==='<')throw new Error('api/chat.js not found — is it deployed in the /api/ folder on Vercel?');
+            try{var err=JSON.parse(b);throw new Error(err.error)}
+            catch(e){if(e.message&&e.message.indexOf('api/chat')!==-1)throw e;throw new Error('Error '+r.status+': '+b.slice(0,100))}
+        });
+        return r.text();
+    }).then(function(resp){
+        btn.innerHTML=origHTML;btn.disabled=false;
+        toast('API connection works! Response: "'+resp.trim().slice(0,40)+'"','success');
+    }).catch(function(err){
+        clearTimeout(t);
+        btn.innerHTML=origHTML;btn.disabled=false;
+        var msg=err.message||'Unknown error';
+        if(msg.indexOf('Invalid')!==-1||msg.indexOf('401')!==-1)toast('Invalid API key — double check and try again.','error');
+        else if(msg.indexOf('fetch')!==-1)toast('Cannot reach server — is your Vercel app deployed?','error');
+        else toast('Connection failed: '+msg,'error');
+        console.error('API test error:',err);
+    });
 }
 
 function autoDetectScript(){
@@ -908,53 +900,39 @@ function stopAllRec(){
 /* ═══════════════════════════════════════════════════════════════
    GLM API
 ═══════════════════════════════════════════════════════════════ */
-/* ── callGLM: direct first, then CORS proxies as fallback ── */
+/* ── callGLM: send to /api/chat Vercel serverless function (NO CORS!) ── */
 function callGLM(msgs,maxTok){
     var tk=maxTok||800;
-    var payload={model:MODEL,messages:msgs,temperature:0.3,max_tokens:tk};
-    /* List of URLs to try: direct connection first, then each CORS proxy */
-    var endpoints=[
-        API_URL,
-        'https://corsproxy.io/?url='+encodeURIComponent(API_URL),
-        'https://cors.sh/?url='+encodeURIComponent(API_URL),
-        'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(API_URL),
-        'https://thingproxy.freeboard.io/fetch/'+API_URL
-    ];
-    var errors=[];
-    var chain=Promise.reject(new Error('start'));
-    endpoints.forEach(function(url,idx){
-        chain=chain.catch(function(prev){
-            var msg=(prev.message||'');
-            /* Don't retry on auth/rate-limit errors — those won't change with a different proxy */
-            if(idx>0){
-                errors.push((idx<=1?'Direct':'Proxy '+(idx-1))+': '+msg.slice(0,60));
-                if(msg.indexOf('Invalid')!==-1||msg.indexOf('401')!==-1)throw prev;
-                if(msg.indexOf('Rate limit')!==-1||msg.indexOf('429')!==-1)throw prev;
+    var c=new AbortController(),t=setTimeout(function(){c.abort()},60000);
+    return fetch(API_PROXY,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+            apiKey:S.apiKey,
+            model:MODEL,
+            messages:msgs,
+            temperature:0.3,
+            max_tokens:tk
+        }),
+        signal:c.signal
+    }).then(function(r){
+        clearTimeout(t);
+        if(!r.ok)return r.text().then(function(b){
+            /* Check if response is HTML (not our JSON error) = serverless func not found */
+            if(b.trim().charAt(0)==='<'){
+                throw new Error('Serverless function not found. Make sure api/chat.js is deployed on Vercel in the /api/ folder at your project root.');
             }
-            /* Try this endpoint */
-            var c=new AbortController(),t=setTimeout(function(){c.abort()},60000);
-            return fetch(url,{
-                method:'POST',
-                headers:{'Content-Type':'application/json','Authorization':'Bearer '+S.apiKey},
-                body:JSON.stringify(payload),
-                signal:c.signal
-            }).then(function(r){
-                clearTimeout(t);
-                if(!r.ok)return r.text().then(function(b){
-                    if(b.trim().charAt(0)==='<')throw new Error('Got HTML instead of JSON (CORS proxy down). ');
-                    try{var e=JSON.parse(b);throw new Error(e.error?.message||e.message||('Error '+r.status))}
-                    catch(x){if(x.message.indexOf('Got HTML')!==-1)throw x;throw new Error('API error '+r.status+': '+b.slice(0,120))}
-                });
-                return r.json();
-            }).then(function(d){
-                if(!d.choices||!d.choices[0]||!d.choices[0].message)throw new Error('Bad API response');
-                return d.choices[0].message.content||'';
-            });
+            try{var err=JSON.parse(b);throw new Error(err.error||('API error '+r.status))}
+            catch(e){
+                if(e.message&&e.message.indexOf('Serverless')!==-1)throw e;
+                if(e.message&&e.message.indexOf('API error')===-1)throw new Error('API error ('+r.status+'): '+b.slice(0,200));
+                throw e;
+            }
         });
-    });
-    return chain.catch(function(last){
-        var detail=errors.length?errors.slice(-2).join(' → '):last.message;
-        throw new Error('API unreachable. '+detail);
+        return r.text();
+    }).then(function(raw){
+        if(!raw)throw new Error('Empty response from API.');
+        return raw;
     });
 }
 
