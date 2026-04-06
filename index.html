@@ -169,8 +169,11 @@
                     <div>
                         <label class="block text-sm font-medium text-sf-200 mb-2"><i class="fas fa-key text-copper-500 mr-1.5"></i>GLM API Key</label>
                         <div class="relative">
-                            <input id="api-key" type="password" placeholder="z.ai API key..." class="input-glow w-full bg-sf-800/60 border border-white/8 rounded-xl px-4 py-3 text-sm text-sf-50 placeholder-sf-300 outline-none transition-all pr-10" aria-label="GLM API Key" autocomplete="off">
-                            <button onclick="toggleVis('api-key',this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-sf-300 hover:text-sf-50 transition-colors"><i class="fas fa-eye text-sm"></i></button>
+                            <input id="api-key" type="password" placeholder="z.ai API key..." class="input-glow w-full bg-sf-800/60 border border-white/8 rounded-xl px-4 py-3 text-sm text-sf-50 placeholder-sf-300 outline-none transition-all pr-20" aria-label="GLM API Key" autocomplete="off">
+                            <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                                <button id="test-api-btn" onclick="testAPIConnection()" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors" title="Test API connection" aria-label="Test API"><i class="fas fa-plug text-xs text-sf-300"></i></button>
+                                <button onclick="toggleVis('api-key',this)" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors"><i class="fas fa-eye text-xs text-sf-300"></i></button>
+                            </div>
                         </div>
                     </div>
                     <div>
@@ -347,14 +350,8 @@
    CONFIG
 ═══════════════════════════════════════════════════════════════ */
 var MODEL='glm-4-flash';
-var API_URL='https://api.z.ai/v1/chat/completions';
-var PROXY='https://corsproxy.io/?url=';
-/* Multiple CORS proxy fallbacks — if one is down, try the next */
-var CORS_PROXIES=[
-    'https://corsproxy.io/?url=',
-    'https://api.allorigins.win/raw?url=',
-    'https://cors.sh/?url='
-];
+/* On Vercel: calls /api/chat which proxies to api.z.ai server-side (no CORS!) */
+var API_PROXY='/api/chat';
 
 var LANG={
     en:{name:'English',stt:'en-US',tts:'en-US',badge:'EN'},
@@ -518,6 +515,46 @@ function parseScript(text){
     return lines;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   TEST API CONNECTION
+   Quick test: sends a tiny request to /api/chat to verify it works.
+═══════════════════════════════════════════════════════════════ */
+function testAPIConnection(){
+    var key=S.apiKey||$('api-key').value.trim();
+    if(!key){toast('Enter your API key first.','info');return}
+    S.apiKey=key;
+    var btn=$('test-api-btn');
+    var origHTML=btn.innerHTML;
+    btn.innerHTML='<i class="fas fa-spinner fa-spin text-xs text-copper-400"></i>';
+    btn.disabled=true;
+
+    var c=new AbortController(),t=setTimeout(function(){c.abort()},30000);
+    fetch(API_PROXY,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({apiKey:key,model:MODEL,messages:[{role:'user',content:'Say hello in one word.'}],max_tokens:20}),
+        signal:c.signal
+    }).then(function(r){
+        clearTimeout(t);
+        if(!r.ok)return r.text().then(function(b){
+            try{var err=JSON.parse(b);throw new Error(err.error)}
+            catch(e){if(e.message&&e.message!=='undefined')throw e;throw new Error('Error '+r.status)}
+        });
+        return r.text();
+    }).then(function(resp){
+        btn.innerHTML=origHTML;btn.disabled=false;
+        toast('API connection works! Response: "'+resp.trim().slice(0,40)+'"','success');
+    }).catch(function(err){
+        clearTimeout(t);
+        btn.innerHTML=origHTML;btn.disabled=false;
+        var msg=err.message||'Unknown error';
+        if(msg.indexOf('Invalid')!==-1||msg.indexOf('401')!==-1)toast('Invalid API key — double check and try again.','error');
+        else if(msg.indexOf('fetch')!==-1)toast('Cannot reach server — is your Vercel app deployed?','error');
+        else toast('Connection failed: '+msg,'error');
+        console.error('API test error:',err);
+    });
+}
+
 function autoDetectScript(){
     var text=$('script-input').value.trim();
     if(!text){toast('Paste text first.','info');return}
@@ -556,7 +593,14 @@ function autoDetectScript(){
     }).catch(function(e){
         $('parse-status').innerHTML='';
         $('auto-detect-btn').disabled=false;
-        toast('Auto-detect failed: '+e.message,'error');
+        var errMsg=e.message||'Unknown error';
+        if(errMsg.indexOf('Invalid API key')!==-1){
+            toast('Auto-detect failed: Invalid API key. Please check your key and try again.','error');
+        }else{
+            toast('Auto-detect failed: '+errMsg,'error');
+        }
+        /* Also log to console for debugging */
+        console.error('Auto-detect error:',e);
     });
 }
 
@@ -855,59 +899,41 @@ function stopAllRec(){
 /* ═══════════════════════════════════════════════════════════════
    GLM API
 ═══════════════════════════════════════════════════════════════ */
-/* ── callGLM: try direct API first, then cycle through CORS proxies ── */
-function fetchGLM(url,msgs,maxTok){
-    var c=new AbortController(),t=setTimeout(function(){c.abort()},30000);
-    return fetch(url,{
+/* ── callGLM: send to /api/chat Vercel serverless function (NO CORS!) ── */
+function callGLM(msgs,maxTok){
+    var tk=maxTok||800;
+    var c=new AbortController(),t=setTimeout(function(){c.abort()},60000);
+    return fetch(API_PROXY,{
         method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':'Bearer '+S.apiKey},
-        body:JSON.stringify({model:MODEL,messages:msgs,temperature:0.3,max_tokens:maxTok||800}),
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+            apiKey:S.apiKey,
+            model:MODEL,
+            messages:msgs,
+            temperature:0.3,
+            max_tokens:tk
+        }),
         signal:c.signal
     }).then(function(r){
         clearTimeout(t);
         if(!r.ok)return r.text().then(function(b){
-            if(r.status===401)throw new Error('Invalid API key.');
-            if(r.status===429)throw new Error('Rate limited — wait a moment.');
-            throw new Error('API error ('+r.status+'): '+b.slice(0,200));
+            try{var err=JSON.parse(b);throw new Error(err.error||('API error '+r.status))}
+            catch(e){if(e.message.indexOf('API error')===-1)throw new Error('API error ('+r.status+'): '+b.slice(0,200));throw e}
         });
-        return r.json();
-    }).then(function(d){
-        if(!d.choices||!d.choices[0]||!d.choices[0].message)throw new Error('Bad API response.');
-        return d.choices[0].message.content||'';
-    });
-}
-function callGLM(msgs,maxTok){
-    var tk=maxTok||800;
-    /* Build list of URLs to try: direct first, then each proxy */
-    var urls=[API_URL];
-    CORS_PROXIES.forEach(function(p){urls.push(p+encodeURIComponent(API_URL))});
-
-    /* Try each URL in sequence; if it's a network/CORS error, try the next */
-    var chain=Promise.reject(new Error('start'));
-    urls.forEach(function(url, idx){
-        chain=chain.catch(function(prevErr){
-            /* If it's NOT a network error (e.g. 401, 429), don't retry — just throw */
-            var msg=prevErr.message||'';
-            if(idx>0 && msg.indexOf('Invalid API key')!==-1)throw prevErr;
-            if(idx>0 && msg.indexOf('Rate limited')!==-1)throw prevErr;
-            if(idx>0 && msg.indexOf('API error')!==-1)throw prevErr;
-            if(idx>0 && msg.indexOf('Bad API response')!==-1)throw prevErr;
-            /* Otherwise try this URL */
-            return fetchGLM(url,msgs,tk);
-        });
-    });
-    /* If ALL URLs failed, give a clear error */
-    return chain.catch(function(lastErr){
-        throw new Error('Could not reach API. Tried direct connection and '+CORS_PROXIES.length+' proxies. Please check: 1) Your internet connection 2) Your API key is valid 3) Try refreshing the page');
+        return r.text();
+    }).then(function(raw){
+        if(!raw)throw new Error('Empty response from API.');
+        return raw;
     });
 }
 
 function evalResponse(ctx,expected,response,isPres){
     var ln=LANG[S.language].name;
     var cs=ctx.map(function(l){return l.role+': '+l.text}).join('\n');
+    var scoringRules='\n\nIMPORTANT scoring rules:\n- Strip ALL punctuation (commas, periods, colons, semicolons, dashes, quotes, parentheses) before comparing words\n- People do NOT speak punctuation — ignore it entirely when scoring\n- Score based on WORD-LEVEL accuracy: correct_words / total_words × 100\n- If 9 of 10 words are correct, score ~90. Do NOT give 0 for one wrong word\n- Accept minor variations: a/an/the, contractions (don\'t/do not), slight word order differences\n- Be GENEROUS — the score should reward what they got RIGHT, not punish mistakes';
     var sysPrompt=isPres
-        ?'You are an expert '+ln+' pronunciation and dialogue coach. Evaluate a student reading a line. Respond ONLY with valid JSON — no markdown, no explanation outside JSON.'
-        :'You are an expert '+ln+' dialogue coach. Evaluate a student\'s response. Respond ONLY with valid JSON — no markdown, no explanation outside JSON.';
+        ?'You are an expert '+ln+' pronunciation and dialogue coach. Evaluate a student reading a line. Respond ONLY with valid JSON — no markdown, no explanation outside JSON.'+scoringRules
+        :'You are an expert '+ln+' dialogue coach. Evaluate a student\'s response. Respond ONLY with valid JSON — no markdown, no explanation outside JSON.'+scoringRules;
     var userPrompt=isPres
         ?'Context:\n'+cs+'\n\nExpected for "'+S.userRole+'": "'+expected+'"\nStudent said: "'+response+'"\n\nReturn JSON:\n{"score":<0-100>,"correct_words":"<yes or no>","pronunciation":"<1 sentence>","accuracy":"<1 sentence>","fluency":"<1 sentence>","corrections":["..."],"encouragement":"<positive>","suggestions":["..."]}'
         :'Context:\n'+cs+'\n\nExpected for "'+S.userRole+'": "'+expected+'"\nStudent said: "'+response+'"\n\nReturn JSON:\n{"score":<0-100>,"accuracy":"<1 sentence>","grammar":"<1 sentence>","fluency":"<1 sentence>","corrections":["..."],"encouragement":"<positive>","suggestions":["..."]}';
@@ -918,8 +944,17 @@ function evalResponse(ctx,expected,response,isPres){
         if(!p){var m=raw.match(/```(?:json)?\s*([\s\S]*?)```/);if(m)try{p=JSON.parse(m[1].trim())}catch(e){}}
         if(!p){var j=raw.match(/\{[\s\S]*\}/);if(j)try{p=JSON.parse(j[0])}catch(e){}}
         if(p){
+            /* Use local word diff as a sanity check — if AI is too harsh,
+               blend with the word-level accuracy for a fairer score */
+            var wdResult=wordDiff(expected,response);
+            var aiScore=Math.min(100,Math.max(0,parseInt(p.score)||0));
+            var wdScore=wdResult.pct;
+            var finalScore=aiScore;
+            /* If AI gives <50 but word match is >65, blend them */
+            if(aiScore<50 && wdScore>65){finalScore=Math.round(aiScore*0.3+wdScore*0.7)}
+            else if(aiScore<30 && wdScore>40){finalScore=Math.round(aiScore*0.4+wdScore*0.6)}
             var base={
-                score:Math.min(100,Math.max(0,parseInt(p.score)||0)),
+                score:finalScore,
                 accuracy:p.accuracy||'--',
                 grammar:p.grammar||(p.pronunciation||'--'),
                 fluency:p.fluency||'--',
