@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script>
-    tailwind.config={theme:{extend:{colors:{copper:{300:'#F0CFA8',400:'#E8B88A',500:'#C8956C',600:'#A87A55'},sage:{300:'#A8E0C0',400:'#7EC9A0',500:'#5BB882',600:'#44996s6'},coral:{400:'#E89590',500:'#D4736E'},sf:{50:'#E8E6E1',100:'#C8C6C1',200:'#8A8885',300:'#6E6D69',700:'#1E1E22',800:'#161619',900:'#0D0D0F'}},fontFamily:{display:['"Space Grotesk"','sans-serif'],body:['"DM Sans"','sans-serif']}}}}
+    tailwind.config={theme:{extend:{colors:{copper:{300:'#F0CFA8',400:'#E8B88A',500:'#C8956C',600:'#A87A55'},sage:{300:'#A8E0C0',400:'#7EC9A0',500:'#5BB882',600:'#449966'},coral:{400:'#E89590',500:'#D4736E'},sf:{50:'#E8E6E1',100:'#C8C6C1',200:'#8A8885',300:'#6E6D69',700:'#1E1E22',800:'#161619',900:'#0D0D0F'}},fontFamily:{display:['"Space Grotesk"','sans-serif'],body:['"DM Sans"','sans-serif']}}}}
     </script>
     <style>
         *,*::before,*::after{box-sizing:border-box}
@@ -1036,16 +1036,34 @@ function renderPracticeIA(area,line,isU){
     if(isU){
         var hc=S.audioClips[S.currentLine]&&!S.isRecording;
         var h='<div class="flex flex-col gap-3">';
-        h+=S.showExpected
-            ?'<div class="bg-white/3 rounded-lg px-4 py-2.5 border border-white/5"><div class="text-xs text-sage-400 font-semibold mb-1 flex items-center justify-between"><span><i class="fas fa-bullseye mr-1"></i>Expected Line</span><button onclick="S.showExpected=false;renderIA()" class="text-sf-300 hover:text-sf-50 text-xs"><i class="fas fa-eye-slash mr-1"></i>Hide</button></div><p class="text-sm text-sf-100 italic">'+esc(line.text)+'</p></div>'
-            :'<div class="flex justify-center"><button onclick="S.showExpected=true;renderIA()" class="text-xs text-copper-500 hover:text-copper-400"><i class="fas fa-eye mr-1"></i>Show expected</button></div>';
 
-        if(S.isProcessing){
+        if(S.isRecording){
+            /* ── RECORDING STATE: volume bar, live transcript, stop button ── */
+            h+='<div class="flex items-center justify-center gap-2 mb-1">'
+              +'<span style="width:8px;height:8px;border-radius:50%;background:#D4736E;display:inline-block;animation:mp 1s ease-out infinite"></span>'
+              +'<span class="text-xs text-coral-400 font-semibold tracking-wide">RECORDING</span>'
+              +'</div>'
+              +'<div class="vol-bar-track"><div id="vol-fill" class="vol-bar-fill" style="width:0%"></div></div>'
+              +'<div class="flex justify-between text-[10px] text-sf-300">'
+              +'<span>Voice level</span>'
+              +'<span>Auto-stop in <span id="sil-count" class="silence-countdown text-coral-400">2s</span> of silence</span>'
+              +'</div>'
+              +(S.userInput?'<div class="bg-sf-800/60 rounded-lg px-4 py-2 border border-white/5 text-left mt-1"><p id="live-text" class="text-sm text-sf-200 italic leading-snug">'+esc(S.userInput)+'</p></div>':'')
+              +'<div class="flex flex-col items-center gap-2 mt-1">'
+              +'<button class="mic-btn mic-btn-lg recording" onclick="stopAllRec()" title="Stop recording"><i class="fas fa-stop"></i></button>'
+              +'<p class="text-xs text-coral-400 font-medium">Tap to stop early</p>'
+              +'</div>';
+        }else if(S.isProcessing){
             h+='<div class="flex items-center justify-center gap-2.5 py-3"><div class="spinner"></div><span class="text-sm text-sf-300">Evaluating...</span></div>';
         }else{
+            /* ── NORMAL STATE: expected line, input, mic, send ── */
+            h+=S.showExpected
+                ?'<div class="bg-white/3 rounded-lg px-4 py-2.5 border border-white/5"><div class="text-xs text-sage-400 font-semibold mb-1 flex items-center justify-between"><span><i class="fas fa-bullseye mr-1"></i>Expected Line</span><button onclick="S.showExpected=false;renderIA()" class="text-sf-300 hover:text-sf-50 text-xs"><i class="fas fa-eye-slash mr-1"></i>Hide</button></div><p class="text-sm text-sf-100 italic">'+esc(line.text)+'</p></div>'
+                :'<div class="flex justify-center"><button onclick="S.showExpected=true;renderIA()" class="text-xs text-copper-500 hover:text-copper-400"><i class="fas fa-eye mr-1"></i>Show expected</button></div>';
+
             h+='<div class="flex items-center gap-2">'
-              +'<input id="txt-in" type="text" placeholder="Type or use mic..." value="'+esc(S.userInput)+'" class="input-glow flex-1 bg-sf-800/60 border border-white/8 rounded-xl px-4 py-3 text-sm text-sf-50 placeholder-sf-300 outline-none transition-all" '+(S.isRecording?'readonly':'')+' aria-label="Response">'
-              +'<button class="mic-btn '+(S.isRecording?'recording':'')+'" onclick="startRec()" aria-label="'+(S.isRecording?'Stop':'Record')+'"><i class="fas '+(S.isRecording?'fa-stop':'fa-microphone')+'"></i></button>'
+              +'<input id="txt-in" type="text" placeholder="Type or use mic..." value="'+esc(S.userInput)+'" class="input-glow flex-1 bg-sf-800/60 border border-white/8 rounded-xl px-4 py-3 text-sm text-sf-50 placeholder-sf-300 outline-none transition-all" aria-label="Response">'
+              +'<button class="mic-btn" onclick="startRec()" aria-label="Record"><i class="fas fa-microphone"></i></button>'
               +'<button onclick="handleSubmission()" class="h-14 px-5 rounded-xl bg-copper-500/15 hover:bg-copper-500/25 border border-copper-500/20 text-copper-400 font-semibold text-sm transition-all flex-shrink-0"><i class="fas fa-paper-plane"></i></button>'
               +'</div>';
             if(hc)h+='<div class="flex items-center gap-2 text-xs text-sf-300"><i class="fas fa-circle text-sage-500" style="font-size:6px"></i>Recorded <button onclick="playClip('+S.currentLine+')" class="text-copper-400 hover:text-copper-300 ml-1"><i class="fas fa-play" style="font-size:10px"></i> Play</button></div>';
