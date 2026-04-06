@@ -503,7 +503,7 @@ function fetchELVoices(){
     S.elevenlabsKey=key;
     var sel=$('el-voice-select');
     sel.innerHTML='<option value="">Loading...</option>';
-    fetch(PROXY+encodeURIComponent('https://api.elevenlabs.io/v1/voices'),{headers:{'xi-api-key':key}})
+    fetch('https://api.elevenlabs.io/v1/voices',{headers:{'xi-api-key':key}})
         .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json()})
         .then(function(d){
             var h='';
@@ -686,7 +686,7 @@ function speakBrowser(text,onEnd){
 
 function speakEL(text,vid,onEnd){
     S.isSpeaking=true;
-    fetch(PROXY+encodeURIComponent('https://api.elevenlabs.io/v1/text-to-speech/'+vid),{
+    fetch('https://api.elevenlabs.io/v1/text-to-speech/'+vid,{
         method:'POST',
         headers:{'xi-api-key':S.elevenlabsKey,'Content-Type':'application/json'},
         body:JSON.stringify({text:text,model_id:'eleven_monolingual_v1',voice_settings:{stability:0.5,similarity_boost:0.75}})
@@ -895,13 +895,8 @@ function finishRecording(){
     S.userResponses[S.currentLine]=S.userInput.trim()||null;
 
     if(S.mode==='presentation'){
-        /* Auto-flow: save response, advance to next line */
-        S.attemptCount[S.currentLine]=(S.attemptCount[S.currentLine]||0)+1;
-        if(S.currentLine>=S.lines.length-1){
-            finishPresentation();
-        }else{
-            advanceLine();
-        }
+        /* Send to per-line evaluation — shows scorecard, then user picks Retry/Continue */
+        handlePresEval();
     }else{
         /* Practice mode */
         if(S.userInput.trim()){
@@ -922,13 +917,8 @@ function stopAllRec(){
     S.userResponses[S.currentLine]=S.userInput.trim()||null;
 
     if(S.mode==='presentation'){
-        /* Auto-flow: save response, advance to next line */
-        S.attemptCount[S.currentLine]=(S.attemptCount[S.currentLine]||0)+1;
-        if(S.currentLine>=S.lines.length-1){
-            finishPresentation();
-        }else{
-            advanceLine();
-        }
+        /* Send to per-line evaluation — shows scorecard, then user picks Retry/Continue */
+        handlePresEval();
     }else{
         if(S.userInput.trim()){handleSubmission()}
         else renderIA();
@@ -1139,69 +1129,13 @@ function startSession(){
             speak(firstLine.text,null,false);
         }
     }else{
-        /* Presentation mode — auto-flow starts after a brief pause */
-        setTimeout(presentationAutoFlow,600);
-    }
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   PRESENTATION AUTO-FLOW
-   Drives continuous flow: NPC lines auto-speak, user lines auto-record.
-   At the very end, batch-evaluates everything and shows the report.
-═══════════════════════════════════════════════════════════════ */
-function presentationAutoFlow(){
-    if(S.screen!=='session'||S.mode!=='presentation')return;
-
-    var line=S.lines[S.currentLine];
-    if(!line){finishPresentation();return}
-
-    var isUser=line.role===S.userRole;
-
-    if(!isUser){
-        /* ── NPC line: auto-speak, then auto-advance ── */
-        S.presState=PS.HIDDEN;
-        renderSession();
-
-        speak(line.text,function(){
-            if(S.screen!=='session'||S.mode!=='presentation')return;
-            if(S.currentLine>=S.lines.length-1){
-                finishPresentation();
-            }else{
-                advanceLine();
-            }
-        },false);
-    }else{
-        /* ── User line: show hint, then auto-start recording ── */
-        S.presState=PS.HIDDEN;
-        renderSession();
-
-        /* Brief pause so user sees "Your Turn" before recording starts */
-        setTimeout(function(){
-            if(S.screen!=='session'||S.mode!=='presentation')return;
-
-            /* Auto-reveal hint based on hint level */
-            if(S.hintLevel!=='none'){
-                S.hintShown[S.currentLine]=true;
-                S.presState=PS.HINT;
-                renderContext();
-                renderIA();
-            }else{
-                S.presState=PS.HINT;
-                renderIA();
-            }
-
-            /* Start recording after another brief pause */
-            setTimeout(function(){
-                if(S.screen!=='session'||S.mode!=='presentation'||S.isRecording)return;
-                startRec();
-            },600);
-        },500);
+        /* Presentation mode — render manual IA for the first line */
+        renderIA();
     }
 }
 
 /* ── Called when all lines are done — batch evaluates then shows report ── */
 function finishPresentation(){
-    S.screen='report_pending';
     releaseMicStream();
 
     /* Switch to report screen and show loading */
@@ -1220,10 +1154,11 @@ function finishPresentation(){
 }
 
 function batchEvaluatePresentation(){
-    /* Collect all user lines that have responses */
+    /* Collect all user lines that have responses but NO score yet
+       (per-line evaluation may have already scored some) */
     var userLines=[];
     S.lines.forEach(function(line,i){
-        if(line.role===S.userRole&&S.userResponses[i]){
+        if(line.role===S.userRole&&S.userResponses[i]&&S.lineScores[i]==null){
             userLines.push({index:i,line:line,response:S.userResponses[i]});
         }
     });
@@ -1318,7 +1253,7 @@ function renderReportUI(){
         +S.lines.map(function(line,i){
         var isU=line.role===S.userRole,sc=S.lineScores[i],det=S.lineDetails[i],resp=S.userResponses[i],clip=S.audioClips[i],isLow=sc!=null&&sc<50;
         if(!isU)return '<div class="report-card bg-white/2 rounded-xl px-4 py-3 border border-white/5 flex items-start gap-3"><span class="text-xs text-sf-300 font-mono w-6 text-right flex-shrink-0 pt-0.5">'+(i+1)+'</span><div class="flex-1 min-w-0"><span class="text-xs text-sage-400 font-semibold">'+esc(line.role)+'</span><p class="text-sm text-sf-200 mt-0.5 truncate">'+esc(line.text)+'</p></div><span class="text-[10px] text-sf-300 flex-shrink-0 pt-1">NPC</span></div>';
-        var sb=sc!=null?'<span class="px-2.5 py-1 rounded-lg text-sm font-bold '+(sc>=80?'bg-sage-500/15 text-sage-400':sc>=50?'bg-copper-500/15 text-copper-400':'bg-coral-500/15 text-coral-400')+'">'+sc+'%</span>':'<span class="px-2.5 py-1 rounded-lg text-sm text-sf-300 bg-white/3">Skipped</span>';
+        var sb=sc!=null?'<span class="px-2.5 py-1 rounded-lg text-sm font-bold '+(sc>=80?'bg-sage-500/15 text-sage-400':sc>=50?'bg-copper-500/15 text-copper-400':'bg-coral-500/15 text-coral-400')+'">'+sc+'<span class="text-[10px] font-normal">/100</span></span>':'<span class="px-2.5 py-1 rounded-lg text-sm text-sf-300 bg-white/3">Skipped</span>';
         var dh='';
         if(det){
             dh='<div class="mt-2 space-y-1.5"><div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5"><div class="bg-white/3 rounded-lg p-2.5"><div class="text-[10px] text-sf-300 font-semibold uppercase mb-0.5">Expected</div><p class="text-xs text-sf-100">'+esc(line.text)+'</p></div><div class="bg-white/3 rounded-lg p-2.5"><div class="text-[10px] text-sf-300 font-semibold uppercase mb-0.5">You Said</div><p class="text-xs '+(isLow?'text-coral-400':'text-sf-100')+'">'+(resp?esc(resp):'<span class="text-sf-300 italic">No response</span>')+'</p></div></div>';
@@ -1768,9 +1703,9 @@ function advanceLine(){
         }
     }
 
-    /* Presentation mode: continue the auto-flow */
+    /* Presentation mode: render the manual IA (hint + mic buttons) */
     if(S.mode==='presentation'){
-        setTimeout(presentationAutoFlow,400);
+        renderIA();
     }
 }
 
@@ -1901,6 +1836,7 @@ function restartSession(){
     renderAllHintPills();
     renderSession();
     if(S.mode==='practice'){var fl=S.lines[0];if(fl&&fl.role!==S.userRole)speak(fl.text,null,false)}
+    else{renderIA()} /* Presentation mode: show the manual hint+mic buttons */
 }
 function newDialogue(){releaseMicStream();switchScreen('setup')}
 
@@ -2048,9 +1984,9 @@ function openHelp(){
             +'<ul>'
             +'<li>Lines start <strong>hidden (blurred)</strong> so you can\'t read them</li>'
             +'<li>When it\'s your turn, a <strong>hint</strong> is shown (first word or full text)</li>'
-            +'<li><strong>Recording starts automatically</strong> — just speak!</li>'
-            +'<li>After <strong>2 seconds of silence</strong>, it auto-stops and advances</li>'
-            +'<li>You can also tap the stop button to move on early</li>'
+            +'<li>Tap the <strong>mic button</strong> to start recording your line</li>'
+            +'<li>After <strong>2 seconds of silence</strong>, it auto-stops and evaluates</li>'
+            +'<li>Review your score, then tap <strong>Continue</strong> or <strong>Retry</strong></li>'
             +'<li>At the end, you get a <strong>full report</strong> with scores for every line</li>'
             +'</ul>'
             +'<h3><i class="fas fa-chart-bar mr-1.5"></i>The Report</h3>'
