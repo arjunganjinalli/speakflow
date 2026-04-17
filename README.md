@@ -32,6 +32,3 @@ Practice dialogue in 11 languages with an AI coach. Two modes:
 - GLM 5.1 API via z.ai
 - Tailwind CSS + custom styling
 
-## For Hackathon
-
-Built for Z.ai Builder Series - Build with GLM 5.1 (March 30 - April 6, 2026)
