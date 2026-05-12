@@ -35,11 +35,7 @@
         .role-pill:hover{border-color:rgba(200,149,108,.35);color:#E8E6E1}
         .role-pill.selected{background:linear-gradient(135deg,rgba(200,149,108,.2),rgba(200,149,108,.08));border-color:#C8956C;color:#E8B88A}
         
-        .hint-pill{cursor:pointer;transition:all .25s ease;padding:4px 12px;border-radius:8px;border:1px solid rgba(200,149,108,.12);background:rgba(22,22,25,.5);font-size:11px;font-weight:600;color:#8A8885;letter-spacing:.3px}
-        .hint-pill:hover{border-color:rgba(200,149,108,.3);color:#C8C6C1}
-        .hint-pill.active{background:rgba(200,149,108,.15);border-color:#C8956C;color:#E8B88A}
-        
-        .bubble{max-width:80%;padding:12px 16px;border-radius:16px;position:relative;transition:all .3s ease;margin-bottom:12px}
+        .bubble{max-width:85%;padding:12px 16px;border-radius:16px;position:relative;transition:all .3s ease;margin-bottom:12px}
         .bubble-other{background:rgba(30,30,34,.7);border:1px solid rgba(91,184,130,.12);border-left:3px solid #5BB882;align-self:flex-start;border-bottom-left-radius:4px}
         .bubble-user{background:rgba(200,149,108,.08);border:1px solid rgba(200,149,108,.15);border-right:3px solid #C8956C;align-self:flex-end;border-bottom-right-radius:4px}
         .bubble-current{box-shadow:0 0 24px rgba(200,149,108,.1);transform:scale(1.02)}
@@ -59,9 +55,6 @@
         .mic-btn-lg.recording::after{inset:-10px}
         @keyframes mp{0%{transform:scale(1);opacity:1}100%{transform:scale(1.6);opacity:0}}
         
-        .progress-track{height:3px;background:rgba(255,255,255,.06);overflow:hidden;width:100%}
-        .progress-fill{height:100%;background:linear-gradient(90deg,#C8956C,#5BB882);transition:width .5s cubic-bezier(.4,0,.2,1)}
-        
         .eval-in{animation:ei .5s cubic-bezier(.4,0,.2,1) forwards}
         @keyframes ei{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
         
@@ -76,37 +69,16 @@
         ::-webkit-scrollbar-track{background:transparent}
         ::-webkit-scrollbar-thumb{background:rgba(200,149,108,.2);border-radius:3px}
         
-        .line-dot{width:8px;height:8px;border-radius:50%;transition:all .3s ease;background:rgba(255,255,255,.1)}
-        .line-dot.done{background:#5BB882}
-        .line-dot.current{background:#C8956C;transform:scale(1.4);box-shadow:0 0 8px rgba(200,149,108,.5)}
-        .line-dot.low{background:#D4736E}
-        
-        .spinner{width:20px;height:20px;border:2px solid rgba(200,149,108,.2);border-top-color:#C8956C;border-radius:50%;animation:sp .8s linear infinite}
-        @keyframes sp{to{transform:rotate(360deg)}}
-        
-        .report-card{transition:all .3s ease;margin-bottom:16px}
-        .report-card:hover{border-color:rgba(200,149,108,.2)}
-        .report-card.low{border-color:rgba(212,115,110,.3)!important;background:rgba(212,115,110,.03)}
-        
-        .check-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:8px;font-size:12px;font-weight:600}
-        .check-yes{background:rgba(91,184,130,.12);color:#7EC9A0}
-        .check-no{background:rgba(212,115,110,.12);color:#E89590}
-        
         .line-hidden{filter:blur(10px);user-select:none;-webkit-user-select:none;pointer-events:none;opacity:.35;transition:filter .4s ease, opacity .4s ease}
-        .line-revealed{filter:none;opacity:1;transition:filter .4s ease, opacity .4s ease}
         
         .vol-bar-track{width:100%;height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden}
         .vol-bar-fill{height:100%;border-radius:3px;transition:width 60ms linear;background:linear-gradient(90deg,#C8956C,#D4736E)}
         
-        .pres-btn-row{display:flex;align-items:center;justify-content:center;gap:16px;width:100%}
         .hint-reveal-btn{display:flex;align-items:center;gap:8px;padding:12px 24px;border-radius:14px;background:rgba(200,149,108,.1);border:1.5px solid rgba(200,149,108,.25);color:#E8B88A;font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .25s ease;white-space:nowrap}
         .hint-reveal-btn:hover{background:rgba(200,149,108,.18);border-color:#C8956C}
         
         .wd-ok{color:#7EC9A0}
         .wd-miss{color:#E89590;text-decoration:underline wavy #D4736E;text-underline-offset:3px}
-        .wd-section{background:rgba(255,255,255,.02);border-radius:8px;padding:8px 12px;border:1px solid rgba(255,255,255,.04)}
-        .wd-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#8A8885;margin-bottom:4px}
-        .wd-words{font-size:13px;line-height:1.8;word-wrap:break-word}
         
         #faq-bot-container{position:fixed;bottom:24px;right:24px;z-index:100}
         .faq-btn{width:56px;height:56px;border-radius:28px;background:linear-gradient(135deg,#C8956C,#5BB882);color:#000;display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,0.5);transition:transform 0.3s}
@@ -146,13 +118,13 @@
         </nav>
     </header>
 
-    <main class="w-full max-w-5xl mx-auto">
-        <section id="view-home" class="view-section active justify-center items-center text-center">
+    <main class="w-full max-w-5xl mx-auto h-full flex flex-col items-center">
+        <section id="view-home" class="view-section active justify-center items-center text-center w-full">
             <h1 class="text-5xl md:text-7xl font-bold gradient-text mb-6">Master Your Delivery</h1>
             <p class="text-xl text-sf-200 mb-10 max-w-2xl">A professional environment for analyzing speech accuracy, practicing dialogues, and perfecting presentations directly in your browser.</p>
             <div class="flex gap-6">
-                <button onclick="navTo('practice')" class="px-8 py-4 rounded-xl bg-copper-500 text-sf-900 font-display font-bold hover:bg-copper-400 transition-colors">Start Practice</button>
-                <button onclick="navTo('presentation')" class="px-8 py-4 rounded-xl bg-sage-500 text-sf-900 font-display font-bold hover:bg-sage-400 transition-colors">Start Presentation</button>
+                <button type="button" onclick="navTo('practice')" class="px-8 py-4 rounded-xl bg-copper-500 text-sf-900 font-display font-bold hover:bg-copper-400 transition-colors">Start Practice</button>
+                <button type="button" onclick="navTo('presentation')" class="px-8 py-4 rounded-xl bg-sage-500 text-sf-900 font-display font-bold hover:bg-sage-400 transition-colors">Start Presentation</button>
             </div>
             <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 w-full text-left">
                 <div class="glass p-6 rounded-2xl">
@@ -173,59 +145,57 @@
             </div>
         </section>
 
-        <section id="view-practice" class="view-section">
-            <div class="glass rounded-2xl p-6 mb-6">
+        <section id="view-practice" class="view-section w-full max-w-4xl mx-auto flex flex-col">
+            <div class="glass rounded-2xl p-6 mb-6 shrink-0">
                 <h2 class="text-2xl font-display font-bold text-sf-50 mb-4"><i class="fas fa-users mr-3 text-copper-500"></i>Practice Mode Setup</h2>
-                <textarea id="practice-script" rows="6" class="w-full bg-sf-800/80 border border-white/10 rounded-xl p-4 text-sf-50 font-body outline-none mb-4" placeholder="Paste your script here. Example:&#10;ROMEO: But, soft! what light through yonder window breaks?&#10;JULIET: Ay me!"></textarea>
+                <textarea id="practice-script" rows="5" class="w-full bg-sf-800/80 border border-white/10 rounded-xl p-4 text-sf-50 font-body outline-none mb-4" placeholder="Paste your script here. Example:&#10;ROMEO: But, soft! what light through yonder window breaks?&#10;JULIET: Ay me!"></textarea>
                 <div class="flex justify-between items-center mb-6">
-                    <button onclick="detectPracticeScript()" class="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-sf-50 font-bold transition-all"><i class="fas fa-wand-magic-sparkles mr-2 text-sage-400"></i>Detect Characters</button>
+                    <button type="button" onclick="detectPracticeScript()" class="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-sf-50 font-bold transition-all"><i class="fas fa-wand-magic-sparkles mr-2 text-sage-400"></i>Detect Characters</button>
                     <span id="practice-status" class="text-sm text-sf-300"></span>
                 </div>
                 <div id="practice-roles-container" class="hidden mb-6">
                     <h3 class="text-sm text-sf-300 uppercase tracking-widest mb-3">Select Your Role</h3>
                     <div id="practice-roles" class="flex flex-wrap gap-3"></div>
                 </div>
-                <button id="practice-start-btn" onclick="startPracticeSession()" class="w-full py-4 rounded-xl bg-copper-500 text-sf-900 font-display font-bold text-lg opacity-50 cursor-not-allowed transition-all" disabled>Begin Practice</button>
+                <button type="button" id="practice-start-btn" onclick="startPracticeSession()" class="w-full py-4 rounded-xl bg-copper-500 text-sf-900 font-display font-bold text-lg opacity-50 cursor-not-allowed transition-all" disabled>Begin Practice</button>
             </div>
             
-            <div id="practice-session-area" class="glass rounded-2xl p-6 hidden flex-col h-[600px]">
-                <div class="flex justify-between items-center mb-4 pb-4 border-b border-white/10">
+            <div id="practice-session-area" class="glass rounded-2xl p-4 md:p-6 hidden flex-col flex-1 max-h-[75vh]">
+                <div class="flex justify-between items-center mb-4 pb-4 border-b border-white/10 shrink-0">
                     <div class="flex items-center gap-3">
                         <span class="px-3 py-1 bg-copper-500/20 text-copper-400 rounded-lg text-xs font-bold uppercase tracking-wide">Practice</span>
-                        <div id="practice-dots" class="flex gap-1"></div>
                     </div>
                     <span id="practice-progress" class="font-mono text-sm text-sf-300"></span>
                 </div>
-                <div id="practice-chat" class="flex-1 overflow-y-auto pr-4 mb-4 flex flex-col gap-4"></div>
-                <div id="practice-controls" class="pt-4 border-t border-white/10 min-h-[120px] flex items-center justify-center"></div>
+                <div id="practice-chat" class="flex-1 overflow-y-auto pr-2 mb-4 flex flex-col gap-4 relative"></div>
+                <div id="practice-controls" class="pt-4 border-t border-white/10 min-h-[120px] shrink-0 flex items-center justify-center"></div>
             </div>
         </section>
 
-        <section id="view-presentation" class="view-section">
-            <div class="glass rounded-2xl p-6 mb-6">
+        <section id="view-presentation" class="view-section w-full max-w-4xl mx-auto flex flex-col">
+            <div class="glass rounded-2xl p-6 mb-6 shrink-0">
                 <h2 class="text-2xl font-display font-bold text-sf-50 mb-4"><i class="fas fa-person-chalkboard mr-3 text-sage-500"></i>Presentation Mode Setup</h2>
-                <textarea id="pres-script" rows="6" class="w-full bg-sf-800/80 border border-white/10 rounded-xl p-4 text-sf-50 font-body outline-none mb-4" placeholder="Paste your presentation text or monologue here.&#10;It will be split into readable segments automatically."></textarea>
+                <textarea id="pres-script" rows="6" class="w-full bg-sf-800/80 border border-white/10 rounded-xl p-4 text-sf-50 font-body outline-none mb-4" placeholder="Paste your presentation text or monologue here.&#10;It will be cleaned of character names and split into readable segments automatically."></textarea>
                 <div class="flex justify-between items-center mb-6">
-                    <button onclick="detectPresScript()" class="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-sf-50 font-bold transition-all"><i class="fas fa-layer-group mr-2 text-sage-400"></i>Process Text</button>
+                    <button type="button" onclick="detectPresScript()" class="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-sf-50 font-bold transition-all"><i class="fas fa-layer-group mr-2 text-sage-400"></i>Process Text</button>
                     <span id="pres-status" class="text-sm text-sf-300"></span>
                 </div>
-                <button id="pres-start-btn" onclick="startPresSession()" class="w-full py-4 rounded-xl bg-sage-500 text-sf-900 font-display font-bold text-lg opacity-50 cursor-not-allowed transition-all" disabled>Begin Presentation</button>
+                <button type="button" id="pres-start-btn" onclick="startPresSession()" class="w-full py-4 rounded-xl bg-sage-500 text-sf-900 font-display font-bold text-lg opacity-50 cursor-not-allowed transition-all" disabled>Begin Presentation</button>
             </div>
             
-            <div id="pres-session-area" class="glass rounded-2xl p-6 hidden flex-col h-[600px]">
-                <div class="flex justify-between items-center mb-4 pb-4 border-b border-white/10">
+            <div id="pres-session-area" class="glass rounded-2xl p-4 md:p-6 hidden flex-col flex-1 max-h-[75vh]">
+                <div class="flex justify-between items-center mb-4 pb-4 border-b border-white/10 shrink-0">
                     <div class="flex items-center gap-3">
                         <span class="px-3 py-1 bg-sage-500/20 text-sage-400 rounded-lg text-xs font-bold uppercase tracking-wide">Presentation</span>
-                        <div id="pres-dots" class="flex gap-1"></div>
                     </div>
                     <span id="pres-progress" class="font-mono text-sm text-sf-300"></span>
                 </div>
-                <div id="pres-content" class="flex-1 overflow-y-auto flex items-center justify-center p-8"></div>
-                <div id="pres-controls" class="pt-4 border-t border-white/10 min-h-[140px] flex flex-col items-center justify-center"></div>
+                <div id="pres-content" class="flex-1 overflow-y-auto flex items-center justify-center p-4"></div>
+                <div id="pres-controls" class="pt-4 border-t border-white/10 min-h-[140px] shrink-0 flex flex-col items-center justify-center"></div>
             </div>
         </section>
 
-        <section id="view-report" class="view-section">
+        <section id="view-report" class="view-section w-full">
             <div class="glass rounded-2xl p-8 max-w-4xl mx-auto w-full">
                 <div class="flex flex-col items-center mb-8 pb-8 border-b border-white/10">
                     <svg viewBox="0 0 120 120" width="140" height="140" class="mb-4">
@@ -239,13 +209,13 @@
                 </div>
                 <div id="report-breakdown" class="space-y-4"></div>
                 <div class="flex gap-4 mt-8 pt-8 border-t border-white/10">
-                    <button onclick="navTo('home')" class="flex-1 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-sf-50 font-bold transition-all">Return Home</button>
-                    <button onclick="printReport()" class="flex-1 py-3 rounded-xl bg-copper-500 text-sf-900 font-bold hover:bg-copper-400 transition-all"><i class="fas fa-print mr-2"></i>Print Report</button>
+                    <button type="button" onclick="navTo('home')" class="flex-1 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-sf-50 font-bold transition-all">Return Home</button>
+                    <button type="button" onclick="printReport()" class="flex-1 py-3 rounded-xl bg-copper-500 text-sf-900 font-bold hover:bg-copper-400 transition-all"><i class="fas fa-print mr-2"></i>Print Report</button>
                 </div>
             </div>
         </section>
 
-        <section id="view-settings" class="view-section">
+        <section id="view-settings" class="view-section w-full">
             <div class="max-w-2xl mx-auto w-full space-y-6">
                 <div class="glass rounded-2xl p-6">
                     <h2 class="text-xl font-display font-bold text-sf-50 mb-4"><i class="fas fa-robot mr-3 text-copper-500"></i>AI Evaluation Settings</h2>
@@ -292,24 +262,24 @@
                         </div>
                     </div>
                 </div>
-                <button onclick="saveSettings()" class="w-full py-4 rounded-xl bg-copper-500 text-sf-900 font-display font-bold text-lg hover:bg-copper-400 transition-all">Save Configuration</button>
+                <button type="button" onclick="saveSettings()" class="w-full py-4 rounded-xl bg-copper-500 text-sf-900 font-display font-bold text-lg hover:bg-copper-400 transition-all">Save Configuration</button>
             </div>
         </section>
     </main>
 
     <div id="faq-bot-container">
-        <button class="faq-btn" onclick="toggleFaq()"><i class="fas fa-question"></i></button>
+        <button type="button" class="faq-btn" onclick="toggleFaq()"><i class="fas fa-question"></i></button>
         <div id="faq-panel" class="faq-panel">
             <div class="faq-header">
                 <h3>Knowledge Base</h3>
-                <button class="faq-close" onclick="toggleFaq()"><i class="fas fa-times"></i></button>
+                <button type="button" class="faq-close" onclick="toggleFaq()"><i class="fas fa-times"></i></button>
             </div>
             <div id="faq-chat" class="faq-body">
-                <div class="faq-msg-bot">Hello! I'm the local logic bot. Ask me how to use SpeakFlow. Try typing "api", "presentation", or "voice".</div>
+                <div class="faq-msg-bot">Hello! Ask me how to use SpeakFlow. Try typing "api", "presentation", or "voice".</div>
             </div>
             <div class="faq-input-area">
                 <input type="text" id="faq-input" class="faq-input" placeholder="Type a question..." onkeypress="if(event.key==='Enter') sendFaq()">
-                <button class="faq-send" onclick="sendFaq()"><i class="fas fa-paper-plane"></i></button>
+                <button type="button" class="faq-send" onclick="sendFaq()"><i class="fas fa-paper-plane"></i></button>
             </div>
         </div>
     </div>
@@ -329,14 +299,7 @@ let S = {
     lineScores: {},
     lineDetails: {},
     voices: [],
-    settings: {
-        apiKey: '',
-        apiUrl: 'https://api.openai.com/v1/chat/completions',
-        apiModel: 'gpt-4o-mini',
-        voiceUri: '',
-        lang: 'en-US',
-        hint: 'first'
-    },
+    settings: { apiKey: '', apiUrl: 'https://api.openai.com/v1/chat/completions', apiModel: 'gpt-4o-mini', voiceUri: '', lang: 'en-US', hint: 'first' },
     presState: 'hidden',
     silenceInterval: null,
     silenceFrames: 0,
@@ -366,7 +329,6 @@ function navTo(viewId) {
     
     let navL = document.getElementById('nav-' + viewId);
     if(navL) navL.classList.add('active');
-    
     stopAllSpeech();
 }
 
@@ -410,7 +372,7 @@ function populateVoices() {
 function toast(msg) {
     let t = document.createElement('div');
     t.className = 'toast';
-    t.innerHTML = '<i class="fas fa-check-circle"></i> ' + escapeHTML(msg);
+    t.innerHTML = '<i class="fas fa-info-circle"></i> ' + escapeHTML(msg);
     document.getElementById('toast-container').appendChild(t);
     setTimeout(() => {
         t.style.animation = 'to2 0.3s ease forwards';
@@ -429,8 +391,8 @@ function getWordDiff(expected, actual) {
     let clean = s => s.replace(/[.,;:!?"'()\[\]{}\-]/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
     let expW = clean(expected).split(' ').filter(w => w);
     let actW = clean(actual).split(' ').filter(w => w);
-    if(!expW.length) return { html: '', pct: 0, correct: 0, total: 0 };
-    if(!actW.length) return { html: '<span class="wd-miss">' + escapeHTML(expected) + '</span>', pct: 0, correct: 0, total: expW.length };
+    if(!expW.length) return { html: '', pct: 0 };
+    if(!actW.length) return { html: '<span class="wd-miss">' + escapeHTML(expected) + '</span>', pct: 0 };
     
     let matched = new Array(expW.length).fill(false);
     let used = new Array(actW.length).fill(false);
@@ -450,7 +412,27 @@ function getWordDiff(expected, actual) {
         if(matched[i]) { html += '<span class="wd-ok">' + escapeHTML(expW[i]) + '</span> '; correct++; }
         else { html += '<span class="wd-miss">' + escapeHTML(expW[i]) + '</span> '; }
     }
-    return { html, pct: Math.round((correct / expW.length) * 100), correct, total: expW.length };
+    return { html, pct: Math.round((correct / expW.length) * 100) };
+}
+
+// Fixed Presentation regex to remove character names so it doesn't "read other people's lines"
+function detectPresScript() {
+    let text = document.getElementById('pres-script').value.trim();
+    if(!text) return;
+    
+    // Strip Character Names (e.g. "ROMEO: " or "JULIET (softly):")
+    text = text.replace(/^\[?[A-Za-z0-9\s_]+\]?(?:\s*\([^)]+\))?\s*:\s*/gm, '');
+    
+    let parts = text.split(/(?<=[.!?])\s+/);
+    S.lines = parts.map(p => ({role: 'Speaker', text: p.trim()})).filter(p => p.text.length > 0);
+    S.userRole = 'Speaker';
+    
+    if(S.lines.length > 0) {
+        document.getElementById('pres-status').innerHTML = '<span class="text-sage-400">Cleaned & Split into ' + S.lines.length + ' segments</span>';
+        let btn = document.getElementById('pres-start-btn');
+        btn.disabled = false;
+        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
 }
 
 function detectPracticeScript() {
@@ -472,38 +454,30 @@ function detectPracticeScript() {
         S.lines = lines;
         S.roles = [...new Set(lines.map(l => l.role))];
         document.getElementById('practice-status').innerHTML = '<span class="text-sage-400">Found ' + lines.length + ' lines</span>';
+        
         let rc = document.getElementById('practice-roles');
-        rc.innerHTML = S.roles.map(r => `<button class="role-pill" onclick="selectRole('${escapeHTML(r)}')">${escapeHTML(r)}</button>`).join('');
+        rc.innerHTML = S.roles.map(r => `<button type="button" class="role-pill" onclick="selectRole('${escapeHTML(r)}')">${escapeHTML(r)}</button>`).join('');
+        
+        // Added feature: "Practice All Roles" so you aren't restricted to just one
+        rc.innerHTML += `<button type="button" class="role-pill mt-3 w-full !bg-copper-500/20 !border-copper-500/50 !text-copper-400 hover:!bg-copper-500/30 font-bold" onclick="selectRole('ALL_ROLES')">Practice All Roles (Full Monologue)</button>`;
+        
         document.getElementById('practice-roles-container').classList.remove('hidden');
     } else {
         document.getElementById('practice-status').innerHTML = '<span class="text-coral-400">No dialogue detected. Check format.</span>';
-        document.getElementById('practice-start-btn').disabled = true;
-        document.getElementById('practice-start-btn').classList.add('opacity-50');
+        let btn = document.getElementById('practice-start-btn');
+        btn.disabled = true;
+        btn.classList.add('opacity-50');
     }
 }
 
 function selectRole(r) {
     S.userRole = r;
     document.querySelectorAll('#practice-roles .role-pill').forEach(p => {
-        p.classList.toggle('selected', p.textContent === r);
+        p.classList.toggle('selected', p.textContent.includes(r));
     });
     let btn = document.getElementById('practice-start-btn');
     btn.disabled = false;
     btn.classList.remove('opacity-50', 'cursor-not-allowed');
-}
-
-function detectPresScript() {
-    let text = document.getElementById('pres-script').value.trim();
-    if(!text) return;
-    let parts = text.split(/(?<=[.!?])\s+/);
-    S.lines = parts.map(p => ({role: 'Speaker', text: p.trim()})).filter(p => p.text.length > 0);
-    S.userRole = 'Speaker';
-    if(S.lines.length > 0) {
-        document.getElementById('pres-status').innerHTML = '<span class="text-sage-400">Split into ' + S.lines.length + ' segments</span>';
-        let btn = document.getElementById('pres-start-btn');
-        btn.disabled = false;
-        btn.classList.remove('opacity-50', 'cursor-not-allowed');
-    }
 }
 
 function resetSessionData() {
@@ -511,6 +485,7 @@ function resetSessionData() {
     S.userResponses = {};
     S.lineScores = {};
     S.lineDetails = {};
+    S.lines.forEach(l => l.played = false);
     stopAllSpeech();
 }
 
@@ -540,13 +515,13 @@ function renderPractice() {
     let startIdx = Math.max(0, S.currentLine - 5);
     let html = S.lines.slice(startIdx, S.currentLine + 1).map((l, idx) => {
         let absIdx = startIdx + idx;
-        let isU = l.role === S.userRole;
+        let isU = (S.userRole === 'ALL_ROLES' || l.role === S.userRole);
         let isCur = absIdx === S.currentLine;
         let cls = isU ? 'bubble-user' : 'bubble-other';
         if(isCur) cls += ' bubble-current';
         if(absIdx < S.currentLine) cls += ' bubble-past';
         
-        let rep = !isU ? `<button class="replay-btn" onclick="playTTS('${escapeHTML(l.text).replace(/'/g, "\\'")}')"><i class="fas fa-volume-up"></i></button>` : '';
+        let rep = `<button type="button" class="replay-btn" onclick="playTTS('${escapeHTML(l.text).replace(/'/g, "\\'")}')"><i class="fas fa-volume-up"></i></button>`;
         let scoreBdg = (isU && S.lineScores[absIdx] !== undefined) ? `<span class="ml-2 text-[10px] px-2 py-0.5 rounded bg-black/20">${S.lineScores[absIdx]}%</span>` : '';
         
         return `<div class="bubble ${cls}"><div class="bubble-label">${escapeHTML(l.role)}${scoreBdg}</div><div class="text-sm text-sf-50 leading-relaxed">${escapeHTML(l.text)}</div>${rep}</div>`;
@@ -557,19 +532,23 @@ function renderPractice() {
     
     let ctrl = document.getElementById('practice-controls');
     let curL = S.lines[S.currentLine];
-    if(curL.role === S.userRole) {
+    
+    // Check if it's the user's turn
+    let isUserTurn = (S.userRole === 'ALL_ROLES' || curL.role === S.userRole);
+
+    if(isUserTurn) {
         if(S.isRecording) {
             ctrl.innerHTML = `
                 <div class="flex flex-col items-center gap-2 w-full">
-                    <div class="text-xs text-coral-400 font-bold mb-2 blink">RECORDING</div>
+                    <div class="text-xs text-coral-400 font-bold mb-2 animate-pulse">RECORDING</div>
                     <div class="vol-bar-track w-full max-w-sm mb-2"><div id="vol-fill" class="vol-bar-fill" style="width:0%"></div></div>
-                    <button class="mic-btn mic-btn-lg recording" onclick="stopRecording()"><i class="fas fa-stop"></i></button>
+                    <button type="button" class="mic-btn mic-btn-lg recording" onclick="stopRecording()"><i class="fas fa-stop"></i></button>
                     <div class="text-xs text-sf-300 mt-2" id="live-transcript">Listening...</div>
                 </div>`;
         } else if(S.lineScores[S.currentLine] !== undefined) {
             let nBtn = S.currentLine >= S.lines.length - 1 ? 
-                `<button onclick="finishSession()" class="px-6 py-3 rounded-xl bg-copper-500 text-sf-900 font-bold">View Report</button>` :
-                `<button onclick="nextLine()" class="px-6 py-3 rounded-xl bg-white/10 text-sf-50 font-bold hover:bg-white/20">Next Line</button>`;
+                `<button type="button" onclick="finishSession()" class="px-6 py-3 rounded-xl bg-copper-500 text-sf-900 font-bold">View Report</button>` :
+                `<button type="button" onclick="nextLine()" class="px-6 py-3 rounded-xl bg-white/10 text-sf-50 font-bold hover:bg-white/20">Next Line</button>`;
             
             ctrl.innerHTML = `
                 <div class="flex flex-col items-center w-full gap-4 eval-in">
@@ -580,18 +559,24 @@ function renderPractice() {
             ctrl.innerHTML = `
                 <div class="flex items-center gap-4 w-full max-w-lg">
                     <input type="text" id="practice-input" class="flex-1 bg-sf-800/80 border border-white/10 rounded-xl p-4 text-sf-50 outline-none" placeholder="Type or speak..." onkeypress="if(event.key==='Enter') submitLine(this.value)">
-                    <button class="mic-btn" onclick="startRecording()"><i class="fas fa-microphone"></i></button>
-                    <button class="px-6 py-4 rounded-xl bg-copper-500/20 text-copper-400 font-bold border border-copper-500/30" onclick="submitLine(document.getElementById('practice-input').value)"><i class="fas fa-paper-plane"></i></button>
+                    <button type="button" class="mic-btn" onclick="startRecording()"><i class="fas fa-microphone"></i></button>
+                    <button type="button" class="px-6 py-4 rounded-xl bg-copper-500/20 text-copper-400 font-bold border border-copper-500/30" onclick="submitLine(document.getElementById('practice-input').value)"><i class="fas fa-paper-plane"></i></button>
                 </div>`;
         }
     } else {
+        // Partner's Turn: Auto Play and Auto Advance
         ctrl.innerHTML = `
-            <div class="flex items-center gap-4">
-                <button onclick="playTTS('${escapeHTML(curL.text).replace(/'/g, "\\'")}')" class="w-12 h-12 rounded-xl bg-sage-500/20 text-sage-400 flex items-center justify-center"><i class="fas fa-volume-up"></i></button>
-                <button onclick="nextLine()" class="px-6 py-3 rounded-xl bg-white/10 text-sf-50 font-bold hover:bg-white/20">Continue</button>
+            <div class="flex flex-col items-center w-full">
+                <span class="text-xs text-sage-400 uppercase tracking-widest font-bold animate-pulse mb-3">Partner is speaking...</span>
+                <div class="flex items-center gap-4">
+                    <button type="button" onclick="playTTS('${escapeHTML(curL.text).replace(/'/g, "\\'")}')" class="w-12 h-12 rounded-xl bg-sage-500/20 text-sage-400 flex items-center justify-center"><i class="fas fa-volume-up"></i></button>
+                    <button type="button" onclick="nextLine()" class="px-6 py-3 rounded-xl bg-white/10 text-sf-50 font-bold hover:bg-white/20">Skip manually</button>
+                </div>
             </div>`;
-        if(!S.isRecording && !S.lineScores[S.currentLine]) {
-            setTimeout(() => playTTS(curL.text), 300);
+            
+        if(!S.isRecording && !S.lineScores[S.currentLine] && !curL.played) {
+            curL.played = true; // ensure it doesn't replay on re-renders
+            setTimeout(() => playTTS(curL.text, true), 400); // true = autoAdvance to next turn
         }
     }
 }
@@ -604,34 +589,44 @@ function renderPresentation() {
     
     if(S.presState === 'hidden') {
         cont.innerHTML = `<div class="bg-white/5 rounded-3xl p-8 border border-white/10 w-full max-w-2xl text-center relative overflow-hidden"><p class="text-2xl text-sf-50 font-medium leading-relaxed line-hidden">${escapeHTML(curL.text)}</p><div class="absolute inset-0 flex items-center justify-center"><span class="bg-black/80 px-4 py-2 rounded-full text-xs text-sf-300 border border-white/10"><i class="fas fa-lock mr-2"></i>Line Hidden</span></div></div>`;
-        ctrl.innerHTML = `<div class="pres-btn-row"><button class="hint-reveal-btn" onclick="S.presState='hint';renderPresentation()"><i class="fas fa-lightbulb"></i>Show Hint</button><button class="mic-btn mic-btn-lg" onclick="startRecording()"><i class="fas fa-microphone"></i></button></div>`;
+        ctrl.innerHTML = `<div class="flex gap-4"><button type="button" class="hint-reveal-btn" onclick="S.presState='hint';renderPresentation()"><i class="fas fa-lightbulb"></i>Show Hint</button><button type="button" class="mic-btn mic-btn-lg" onclick="startRecording()"><i class="fas fa-microphone"></i></button></div>`;
     } else if(S.presState === 'hint') {
         let hText = S.settings.hint === 'full' ? curL.text : S.settings.hint === 'first' ? curL.text.split(' ')[0] + ' ...' : 'No hint enabled.';
         cont.innerHTML = `<div class="bg-copper-500/10 rounded-3xl p-8 border border-copper-500/20 w-full max-w-2xl text-center eval-in"><p class="text-2xl text-copper-400 font-medium leading-relaxed">${escapeHTML(hText)}</p></div>`;
-        ctrl.innerHTML = `<button class="mic-btn mic-btn-lg" onclick="startRecording()"><i class="fas fa-microphone"></i></button>`;
+        ctrl.innerHTML = `<button type="button" class="mic-btn mic-btn-lg" onclick="startRecording()"><i class="fas fa-microphone"></i></button>`;
     } else if(S.presState === 'rec') {
         let disp = S.settings.hint === 'full' ? curL.text : S.settings.hint === 'first' ? curL.text.split(' ')[0] + ' ...' : 'No hint enabled.';
         cont.innerHTML = `<div class="bg-white/5 rounded-3xl p-8 border border-white/10 w-full max-w-2xl text-center"><p class="text-2xl text-sf-50 font-medium leading-relaxed">${escapeHTML(disp)}</p></div>`;
-        ctrl.innerHTML = `<div class="flex flex-col items-center gap-3 w-full max-w-sm"><div class="text-xs text-coral-400 font-bold blink">RECORDING</div><div class="vol-bar-track w-full"><div id="vol-fill" class="vol-bar-fill" style="width:0%"></div></div><button class="mic-btn mic-btn-lg recording" onclick="stopRecording()"><i class="fas fa-stop"></i></button><div class="text-xs text-sf-300" id="live-transcript">Listening...</div></div>`;
+        ctrl.innerHTML = `<div class="flex flex-col items-center gap-3 w-full max-w-sm"><div class="text-xs text-coral-400 font-bold animate-pulse">RECORDING</div><div class="vol-bar-track w-full"><div id="vol-fill" class="vol-bar-fill" style="width:0%"></div></div><button type="button" class="mic-btn mic-btn-lg recording" onclick="stopRecording()"><i class="fas fa-stop"></i></button><div class="text-xs text-sf-300" id="live-transcript">Listening...</div></div>`;
     } else if(S.presState === 'result') {
         let wd = getWordDiff(curL.text, S.userResponses[S.currentLine]);
         let sc = S.lineScores[S.currentLine];
         let col = sc >= 80 ? '#5BB882' : sc >= 50 ? '#E8B88A' : '#D4736E';
-        cont.innerHTML = `<div class="bg-white/5 rounded-3xl p-8 border border-white/10 w-full max-w-2xl eval-in flex flex-col items-center"><svg viewBox="0 0 100 100" width="80" height="80" class="mb-6"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="6"/><circle cx="50" cy="50" r="40" fill="none" stroke="${col}" stroke-width="6" stroke-dasharray="251.2" stroke-dashoffset="${251.2 * (1 - sc/100)}" transform="rotate(-90 50 50)"/><text x="50" y="58" text-anchor="middle" fill="#fff" font-size="24" font-weight="bold">${sc}</text></svg><div class="w-full">${wd.html}</div></div>`;
-        let nBtn = S.currentLine >= S.lines.length - 1 ? `<button onclick="finishSession()" class="px-8 py-4 rounded-xl bg-sage-500 text-sf-900 font-bold text-lg w-full max-w-xs">Finish Presentation</button>` : `<button onclick="nextLine()" class="px-8 py-4 rounded-xl bg-white/10 text-sf-50 font-bold hover:bg-white/20 w-full max-w-xs">Next Slide</button>`;
+        cont.innerHTML = `<div class="bg-white/5 rounded-3xl p-8 border border-white/10 w-full max-w-2xl eval-in flex flex-col items-center"><svg viewBox="0 0 100 100" width="80" height="80" class="mb-6"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="6"/><circle cx="50" cy="50" r="40" fill="none" stroke="${col}" stroke-width="6" stroke-dasharray="251.2" stroke-dashoffset="${251.2 * (1 - sc/100)}" transform="rotate(-90 50 50)"/><text x="50" y="58" text-anchor="middle" fill="#fff" font-size="24" font-weight="bold">${sc}</text></svg><div class="w-full text-center">${wd.html}</div></div>`;
+        
+        let nBtn = S.currentLine >= S.lines.length - 1 ? 
+            `<button type="button" onclick="finishSession()" class="px-8 py-4 rounded-xl bg-sage-500 text-sf-900 font-bold text-lg w-full max-w-xs">Finish Presentation</button>` : 
+            `<button type="button" onclick="nextLine()" class="px-8 py-4 rounded-xl bg-white/10 text-sf-50 font-bold hover:bg-white/20 w-full max-w-xs">Next Slide</button>`;
         ctrl.innerHTML = nBtn;
     }
 }
 
 function nextLine() {
     S.currentLine++;
+    
+    // Safety check if partner had the final line and auto-advanced
+    if(S.currentLine >= S.lines.length) {
+        finishSession();
+        return;
+    }
+    
     S.presState = 'hidden';
     if(S.mode === 'practice') renderPractice();
     else renderPresentation();
 }
 
 function submitLine(txt) {
-    if(!txt.trim()) return;
+    if(!txt || !txt.trim()) return;
     S.userResponses[S.currentLine] = txt;
     processEvaluation(txt).then(res => {
         S.lineScores[S.currentLine] = res.score;
@@ -644,7 +639,7 @@ function submitLine(txt) {
 function processEvaluation(actual) {
     let expected = S.lines[S.currentLine].text;
     if(S.settings.apiKey) {
-        let prmp = `Evaluate this dialogue line.\nExpected: "${expected}"\nActual: "${actual}"\nReply strictly in JSON format: {"score":0-100,"accuracy":"short string","grammar":"short string","fluency":"short string"}`;
+        let prmp = `Evaluate this dialogue line.\nExpected: "${expected}"\nActual: "${actual}"\nReply strictly in JSON format: {"score":0-100,"accuracy":"short string"}`;
         return fetch(S.settings.apiUrl, {
             method: 'POST',
             headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + S.settings.apiKey},
@@ -652,8 +647,7 @@ function processEvaluation(actual) {
         }).then(r => r.json()).then(d => {
             try {
                 let cnt = d.choices[0].message.content;
-                let j = JSON.parse(cnt.substring(cnt.indexOf('{'), cnt.lastIndexOf('}') + 1));
-                return j;
+                return JSON.parse(cnt.substring(cnt.indexOf('{'), cnt.lastIndexOf('}') + 1));
             } catch(e) { return fallbackEval(expected, actual); }
         }).catch(() => fallbackEval(expected, actual));
     } else {
@@ -663,13 +657,7 @@ function processEvaluation(actual) {
 
 function fallbackEval(expected, actual) {
     let wd = getWordDiff(expected, actual);
-    let score = wd.pct;
-    return {
-        score: score,
-        accuracy: score >= 80 ? 'Excellent word match' : score >= 50 ? 'Moderate word match' : 'Poor word match',
-        grammar: 'Evaluated locally',
-        fluency: 'Evaluated locally'
-    };
+    return { score: wd.pct };
 }
 
 function finishSession() {
@@ -684,15 +672,15 @@ function finishSession() {
     let brk = document.getElementById('report-breakdown');
     let html = '';
     S.lines.forEach((l, i) => {
-        if(l.role !== S.userRole && S.mode === 'practice') return;
+        // Skip breakdown for lines the user didn't speak (unless ALL_ROLES)
+        if(S.mode === 'practice' && S.userRole !== 'ALL_ROLES' && l.role !== S.userRole) return;
+        
         let sc = S.lineScores[i] !== undefined ? S.lineScores[i] : 0;
         let resp = S.userResponses[i] || '--';
         let colClass = sc >= 80 ? 'text-sage-400' : sc >= 50 ? 'text-copper-400' : 'text-coral-400';
         let bgClass = sc >= 80 ? 'bg-sage-500/10 border-sage-500/20' : sc >= 50 ? 'bg-copper-500/10 border-copper-500/20' : 'bg-coral-500/10 border-coral-500/20';
         
-        let playBtn = `<button onclick="playTTS('${escapeHTML(resp).replace(/'/g, "\\'")}')" class="mt-3 px-4 py-2 bg-white/5 rounded-lg text-xs font-bold text-sf-200 hover:text-white"><i class="fas fa-play mr-2"></i>Play Your Audio</button>`;
-        
-        html += `<div class="rounded-xl p-5 border ${bgClass} mb-4"><div class="flex justify-between items-start mb-2"><span class="text-xs font-bold uppercase tracking-wide text-sf-300">Line ${i+1}</span><span class="text-lg font-bold ${colClass}">${sc}%</span></div><div class="mb-2"><span class="text-[10px] text-sf-300 uppercase block mb-1">Expected</span><div class="text-sm text-sf-100">${escapeHTML(l.text)}</div></div><div><span class="text-[10px] text-sf-300 uppercase block mb-1">You Said</span><div class="text-sm text-sf-50">${getWordDiff(l.text, resp).html}</div></div>${resp !== '--' ? playBtn : ''}</div>`;
+        html += `<div class="rounded-xl p-5 border ${bgClass} mb-4"><div class="flex justify-between items-start mb-2"><span class="text-xs font-bold uppercase tracking-wide text-sf-300">Line ${i+1}</span><span class="text-lg font-bold ${colClass}">${sc}%</span></div><div class="mb-2"><span class="text-[10px] text-sf-300 uppercase block mb-1">Expected</span><div class="text-sm text-sf-100">${escapeHTML(l.text)}</div></div><div><span class="text-[10px] text-sf-300 uppercase block mb-1">You Said</span><div class="text-sm text-sf-50">${getWordDiff(l.text, resp).html}</div></div></div>`;
     });
     brk.innerHTML = html;
 }
@@ -701,13 +689,20 @@ function printReport() {
     window.print();
 }
 
-function playTTS(text) {
-    if(typeof speechSynthesis === 'undefined') return;
+function playTTS(text, autoAdvance = false) {
+    if(typeof speechSynthesis === 'undefined') {
+        if(autoAdvance) setTimeout(nextLine, 1000);
+        return;
+    }
     speechSynthesis.cancel();
     let u = new SpeechSynthesisUtterance(text);
     if(S.settings.voiceUri) {
         let v = S.voices.find(x => x.voiceURI === S.settings.voiceUri);
         if(v) u.voice = v;
+    }
+    if(autoAdvance) {
+        u.onend = () => { setTimeout(nextLine, 300); };
+        u.onerror = () => { setTimeout(nextLine, 300); };
     }
     speechSynthesis.speak(u);
 }
@@ -719,7 +714,7 @@ function stopAllSpeech() {
 
 function startRecording() {
     let SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if(!SR) { toast('Speech recognition not supported in this browser.'); return; }
+    if(!SR) { toast('Speech recognition not supported on this browser.'); return; }
     
     stopAllSpeech();
     S.recognition = new SR();
@@ -729,6 +724,7 @@ function startRecording() {
     S.userInput = '';
     S.isRecording = true;
     
+    // Updates UI to RECORDING state immediately
     if(S.mode === 'practice') renderPractice();
     else { S.presState = 'rec'; renderPresentation(); }
     
@@ -745,11 +741,15 @@ function startRecording() {
         };
         
         S.recognition.onend = () => { if(S.isRecording) finalizeRecording(); };
-        S.recognition.onerror = () => { if(S.isRecording) finalizeRecording(); };
+        S.recognition.onerror = (e) => {
+            if(e.error !== 'no-speech') toast('Microphone alert: ' + e.error);
+            if(S.isRecording) finalizeRecording();
+        };
         S.recognition.start();
     }).catch(() => {
         S.isRecording = false;
-        toast('Microphone access denied.');
+        toast('Microphone access denied. Please allow it in browser settings.');
+        // Reverts UI safely
         if(S.mode === 'practice') renderPractice();
         else { S.presState = 'hint'; renderPresentation(); }
     });
@@ -758,15 +758,14 @@ function startRecording() {
 function stopRecording() {
     if(!S.isRecording) return;
     S.isRecording = false;
-    if(S.recognition) {
-        try { S.recognition.stop(); } catch(e){}
-    }
+    if(S.recognition) { try { S.recognition.stop(); } catch(e){} }
     if(S.silenceInterval) clearInterval(S.silenceInterval);
     if(S.audioContext) { try{S.audioContext.close()}catch(e){} }
     if(S.micStream) { S.micStream.getTracks().forEach(t=>t.stop()); S.micStream = null; }
     
     if(S.userInput.trim()) submitLine(S.userInput);
     else {
+        // If recording stopped with empty input, revert back to ready state safely
         if(S.mode === 'practice') renderPractice();
         else { S.presState = 'hint'; renderPresentation(); }
     }
@@ -804,7 +803,7 @@ function setupSilenceDetection(stream) {
             if(rms < 0.015) S.silenceFrames++;
             else S.silenceFrames = 0;
             
-            if(S.silenceFrames >= 40) stopRecording();
+            if(S.silenceFrames >= 40) stopRecording(); // auto stop after ~2s silence
             
         }, 50);
     } catch(e) {}
@@ -817,7 +816,6 @@ function toggleFaq() {
     if(faqOpen) p.classList.add('open');
     else p.classList.remove('open');
 }
-
 function sendFaq() {
     let inp = document.getElementById('faq-input');
     let q = inp.value.trim();
@@ -827,13 +825,13 @@ function sendFaq() {
     let chat = document.getElementById('faq-chat');
     chat.innerHTML += `<div class="faq-msg-user">${escapeHTML(q)}</div>`;
     
-    let ans = "I am a local logic bot. Please explore the settings or use the provided buttons to navigate.";
+    let ans = "Explore the settings or use the provided buttons to navigate.";
     let lq = q.toLowerCase();
     
-    if(lq.includes('api') || lq.includes('key')) ans = "You can add an OpenAI-compatible API key in Settings. If left empty, evaluation is handled entirely locally and is 100% free.";
-    else if(lq.includes('presentation')) ans = "Presentation mode is for monologues or speeches. It tests your memory by optionally hiding text and auto-progressing.";
-    else if(lq.includes('practice')) ans = "Practice mode acts as a scene partner. The browser will read the other characters' lines, and evaluate you when it's your turn.";
-    else if(lq.includes('voice') || lq.includes('language')) ans = "Navigate to Settings to change the playback voice or the speech recognition language mapping.";
+    if(lq.includes('api') || lq.includes('key')) ans = "You can add an OpenAI key in Settings. If left empty, evaluation is 100% free locally.";
+    else if(lq.includes('presentation')) ans = "Presentation mode is for monologues. It strips character names automatically so you can focus on reading.";
+    else if(lq.includes('practice')) ans = "Practice mode acts as a scene partner. The browser reads the other roles and auto-advances to your turn.";
+    else if(lq.includes('all roles')) ans = "Select 'Practice All Roles' to practice the full script without the app skipping your partner's turns.";
     
     setTimeout(() => {
         chat.innerHTML += `<div class="faq-msg-bot">${ans}</div>`;
